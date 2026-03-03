@@ -1,5 +1,5 @@
 // lib/styles/STYLE_LIBRARY.ts
-// Complete 50+ style library for BestAIHeadshot
+// Complete 50+ style library for Nova Imago
 // Organized by categories like AISelfie.es
 
 export interface StyleDefinition {

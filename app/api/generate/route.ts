@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import JSZip from 'jszip'
+import Replicate from 'replicate'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,410 +13,510 @@ const supabase = createClient(
   }
 )
 
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN!,
+})
+
+// ===========================================
+// PERSOONLIJKE KENMERKEN
+// ===========================================
+
+interface UserCharacteristics {
+  gender?: string
+  ethnicity?: string
+  eye_color?: string
+  hair_color?: string
+  is_bald?: boolean
+  has_glasses?: boolean
+  age_range?: string
+}
+
+// ===========================================
+// FIX: SKIN TONE MAPPING
+// Zonder skin tone → AI verzint eigen huid → plastic/airbrushed look
+// Met skin tone → realistisch, klopt met echte persoon
+// ===========================================
+const skinToneMap: Record<string, string> = {
+  'caucasian': 'fair skin',
+  'latin american': 'warm medium brown skin',
+  'hispanic': 'warm tan skin',
+  'black': 'dark brown skin',
+  'caribbean': 'rich brown skin',
+  'asian': 'light tan skin',
+  'middle eastern': 'olive skin',
+  'mixed': 'warm medium brown skin',
+  'south asian': 'warm brown skin',
+  'african': 'deep brown skin',
+}
+
+function buildPersonDescription(characteristics: UserCharacteristics): string {
+  const parts: string[] = []
+  
+  if (characteristics.ethnicity && characteristics.gender) {
+    const article = ['a', 'e', 'i', 'o', 'u'].includes(characteristics.ethnicity[0].toLowerCase()) ? 'an' : 'a'
+    parts.push(`${article} ${characteristics.ethnicity} ${characteristics.gender}`)
+  } else if (characteristics.gender) {
+    parts.push(`a ${characteristics.gender}`)
+  }
+
+  // === KRITIEKE FIX: Skin tone toevoegen ===
+  // Zonder dit genereert de AI een onrealistische "plastic" huid
+  if (characteristics.ethnicity) {
+    const skinTone = skinToneMap[characteristics.ethnicity.toLowerCase()]
+    if (skinTone) {
+      parts.push(skinTone)
+    }
+  }
+  
+  if (characteristics.eye_color) {
+    parts.push(`with ${characteristics.eye_color} eyes`)
+  }
+  
+  if (characteristics.is_bald) {
+    parts.push(`bald head`)
+  } else if (characteristics.hair_color) {
+    parts.push(`${characteristics.hair_color} hair`)
+  }
+  
+  if (characteristics.has_glasses) {
+    parts.push(`wearing glasses`)
+  }
+  
+  if (characteristics.age_range) {
+    parts.push(`${characteristics.age_range} years old`)
+  }
+
+  return parts.join(', ')
+}
+
+function buildNegativePromptAdditions(characteristics: UserCharacteristics): string {
+  const negatives: string[] = []
+  
+  if (characteristics.gender === 'male') {
+    negatives.push('female', 'woman', 'feminine features', 'makeup')
+  } else if (characteristics.gender === 'female') {
+    negatives.push('male', 'man', 'masculine features', 'beard', 'mustache', 'facial hair')
+  }
+  
+  if (characteristics.is_bald) {
+    negatives.push('hair on head', 'full head of hair', 'long hair', 'short hair', 'thick hair', 'hairstyle')
+  }
+  
+  if (characteristics.has_glasses === false) {
+    negatives.push('glasses', 'eyeglasses', 'spectacles', 'sunglasses')
+  }
+  
+  return negatives.join(', ')
+}
+
+// ===========================================
+// AUTOMATISCH VERSIE ID OPHALEN
+// ===========================================
+
+async function resolveModelVersionId(userId: string, trainedModelId: string): Promise<string> {
+  const isVersionId = /^[a-f0-9]{64}$/.test(trainedModelId)
+  
+  if (isVersionId) {
+    return trainedModelId
+  }
+  
+  console.log(`🔍 Training job ID gevonden, versie ID ophalen bij Replicate...`)
+  
+  const training = await replicate.trainings.get(trainedModelId)
+  console.log(`📊 Training status: ${training.status}`)
+  
+  if (training.status !== 'succeeded') {
+    throw new Error(`Model nog niet klaar. Status: ${training.status}. Wacht tot de training voltooid is.`)
+  }
+  
+  const output = training.output as any
+  let versionId: string | null = null
+  
+  if (output?.version) {
+    versionId = output.version
+    if (versionId && versionId.includes(':')) {
+      versionId = versionId.split(':')[1]
+    }
+  } else if (typeof output === 'string' && output.includes(':')) {
+    versionId = output.split(':')[1]
+  }
+  
+  if (!versionId) {
+    console.error('❌ Geen versie ID gevonden in training output:', JSON.stringify(output, null, 2))
+    throw new Error('Kon versie ID niet ophalen. Controleer je Replicate dashboard.')
+  }
+  
+  console.log(`✅ Versie ID gevonden: ${versionId}`)
+  
+  await supabase
+    .from('users')
+    .update({ trained_model_id: versionId })
+    .eq('id', userId)
+  
+  console.log(`💾 Versie ID opgeslagen in database voor user ${userId}`)
+  
+  return versionId
+}
+
+// ===========================================
+// STYLE PROMPTS
+//
+// REGELS (niet vergeten!):
+// ✅ Korte keywords, geen volzinnen
+// ✅ "natural lighting" of "soft natural light" → realistisch
+// ✅ "outdoor" → altijd realistischer dan studio
+// ❌ GEEN "studio lighting" → geeft plastic look
+// ❌ GEEN "professional photography" → geeft plastic look  
+// ❌ GEEN "bokeh" → geeft te cinematisch effect
+// ❌ GEEN "high contrast" → geeft onnatuurlijk licht
+// ===========================================
+
+const STYLE_PROMPTS: Record<string, string> = {
+
+  // ===== FORMAL / CORPORATE (13 styles) =====
+  // Let op: corporate styles werken minder goed door harde verlichting
+  // Gebruik "natural lighting" ipv "studio lighting" ook hier
+  'corporate-classic': '[TRIGGER], professional headshot, navy blue suit, white dress shirt, modern office background with windows, natural light, sharp focus',
+  'executive-navy': '[TRIGGER], half body portrait, arms crossed, navy blue suit with tie, office background with city view, soft natural light, confident pose',
+  'ceo-black': '[TRIGGER], headshot portrait, black suit, white shirt, light gray background, soft natural light, strong presence',
+  'boardroom-gray': '[TRIGGER], half body portrait, arms crossed, charcoal gray suit, modern office background with windows, natural lighting, confident pose',
+  'power-suit': '[TRIGGER], half body portrait, dark navy suit, library or office background, warm ambient light, professional look',
+  'light-blue-exec': '[TRIGGER], half body portrait, holding tablet, light blue blazer, white shirt, modern office with large windows, bright natural light',
+  'pinstripe-pro': '[TRIGGER], professional headshot, pinstripe suit, neutral background, soft natural light, sharp professional look',
+  'three-piece': '[TRIGGER], half body portrait, arms crossed, three piece suit with vest, office background, window light, distinguished look',
+  'wall-street': '[TRIGGER], professional portrait, dark suit, red tie, city street background, confident expression, natural light',
+  'corner-office': '[TRIGGER], medium shot, sitting at desk, dark suit, modern office, city view through windows, natural daylight',
+  'conference-ready': '[TRIGGER], half body portrait, navy blazer, standing confidently, conference room background, soft natural light',
+  'investor-meeting': '[TRIGGER], professional headshot, charcoal suit, white shirt, light neutral background, trustworthy expression, soft natural light',
+  'formal-black': '[TRIGGER], headshot portrait, black formal suit, white shirt, neutral background, soft natural light, elegant',
+
+  // ===== SMART CASUAL (12 styles) =====
+  'teal-blazer': '[TRIGGER], half body portrait, arms crossed, teal blazer, white t-shirt, light background, soft natural light, modern professional',
+  'beige-elegance': '[TRIGGER], half body portrait, watch visible on wrist, beige linen suit, dark background, warm ambient light, sophisticated',
+  'gray-blazer-blue': '[TRIGGER], half body portrait, arms crossed, gray blazer, light background, soft window light, approachable professional',
+  'open-collar-navy': '[TRIGGER], close up headshot, navy blazer, open collar white shirt, gray background, soft natural light, friendly expression',
+  'blazer-white-tee': '[TRIGGER], medium shot portrait, black blazer over white t-shirt, outdoor evening background, natural light, confident',
+  'v-neck-sweater': '[TRIGGER], headshot portrait, blue v-neck sweater over collared shirt, white background, soft light, smart casual',
+  'office-casual-plants': '[TRIGGER], medium shot, sitting at modern desk, light blue oxford shirt, office with plants, natural daylight, relaxed',
+  'weekend-blazer': '[TRIGGER], half body portrait, tan blazer, dark t-shirt, outdoor cafe background, natural light, relaxed confidence',
+  'creative-director': '[TRIGGER], half body portrait, black blazer, black turtleneck, minimalist background, soft natural light, creative',
+  'startup-ceo': '[TRIGGER], medium shot, navy blazer, no tie, open collar, coworking space background, natural light, energetic',
+  'tech-lead': '[TRIGGER], headshot portrait, gray sport coat, crew neck, clean background, soft window light, natural expression',
+  'consultant-look': '[TRIGGER], half body portrait, light gray suit, no tie, arms relaxed, modern office, soft natural light, confident',
+
+  // ===== CASUAL PROFESSIONAL (10 styles) =====
+  'white-tee-orange': '[TRIGGER], half body portrait, white t-shirt, warm orange toned background, fresh modern look, soft natural light',
+  'black-tee-urban': '[TRIGGER], medium shot portrait, black t-shirt, city street background, natural daylight, confident casual',
+  'navy-polo-clean': '[TRIGGER], headshot portrait, navy blue polo shirt, clean background, soft natural light, friendly expression',
+  'gray-tee-crossed': '[TRIGGER], half body portrait, arms crossed, gray t-shirt, light background, natural light, relaxed pose',
+  'white-tee-nature': '[TRIGGER], half body portrait, arms crossed, white t-shirt, green nature background blurred, outdoor natural light',
+  'plaid-casual': '[TRIGGER], headshot portrait, plaid button-up shirt, neutral background, soft natural light, relaxed professional',
+  'henley-relaxed': '[TRIGGER], medium shot, henley shirt, window lighting, home office background, comfortable natural feel',
+  'denim-shirt': '[TRIGGER], headshot portrait, chambray denim shirt, white background, soft natural light, casual friendly look',
+  'knit-sweater': '[TRIGGER], half body portrait, chunky knit sweater, warm ambient light, cozy background, approachable',
+  'linen-summer': '[TRIGGER], half body portrait, white linen shirt, bright outdoor background, natural sunlight, relaxed',
+
+  // ===== CREATIVE / EDGY (8 styles) =====
+  'leather-jacket-city': '[TRIGGER], medium shot, black leather jacket, white t-shirt, city street background, natural evening light, edgy professional',
+  'night-life': '[TRIGGER], medium shot, black outfit, leather jacket, city background with ambient lights, confident urban style',
+  'turtleneck-modern': '[TRIGGER], close up portrait, gray turtleneck sweater, white curtain background, soft natural light, minimalist modern',
+  'black-turtleneck-drama': '[TRIGGER], headshot portrait, black turtleneck, dark background, soft side light from window, moody atmosphere',
+  'tech-founder': '[TRIGGER], half body portrait, dark gray t-shirt, arms crossed, modern office background, soft natural light, confident',
+  'all-black-minimal': '[TRIGGER], half body portrait, all black outfit, dark neutral background, soft ambient light, minimal style',
+  'creative-colorful': '[TRIGGER], headshot portrait, colorful patterned shirt, light background, soft natural light, creative professional',
+  'rebel-professional': '[TRIGGER], medium shot, dark blazer, casual t-shirt underneath, urban outdoor background, natural light, creative style',
+
+  // ===== OUTDOOR / NATURAL (8 styles) - BESTE RESULTATEN =====
+  // Deze categorie geeft altijd de meest realistische resultaten
+  // Outdoor licht = realistisch → geen plastic look
+  'park-portrait': '[TRIGGER], medium shot, outdoor park setting, casual shirt, dappled sunlight, relaxed natural pose',
+  'rooftop-view': '[TRIGGER], medium shot, rooftop setting, city skyline background, smart casual outfit, natural daylight',
+  'golden-hour': '[TRIGGER], portrait, golden hour lighting, outdoor, warm natural tones, lifestyle photography style',
+  'nature-fresh': '[TRIGGER], half body portrait, light casual shirt, green nature background, soft daylight, fresh outdoor',
+  'city-walk': '[TRIGGER], medium shot, walking pose, casual jacket, city street background, urban lifestyle, natural movement',
+  'coffee-shop': '[TRIGGER], medium shot, coffee shop interior, casual smart outfit, warm ambient lighting, relaxed',
+  'beach-professional': '[TRIGGER], medium shot, beach boardwalk, light linen shirt, ocean background, natural golden light',
+  'architectural': '[TRIGGER], half body portrait, modern architecture background, business casual outfit, natural light, editorial style',
+
+  // ===== SPECIALTY POSES (7 styles - profile-angle verwijderd) =====
+  'arms-crossed-power': '[TRIGGER], half body portrait, arms crossed, dark suit, natural background light, authoritative pose',
+  'holding-tablet': '[TRIGGER], half body portrait, holding tablet device, business casual, modern office, natural daylight',
+  'sitting-confident': '[TRIGGER], medium shot, sitting confidently in chair, blazer, office setting, natural window light',
+  'leaning-casual': '[TRIGGER], medium shot, leaning against wall, smart casual outfit, modern interior, soft natural light',
+  'hands-in-pockets': '[TRIGGER], half body portrait, hands in pockets, blazer and jeans, outdoor urban background, natural light',
+  'thoughtful-pose': '[TRIGGER], headshot portrait, hand near chin, professional attire, soft background, natural window light',
+  'looking-up': '[TRIGGER], headshot portrait, looking up confidently, professional attire, bright outdoor background, natural light',
+
+  // ===== COLORED BACKGROUNDS (6 styles) =====
+  // Tip: zelfs hier "soft light" ipv "studio lighting" gebruiken
+  'blue-studio': '[TRIGGER], professional headshot, business attire, solid blue background, soft even lighting, clean look',
+  'green-studio': '[TRIGGER], half body portrait, smart casual outfit, solid green background, soft natural-style light',
+  'purple-creative': '[TRIGGER], headshot portrait, dark outfit, purple background, soft creative lighting',
+  'yellow-energetic': '[TRIGGER], half body portrait, casual outfit, bright yellow background, vibrant, energetic',
+  'red-bold': '[TRIGGER], headshot portrait, dark outfit, red background, bold, confident, soft even light',
+  'gradient-modern': '[TRIGGER], professional headshot, modern outfit, gradient background, contemporary style, soft light',
+
+  // ===== FULL BODY (6 styles) =====
+  'fullbody-navy-suit': '[TRIGGER], full body portrait, standing confidently, navy blue suit, white shirt, light neutral background, natural light, head to toe',
+  'fullbody-black-outfit': '[TRIGGER], full body portrait, standing tall, all black outfit, dark background, soft ambient light, full length',
+  'fullbody-casual-white': '[TRIGGER], full body portrait, standing relaxed, white t-shirt, light jeans, white background, natural light, full length',
+  'fullbody-blazer-jeans': '[TRIGGER], full body portrait, hand in pocket, blazer and dark jeans, modern interior, soft natural light, head to toe',
+  'fullbody-city-street': '[TRIGGER], full body portrait, city street, smart casual outfit, natural daylight, lifestyle photography',
+  'fullbody-outdoor': '[TRIGGER], full body portrait, park setting, casual smart outfit, green background blurred, natural light, relaxed full body',
+
+  // ===== ZONNEBRIL (4 styles) =====
+  'sunglasses-city': '[TRIGGER], half body portrait, stylish sunglasses, dark blazer, city street background, natural daylight, cool confident',
+  'sunglasses-outdoor': '[TRIGGER], medium shot, sunglasses, casual jacket, outdoor sunny background, natural daylight, relaxed',
+  'sunglasses-black-suit': '[TRIGGER], half body portrait, dark sunglasses, black suit, urban background, natural light, confident',
+  'sunglasses-casual': '[TRIGGER], headshot portrait, sunglasses, white t-shirt, outdoor bright background, natural light, casual cool',
+
+  // ===== LUXURY / WATCH (3 styles) =====
+  'watch-showcase': '[TRIGGER], half body portrait, hand visible with luxury watch, beige blazer, dark background, warm ambient light, sophisticated',
+  'watch-luxury-outdoor': '[TRIGGER], medium shot, sitting relaxed, luxury watch on wrist, smart casual blazer, outdoor nature background, natural light',
+  'watch-dark-elegant': '[TRIGGER], half body portrait, hand showing watch, dark suit, dark background, soft ambient light, luxury style',
+
+  // ===== GEKLEURDE PAKKEN (5 styles) =====
+  'teal-suit': '[TRIGGER], half body portrait, arms crossed, teal suit, white shirt, light background, soft natural light, bold professional',
+  'green-suit': '[TRIGGER], half body portrait, green blazer suit, light background, soft natural light, fresh bold look',
+  'pink-blazer': '[TRIGGER], half body portrait, pink blazer, white top, light background, soft natural light, stylish modern',
+  'orange-suit': '[TRIGGER], half body portrait, orange blazer, white shirt, vibrant background, natural light, energetic professional',
+  'brown-suit-elegant': '[TRIGGER], half body portrait, warm brown suit, open collar, dark background, warm ambient light, elegant',
+
+  // ===== TUXEDO / BLACK TIE (2 styles) =====
+  'tuxedo-classic': '[TRIGGER], half body portrait, black tuxedo, white dress shirt, black bow tie, dark elegant background, soft ambient light',
+  'tuxedo-modern': '[TRIGGER], headshot portrait, modern slim tuxedo, no tie, open collar, soft dramatic light, elegant evening',
+
+  // ===== MOTOR / LIFESTYLE (2 styles) =====
+  'moto-leather': '[TRIGGER], medium shot, leaning against motorcycle, brown leather jacket, white t-shirt, outdoor urban background, natural light',
+  'moto-city': '[TRIGGER], half body portrait, standing next to motorbike, black leather jacket, city street, natural daylight, confident',
+
+  // ===== ZITTEND CASUAL (3 styles) =====
+  'sitting-ground': '[TRIGGER], medium shot, sitting casually on ground, knees up, casual outfit, soft outdoor light, relaxed approachable',
+  'sitting-steps': '[TRIGGER], medium shot, sitting on outdoor steps, smart casual outfit, urban background, natural daylight, candid feel',
+  'sitting-chair-casual': '[TRIGGER], medium shot, sitting sideways in chair, arms on backrest, smart casual outfit, modern interior, soft window light',
+
+  // ===== CLOSE-UP HEADSHOTS (3 styles) =====
+  'closeup-dramatic': '[TRIGGER], extreme close up headshot, side window light, dark background, intense gaze, cinematic portrait',
+  'closeup-warm': '[TRIGGER], close up headshot, soft warm window light, light background, genuine warm smile, approachable',
+  'closeup-outdoor': '[TRIGGER], close up headshot, outdoor natural light, blurred green background, fresh natural look, candid feel',
+}
+
 export async function POST(request: NextRequest) {
-  let orderId: string | undefined
-
   try {
-    const body = await request.json()
-    orderId = body.orderId
+    const { userId, styleIds, aspectRatio } = await request.json()
 
-    if (!orderId) {
-      return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
+    if (!userId) {
+      return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
 
-    console.log('🚀 Starting AI generation for order:', orderId)
+    if (!styleIds || styleIds.length === 0) {
+      return NextResponse.json({ error: 'No styles selected' }, { status: 400 })
+    }
 
-    // Get order details
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
+    console.log(`🚀 Starting generation for user: ${userId}`)
+    console.log(`🎨 Styles: ${styleIds.length}, Aspect: ${aspectRatio}`)
+
+    const { data: user, error: userError } = await supabase
+      .from('users')
       .select('*')
-      .eq('id', orderId)
+      .eq('id', userId)
       .single()
 
-    if (orderError || !order) {
-      console.error('❌ Order not found:', orderError)
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    if (userError || !user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Get uploaded photos
-    const { data: upload, error: uploadError } = await supabase
-      .from('uploads')
-      .select('*')
-      .eq('order_id', orderId)
-      .single()
-
-    if (uploadError || !upload) {
-      console.error('❌ Upload not found:', uploadError)
-      return NextResponse.json({ error: 'Upload not found' }, { status: 404 })
+    const creditsNeeded = styleIds.length
+    if (user.credits < creditsNeeded) {
+      return NextResponse.json({ 
+        error: `Not enough credits. Need ${creditsNeeded}, have ${user.credits}` 
+      }, { status: 400 })
     }
 
-    console.log(`📸 Found ${upload.photo_urls.length} photos to process`)
-
-    // Update order status
-    await supabase
-      .from('orders')
-      .update({ status: 'processing' })
-      .eq('id', orderId)
-
-    console.log('👔 Order status updated to: processing')
-
-    const headshotCounts: { [key: string]: number } = {
-      starter: 40,
-      pro: 100,
-      executive: 200,
+    if (!user.trained_model_id) {
+      return NextResponse.json({ error: 'No trained model found' }, { status: 400 })
     }
-    const numHeadshots = headshotCounts[order.plan] || 100
 
-    console.log(`🎨 Will generate ${numHeadshots} headshots for ${order.plan} plan`)
+    const modelVersionId = await resolveModelVersionId(userId, user.trained_model_id)
 
-    // STEP 1: Download all photos and create ZIP
-    console.log('📥 Downloading photos and creating ZIP...')
+    const triggerWord = user.trigger_word || 'HEADSHOT'
     
-    const zip = new JSZip()
+    const characteristics: UserCharacteristics = {
+      gender: user.gender,
+      ethnicity: user.ethnicity,
+      eye_color: user.eye_color,
+      hair_color: user.hair_color,
+      is_bald: user.is_bald,
+      has_glasses: user.has_glasses,
+      age_range: user.age_range,
+    }
     
-    for (let i = 0; i < upload.photo_urls.length; i++) {
-      const photoUrl = upload.photo_urls[i]
+    const personDescription = buildPersonDescription(characteristics)
+    const negativeAdditions = buildNegativePromptAdditions(characteristics)
+    
+    console.log(`✅ User has ${user.credits} credits, needs ${creditsNeeded}`)
+    console.log(`🧠 Using model version: ${modelVersionId}`)
+    console.log(`🔑 Using trigger word: ${triggerWord}`)
+    console.log(`👤 Person description: ${personDescription}`)
+
+    const generatedImages: string[] = []
+    const failedStyles: string[] = []
+
+    // ===========================================
+    // BEWEZEN NEGATIVE PROMPT — NIET AANPASSEN
+    // ===========================================
+    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette"
+
+    const fullNegativePrompt = negativeAdditions 
+      ? `${baseNegativePrompt}, ${negativeAdditions}`
+      : baseNegativePrompt
+
+    for (const styleId of styleIds) {
+      const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional headshot portrait, natural lighting, clean background, sharp focus'
       
+      const triggerWithDescription = personDescription 
+        ? `${triggerWord}, ${personDescription}`
+        : triggerWord
+      
+      const realism = 'natural skin texture, photorealistic, candid feel'
+      const fullPrompt = promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription) + `, ${realism}`
+
+      console.log(`🎨 Generating style: ${styleId}`)
+      console.log(`📝 Prompt: ${fullPrompt}`)
+
       try {
-        const response = await fetch(photoUrl)
-        if (!response.ok) {
-          throw new Error(`Failed to download photo ${i}: ${response.statusText}`)
-        }
-        
-        const arrayBuffer = await response.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
-        
-        // Add to ZIP with simple numbered names
-        zip.file(`photo_${i + 1}.jpg`, buffer)
-        
-        console.log(`✅ Downloaded photo ${i + 1}/${upload.photo_urls.length}`)
-      } catch (downloadError) {
-        console.error(`❌ Failed to download photo ${i}:`, downloadError)
-        throw downloadError
-      }
-    }
-
-    // Generate ZIP buffer
-    console.log('🗜️ Compressing ZIP...')
-    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })
-    console.log(`✅ ZIP created: ${(zipBuffer.length / 1024 / 1024).toFixed(2)} MB`)
-
-    // STEP 2: Upload ZIP to Supabase Storage
-    console.log('📤 Uploading ZIP to Supabase...')
-    
-    const zipFilename = `${orderId}/training-photos.zip`
-    
-    const { data: zipUploadData, error: zipUploadError } = await supabase.storage
-      .from('headshots')
-      .upload(zipFilename, zipBuffer, {
-        contentType: 'application/zip',
-        cacheControl: '3600',
-        upsert: true,
-      })
-
-    if (zipUploadError) {
-      console.error('❌ Failed to upload ZIP:', zipUploadError)
-      throw new Error(`Failed to upload ZIP: ${zipUploadError.message}`)
-    }
-
-    // Get public URL for ZIP
-    const { data: zipPublicUrlData } = supabase.storage
-      .from('headshots')
-      .getPublicUrl(zipFilename)
-
-    const zipUrl = zipPublicUrlData.publicUrl
-
-    console.log('✅ ZIP uploaded:', zipUrl)
-
-    // STEP 3: Create destination model
-    const modelName = `headshot-${orderId.slice(0, 8)}`
-    const modelOwner = 'kingpapuche'
-
-    console.log('📦 Creating destination model:', `${modelOwner}/${modelName}`)
-    
-    const createModelResponse = await fetch(
-      'https://api.replicate.com/v1/models',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.REPLICATE_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          owner: modelOwner,
-          name: modelName,
-          visibility: 'private',
-          hardware: 'gpu-t4',
-          description: 'AI Headshot Model',
-        }),
-      }
-    )
-
-    // 409 means model already exists, which is fine
-    if (!createModelResponse.ok && createModelResponse.status !== 409) {
-      const errorText = await createModelResponse.text()
-      console.error('❌ Failed to create model:', errorText)
-      throw new Error(`Failed to create model: ${errorText}`)
-    }
-
-    console.log('✅ Model created or already exists')
-
-    // STEP 4: Start training with ZIP file
-    console.log('🧠 Starting FLUX LoRA training via HTTP API...')
-
-    const trainingResponse = await fetch(
-      'https://api.replicate.com/v1/models/ostris/flux-dev-lora-trainer/versions/e440909d3512c31646ee2e0c7d6f6f4923224863a6a10c494606e79fb5844497/trainings',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.REPLICATE_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          destination: `${modelOwner}/${modelName}`,
-          input: {
-            input_images: zipUrl,
-            steps: 1500,
-            lora_rank: 16,
-            optimizer: 'adamw8bit',
-            batch_size: 1,
-            resolution: '512,768,1024',
-            autocaption: false,
-            trigger_word: 'TOK',
-            learning_rate: 0.0004,
-            wandb_project: 'flux_train_replicate',
-            wandb_save_interval: 100,
-            caption_dropout_rate: 0.05,
-            cache_latents_to_disk: false,
-            wandb_sample_interval: 100,
-          },
-        }),
-      }
-    )
-
-    if (!trainingResponse.ok) {
-      const errorText = await trainingResponse.text()
-      console.error('❌ Training failed:', errorText)
-      throw new Error(`Training failed: ${trainingResponse.status} - ${errorText}`)
-    }
-
-    const training = await trainingResponse.json()
-
-    console.log('✅ Training started:', training.id)
-    console.log('⏱️  Training will take ~15-20 minutes...')
-
-    // STEP 5: Poll for training completion
-    let trainingStatus = training
-    let attempts = 0
-    const maxAttempts = 60
-
-    while (
-      trainingStatus.status !== 'succeeded' &&
-      trainingStatus.status !== 'failed' &&
-      attempts < maxAttempts
-    ) {
-      await new Promise((resolve) => setTimeout(resolve, 60000)) // 1 min
-
-      const statusResponse = await fetch(
-        `https://api.replicate.com/v1/trainings/${training.id}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.REPLICATE_API_TOKEN}`,
-          },
-        }
-      )
-
-      if (statusResponse.ok) {
-        trainingStatus = await statusResponse.json()
-        attempts++
-        console.log(`🔄 Training status: ${trainingStatus.status} (${attempts} min)`)
-      } else {
-        attempts++
-        console.log(`⚠️  Failed to check status, retrying... (${attempts} min)`)
-      }
-
-      if (trainingStatus.status === 'failed') {
-        throw new Error(`Training failed: ${JSON.stringify(trainingStatus.error)}`)
-      }
-    }
-
-    if (trainingStatus.status !== 'succeeded') {
-      throw new Error('Training timed out after 60 minutes')
-    }
-
-    console.log('🎉 Training completed!')
-
-    const trainedModelVersion = trainingStatus.output?.version
-
-    if (!trainedModelVersion) {
-      throw new Error('No trained model version returned')
-    }
-
-    console.log('📦 Trained model version:', trainedModelVersion)
-
-    // STEP 6: Generate headshots
-    console.log('🎨 Generating headshots...')
-
-    const generatedUrls: string[] = []
-    const prompts = [
-      'TOK person professional corporate headshot, navy suit, gray background, studio lighting',
-      'TOK person executive portrait, charcoal suit, neutral background, professional lighting',
-      'TOK person LinkedIn headshot, business casual, soft gray background, natural lighting',
-      'TOK person corporate photo, black suit, white background, studio lighting',
-      'TOK person professional headshot, modern style, clean background, perfect lighting',
-    ]
-
-    for (let i = 0; i < 5; i++) {
-      try {
-        const predictionResponse = await fetch(
-          'https://api.replicate.com/v1/predictions',
+        const output = await replicate.run(
+          `kingpapuche/headshot-model:${modelVersionId}`,
           {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${process.env.REPLICATE_API_TOKEN}`,
-              'Content-Type': 'application/json',
+            input: {
+              prompt: fullPrompt,
+              negative_prompt: fullNegativePrompt,
+              model: "dev",
+              // ===========================================
+              // BEWEZEN AI SETTINGS — NOOIT AANPASSEN
+              // ===========================================
+              lora_scale: 1,
+              num_outputs: 1,
+              aspect_ratio: aspectRatio || "3:4",
+              output_format: "webp",
+              guidance_scale: 3.5,
+              output_quality: 90,
+              num_inference_steps: 28,
+              disable_safety_checker: false,
             },
-            body: JSON.stringify({
-              version: trainedModelVersion,
-              input: {
-                prompt: prompts[i],
-                num_outputs: 1,
-                aspect_ratio: '1:1',
-                output_format: 'webp',
-                output_quality: 90,
-              },
-            }),
           }
         )
 
-        if (!predictionResponse.ok) {
-          console.error(`⚠️  Failed to create prediction ${i + 1}`)
-          continue
-        }
+        if (Array.isArray(output)) {
+          for (let i = 0; i < output.length; i++) {
+            const imageUrl = output[i]
+            
+            try {
+              const response = await fetch(imageUrl as string)
+              const arrayBuffer = await response.arrayBuffer()
+              const buffer = Buffer.from(arrayBuffer)
 
-        const prediction = await predictionResponse.json()
+              const filename = `generated/${userId}/${Date.now()}-${styleId}-${i}.webp`
 
-        // Wait for completion
-        let finalPrediction = prediction
-        let predAttempts = 0
-        while (
-          finalPrediction.status !== 'succeeded' &&
-          finalPrediction.status !== 'failed' &&
-          predAttempts < 30
-        ) {
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-
-          const statusResponse = await fetch(
-            `https://api.replicate.com/v1/predictions/${prediction.id}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${process.env.REPLICATE_API_TOKEN}`,
-              },
-            }
-          )
-
-          if (statusResponse.ok) {
-            finalPrediction = await statusResponse.json()
-          }
-          predAttempts++
-        }
-
-        if (finalPrediction.output) {
-          const replicateUrl = Array.isArray(finalPrediction.output)
-            ? finalPrediction.output[0]
-            : finalPrediction.output
-
-          console.log(`✅ Headshot ${i + 1}/5 generated, downloading...`)
-
-          // Download from Replicate
-          try {
-            const downloadResponse = await fetch(replicateUrl)
-            if (!downloadResponse.ok) {
-              throw new Error(`Failed to download: ${downloadResponse.statusText}`)
-            }
-
-            const arrayBuffer = await downloadResponse.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
-
-            // Upload to Supabase Storage
-            const filename = `${orderId}/headshot-${i + 1}.webp`
-
-            const { error: uploadError } = await supabase.storage
-              .from('headshots')
-              .upload(filename, buffer, {
-                contentType: 'image/webp',
-                cacheControl: '31536000', // 1 year
-                upsert: true,
-              })
-
-            if (uploadError) {
-              console.error(`❌ Failed to upload headshot ${i + 1}:`, uploadError)
-              // Fallback to Replicate URL if upload fails
-              generatedUrls.push(replicateUrl)
-            } else {
-              // Get permanent Supabase URL
-              const { data: publicUrlData } = supabase.storage
+              const { error: uploadError } = await supabase.storage
                 .from('headshots')
-                .getPublicUrl(filename)
+                .upload(filename, buffer, {
+                  contentType: 'image/webp',
+                  cacheControl: '31536000',
+                  upsert: true,
+                })
 
-              generatedUrls.push(publicUrlData.publicUrl)
-              console.log(`💾 Headshot ${i + 1}/5 saved to Supabase`)
+              if (!uploadError) {
+                const { data: publicUrlData } = supabase.storage
+                  .from('headshots')
+                  .getPublicUrl(filename)
+
+                generatedImages.push(publicUrlData.publicUrl)
+                console.log(`✅ Saved image ${generatedImages.length}: ${styleId}`)
+              } else {
+                console.error('Upload error:', uploadError)
+                generatedImages.push(imageUrl as string)
+              }
+            } catch (downloadError) {
+              console.error('Download error:', downloadError)
+              generatedImages.push(imageUrl as string)
             }
-          } catch (downloadError) {
-            console.error(`❌ Error downloading headshot ${i + 1}:`, downloadError)
-            // Fallback to Replicate URL
-            generatedUrls.push(replicateUrl)
           }
         }
       } catch (genError) {
-        console.error(`❌ Error generating headshot ${i + 1}:`, genError)
+        console.error(`❌ Error generating style ${styleId}:`, genError)
+        failedStyles.push(styleId)
       }
     }
 
-    console.log(`🎉 Generated and saved ${generatedUrls.length} headshots total`)
+    console.log(`🎉 Generated ${generatedImages.length} images total`)
 
-    // STEP 7: Save to database
-    const { data: generation } = await supabase
+    // === STYLE ANALYTICS ===
+    if (generatedImages.length > 0) {
+      const analyticsRows = styleIds.map((styleId: string) => ({
+        style_id: styleId,
+        user_id: userId,
+      }))
+      await supabase.from('style_analytics').insert(analyticsRows)
+    }
+    if (failedStyles.length > 0) {
+      console.log(`⚠️ Failed styles: ${failedStyles.join(', ')}`)
+    }
+
+    const actualCreditsUsed = generatedImages.length
+    const newCredits = user.credits - actualCreditsUsed
+    
+    const { error: creditError } = await supabase
+      .from('users')
+      .update({ credits: newCredits })
+      .eq('id', userId)
+
+    if (creditError) {
+      console.error('Failed to deduct credits:', creditError)
+    } else {
+      console.log(`💳 Deducted ${actualCreditsUsed} credits. New balance: ${newCredits}`)
+    }
+
+    const { data: generation, error: genRecordError } = await supabase
       .from('generations')
       .insert({
-        order_id: orderId,
-        result_urls: generatedUrls,
-        trained_model_version: trainedModelVersion,
+        user_id: userId,
+        result_urls: generatedImages,
+        styles_used: styleIds,
+        credits_used: actualCreditsUsed,
         status: 'completed',
       })
       .select()
       .single()
 
-    await supabase
-      .from('orders')
-      .update({ status: 'completed' })
-      .eq('id', orderId)
+    if (genRecordError) {
+      console.error('Failed to save generation record:', genRecordError)
+    }
 
-    console.log('🎉 AI generation completed!')
+    await supabase
+      .from('credits_transactions')
+      .insert({
+        user_id: userId,
+        amount: -actualCreditsUsed,
+        type: 'generation',
+        description: `Generated ${generatedImages.length} headshots (${styleIds.length} styles)`,
+      })
 
     return NextResponse.json({
       success: true,
-      orderId,
-      headshotsGenerated: generatedUrls.length,
+      imagesGenerated: generatedImages.length,
+      imageUrls: generatedImages,
+      creditsUsed: actualCreditsUsed,
+      creditsRemaining: newCredits,
       generationId: generation?.id,
+      failedStyles: failedStyles.length > 0 ? failedStyles : undefined,
     })
+
   } catch (error) {
-    console.error('💥 AI generation error:', error)
-
-    if (orderId) {
-      try {
-        await supabase
-          .from('orders')
-          .update({ status: 'failed' })
-          .eq('id', orderId)
-      } catch (updateError) {
-        console.error('❌ Error updating order status:', updateError)
-      }
-    }
-
+    console.error('❌ Generation error:', error)
     return NextResponse.json(
       {
-        error: 'AI generation failed',
+        error: 'Generation failed',
         details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }

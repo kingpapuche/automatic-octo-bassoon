@@ -1,376 +1,309 @@
-'use client'
-
-import { useState, useCallback } from 'react'
-import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { useDropzone } from 'react-dropzone'
+import BeforeAfterSlider from '@/components/beforeafterslider'
+import {
+  Zap, Palette, Gem, Lock, BadgeDollarSign, ShieldCheck,
+  Upload, SlidersHorizontal, Download,
+  Camera, Star, Sparkles, Check
+} from 'lucide-react'
 
-export default function UploadPage() {
-  const searchParams = useSearchParams()
-  const plan = searchParams.get('plan') || 'pro'
-  
-  const [photos, setPhotos] = useState<File[]>([])
-  const [email, setEmail] = useState('')
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState('')
-
-  const planDetails = {
-    starter: { price: 29, photos: 40, name: 'Starter' },
-    pro: { price: 49, photos: 100, name: 'Professional' },
-    executive: { price: 99, photos: 200, name: 'Executive' },
-  }
-
-  const selectedPlan = planDetails[plan as keyof typeof planDetails] || planDetails.pro
-
- const onDrop = useCallback((acceptedFiles: File[]) => {
-  setError('')
-  
-  // Check max photos
-  if (photos.length + acceptedFiles.length > 20) {
-    setError('Maximum 20 photos allowed')
-    return
-  }
-
-  // Filter valid files
-  const validFiles = acceptedFiles.filter(file => {
-    const isImage = file.type.startsWith('image/')
-    const isUnder10MB = file.size < 10 * 1024 * 1024
-    return isImage && isUnder10MB
-  })
-
-  if (validFiles.length !== acceptedFiles.length) {
-    setError('Some files were rejected. Only images under 10MB are allowed.')
-  }
-
-  // Check for duplicates (by name and size)
-  const existingFiles = new Set(photos.map(p => `${p.name}-${p.size}`))
-  const newFiles: File[] = []
-  const duplicates: string[] = []
-
-  validFiles.forEach(file => {
-    const fileKey = `${file.name}-${file.size}`
-    if (existingFiles.has(fileKey)) {
-      duplicates.push(file.name)
-    } else {
-      newFiles.push(file)
-      existingFiles.add(fileKey)
-    }
-  })
-
-  // Show duplicate warning
-  if (duplicates.length > 0) {
-    setError(`Duplicate photos skipped: ${duplicates.slice(0, 3).join(', ')}${duplicates.length > 3 ? ` and ${duplicates.length - 3} more` : ''}`)
-  }
-
-  // Add only new files
-  if (newFiles.length > 0) {
-    setPhotos(prev => [...prev, ...newFiles])
-  }
-}, [photos])
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-  onDrop,
-  accept: {
-    'image/*': ['.png', '.jpg', '.jpeg', '.webp']
-  },
-  maxSize: 10 * 1024 * 1024,
-  multiple: true,
-})
-
-  const removePhoto = (index: number) => {
-    setPhotos(prev => prev.filter((_, i) => i !== index))
-  }
-
-  const handleSubmit = async () => {
-    if (photos.length < 10) {
-      setError('Please upload at least 10 photos')
-      return
-    }
-
-    if (!email || !email.includes('@')) {
-      setError('Please enter a valid email')
-      return
-    }
-
-    setUploading(true)
-    setError('')
-
-    try {
-      // Step 1: Create order first
-      const orderResponse = await fetch('/api/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          plan,
-          photoUrls: [], // Empty for now, will be filled by upload
-        }),
-      })
-
-      const orderData = await orderResponse.json()
-
-      if (!orderResponse.ok || orderData.error) {
-        throw new Error(orderData.error || 'Failed to create order')
-      }
-
-      const { orderId, checkoutUrl } = orderData
-
-      console.log('Order created:', orderId)
-
-      // Step 2: Upload photos to Supabase via API
-      const uploadFormData = new FormData()
-      uploadFormData.append('orderId', orderId)
-      
-      photos.forEach((photo) => {
-        uploadFormData.append('photos', photo)
-      })
-
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: uploadFormData,
-      })
-
-      const uploadData = await uploadResponse.json()
-
-      if (!uploadResponse.ok || uploadData.error) {
-        throw new Error(uploadData.error || 'Failed to upload photos')
-      }
-
-      console.log('Photos uploaded:', uploadData.photoCount)
-      console.log('Redirecting to Stripe:', checkoutUrl)
-
-      // Step 3: Redirect to Stripe checkout
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl
-      } else {
-        throw new Error('No checkout URL received')
-      }
-      
-    } catch (err) {
-      console.error('Upload error:', err)
-      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
-      setUploading(false)
-    }
-  }
-
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
-      {/* Header */}
-      <nav className="border-b border-[#E8E6E0] bg-white">
-        <div className="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 bg-[#FAFAF9]/95 backdrop-blur-md border-b border-[#E8E6E0] z-50">
+        <div className="max-w-[1320px] mx-auto px-8 py-5 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#5B4E9D] to-[#7D6FB8] rounded-xl flex items-center justify-center text-white text-2xl">
-              ✨
+            <div className="w-10 h-10 bg-gradient-to-br from-[#5B4E9D] to-[#7D6FB8] rounded-xl flex items-center justify-center shadow-md">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-serif text-2xl font-semibold text-[#2D2D2D]">
-              BestAIHeadshot
+            <span className="font-serif text-2xl font-semibold text-[#2D2D2D] tracking-tight">
+              Nova Imago
             </span>
           </Link>
-          
-          <Link href="/" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium">
-            ← Back to Home
-          </Link>
+
+          <div className="hidden md:flex items-center gap-10">
+            <Link href="#features" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Why Us</Link>
+            <Link href="#pricing" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Plans</Link>
+            <Link href="#how-it-works" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">How It Works</Link>
+            <Link href="#faq" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Help</Link>
+            <Link href="/login" className="text-[#5B4E9D] hover:text-[#483A7C] font-semibold transition">Login</Link>
+            <Link href="/login" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:scale-105">
+              Get Started →
+            </Link>
+          </div>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-8 py-16">
-        {/* Plan Selected */}
-        <div className="bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] text-white rounded-3xl p-8 mb-12">
-          <div className="flex justify-between items-center">
+      {/* Hero Section */}
+      <section className="mt-[90px] py-10 px-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B4A]/10 rounded-full blur-3xl animate-pulse"></div>
+
+        <div className="max-w-[1320px] mx-auto relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-2">{selectedPlan.name} Plan</h2>
-              <p className="text-white/90">
-                {selectedPlan.photos} professional headshots • Ready in 30 minutes
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] text-white px-5 py-2.5 rounded-full shadow-lg mb-8">
+                <Sparkles className="w-4 h-4" />
+                <span className="text-sm font-semibold">Powered by FLUX AI — the most realistic model available</span>
+              </div>
+
+              <h1 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.15] mb-7 text-[#2D2D2D] font-normal tracking-tight">
+                Turn Your Selfies Into<br />
+                <span className="italic bg-gradient-to-r from-[#7D6FB8] via-[#3A9B8E] to-[#14B8A6] text-transparent bg-clip-text">Professional Headshots</span>
+              </h1>
+
+              <p className="text-[1.25rem] text-[#6B6B6B] mb-10 leading-relaxed">
+                Upload 10–20 photos. Choose your style. Get studio-quality headshots in under 30 minutes — without a photographer, studio, or expensive session.
               </p>
+
+              <div className="flex flex-wrap gap-4 mb-10">
+                <Link href="/login" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-105">
+                  Get Your Headshots Now →
+                </Link>
+                <Link href="#pricing" className="bg-white hover:bg-[#5B4E9D] text-[#5B4E9D] hover:text-white px-8 py-4 rounded-full font-semibold text-lg transition border-2 border-[#5B4E9D] hover:-translate-y-1">
+                  View Pricing
+                </Link>
+              </div>
+
+              <div className="flex flex-wrap gap-6">
+                {['Ready in 30 minutes', 'Profile-Worthy Guarantee', '100% private & secure'].map((item) => (
+                  <div key={item} className="flex items-center gap-2">
+                    <div className="w-5 h-5 bg-[#0D9488] rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-white stroke-[3]" />
+                    </div>
+                    <span className="text-[#6B6B6B] font-medium text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="text-right">
-              <div className="font-serif text-5xl font-bold">${selectedPlan.price}</div>
-              <p className="text-white/80 text-sm">One-time payment</p>
-            </div>
-          </div>
-        </div>
 
-     {/* Upload Section */}
-<div className="bg-white rounded-3xl p-10 border-2 border-[#E8E6E0] mb-8">
-  <h3 className="text-2xl font-bold text-[#2D2D2D] mb-2">
-    Upload Your Photos
-  </h3>
-  <p className="text-[#6B6B6B] mb-8">
-    Upload 10-20 photos for best results. Our AI needs variety!
-  </p>
-
-  {/* Pro Tips Panel */}
-  <div className="bg-gradient-to-br from-[#F0EDFF] to-[#E8F5F4] border-2 border-[#7D6FB8]/20 rounded-2xl p-6 mb-8">
-    <div className="flex items-start gap-4">
-      <div className="text-4xl">💡</div>
-      <div className="flex-1">
-        <h4 className="font-bold text-[#2D2D2D] mb-3 text-lg">Photo Tips for Best Results:</h4>
-        
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <p className="font-semibold text-[#0D9488] mb-2">✓ DO Upload:</p>
-            <ul className="text-[#6B6B6B] space-y-1 text-sm">
-              <li>• 10-20 <strong>different</strong> photos</li>
-              <li>• Various angles (front, side, 3/4 view)</li>
-              <li>• Different lighting conditions</li>
-              <li>• Mix of expressions (smile, neutral)</li>
-              <li>• Clear face, high quality</li>
-            </ul>
-          </div>
-          
-          <div>
-            <p className="font-semibold text-red-600 mb-2">✗ DON&apos;T Upload:</p>
-            <ul className="text-[#6B6B6B] space-y-1 text-sm">
-              <li>• Duplicate photos</li>
-              <li>• Group photos or multiple people</li>
-              <li>• Sunglasses or heavy filters</li>
-              <li>• Blurry or low-quality images</li>
-              <li>• Photos with hats covering face</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-[#7D6FB8]/20">
-          <p className="text-sm text-[#5B4E9D] font-medium">
-            💎 <strong>Why variety matters:</strong> Our AI learns your unique features from different angles and lighting. More variety = more realistic, professional headshots!
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* Dropzone */}
-  <div
-    {...getRootProps()}
-    className={
-      isDragActive
-        ? 'border-3 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all border-[#5B4E9D] bg-[#5B4E9D]/5'
-        : 'border-3 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all border-[#E8E6E0] hover:border-[#7D6FB8] hover:bg-[#F5F4F0]'
-    }
-  >
-    <input {...getInputProps()} />
-    <div className="text-6xl mb-4">📸</div>
-    {isDragActive ? (
-      <p className="text-xl text-[#5B4E9D] font-semibold">Drop your photos here...</p>
-    ) : (
-      <div>
-        <p className="text-xl text-[#2D2D2D] font-semibold mb-2">
-          Drag &amp; drop photos here
-        </p>
-        <p className="text-[#6B6B6B] mb-4">or click to browse</p>
-        <p className="text-sm text-[#9B9B9B]">
-          10-20 photos • JPG, PNG • Max 10MB each
-        </p>
-      </div>
-    )}
-  </div>
-
-  {error && (
-    <div className="mt-6 bg-red-50 border-2 border-red-200 rounded-xl p-4 text-red-600 flex items-start gap-3">
-      <span className="text-2xl">⚠️</span>
-      <div>
-        <p className="font-semibold mb-1">Upload Issue:</p>
-        <p>{error}</p>
-      </div>
-    </div>
-  )}
-
-  {/* Photo Preview Grid */}
-  {photos.length > 0 && (
-    <div className="mt-8">
-      <div className="flex justify-between items-center mb-4">
-        <h4 className="font-semibold text-[#2D2D2D]">
-          {photos.length} photo{photos.length !== 1 ? 's' : ''} uploaded
-          {photos.length < 10 && (
-            <span className="text-[#FF6B4A] ml-2">
-              ({10 - photos.length} more needed)
-            </span>
-          )}
-          {photos.length >= 10 && (
-            <span className="text-[#0D9488] ml-2">✓ Ready to continue!</span>
-          )}
-        </h4>
-        <button
-          onClick={() => setPhotos([])}
-          className="text-sm text-[#6B6B6B] hover:text-red-600 font-medium transition"
-        >
-          Clear all
-        </button>
-      </div>
-      
-      <div className="grid grid-cols-4 gap-4">
-        {photos.map((photo, index) => (
-          <div key={index} className="relative group">
-            <img
-              src={URL.createObjectURL(photo)}
-              alt={`Upload ${index + 1}`}
-              className="w-full aspect-square object-cover rounded-xl border-2 border-[#E8E6E0] group-hover:border-[#7D6FB8] transition"
-            />
-            <button
-              onClick={() => removePhoto(index)}
-              className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition font-bold shadow-lg"
-            >
-              ×
-            </button>
-            <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
-              #{index + 1}
+            <div className="flex justify-center">
+              <BeforeAfterSlider
+                beforeImage="/images/before.jpg"
+                afterImage="/images/headshot-42.webp"
+                beforeLabel="Your Selfie"
+                afterLabel="AI Headshot"
+              />
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
-
-        {/* Email Input */}
-        <div className="bg-white rounded-3xl p-10 border-2 border-[#E8E6E0] mb-8">
-          <h3 className="text-2xl font-bold text-[#2D2D2D] mb-2">
-            Your Email
-          </h3>
-          <p className="text-[#6B6B6B] mb-6">
-            We'll send your headshots here when ready
-          </p>
-
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            className="w-full px-6 py-4 border-2 border-[#E8E6E0] rounded-xl text-lg focus:border-[#5B4E9D] focus:outline-none transition"
-          />
         </div>
+      </section>
 
-        {/* Continue Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={uploading || photos.length < 10 || !email}
-          className="w-full bg-[#FF6B4A] hover:bg-[#FF5230] disabled:bg-[#9B9B9B] disabled:cursor-not-allowed text-white py-5 rounded-full text-xl font-bold transition shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:hover:translate-y-0"
-        >
-          {uploading ? (
-            'Uploading photos...'
-          ) : photos.length < 10 ? (
-            `Upload ${10 - photos.length} more photo${10 - photos.length !== 1 ? 's' : ''} to continue`
-          ) : (
-            `Continue to Payment ($${selectedPlan.price})`
-          )}
-        </button>
+      {/* Value Bar */}
+      <section className="py-16 px-8 bg-gradient-to-r from-[#5B4E9D] to-[#483A7C] text-white">
+        <div className="max-w-[1320px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+          <div><h3 className="font-serif text-5xl mb-2">30 min</h3><p className="opacity-90">Average delivery time</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">93+</h3><p className="opacity-90">Unique styles available</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">$29</h3><p className="opacity-90">Starting price</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">7-day</h3><p className="opacity-90">Money-back guarantee</p></div>
+        </div>
+      </section>
 
-        {/* Trust Badges */}
-        <div className="flex justify-center gap-8 mt-8 text-[#6B6B6B] text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-[#0D9488]">🔒</span>
-            <span>Secure payment</span>
+      {/* How It Works */}
+      <section id="how-it-works" className="py-24 px-8 bg-[#FAFAF9]">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">How It Works</h2>
+            <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">Three simple steps to your perfect headshot</p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[#0D9488]">✓</span>
-            <span>Money-back guarantee</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[#0D9488]">🛡️</span>
-            <span>Privacy protected</span>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { step: '01', icon: Upload, title: 'Upload Your Photos', desc: 'Upload 10–20 selfies from different angles and lighting conditions. No professional equipment needed.' },
+              { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 93+ hand-curated styles — corporate, casual, creative, full body, and more.' },
+              { step: '03', icon: Download, title: 'Receive Your Headshots', desc: 'Your AI-generated headshots are ready in under 30 minutes. Download and use them anywhere.' },
+            ].map((item) => (
+              <div key={item.step} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300 relative">
+                <div className="absolute top-6 right-8 text-[#E8E6E0] font-serif text-6xl font-bold">{item.step}</div>
+                <div className="w-14 h-14 bg-[#F0EEF8] rounded-2xl flex items-center justify-center mb-6">
+                  <item.icon className="w-7 h-7 text-[#5B4E9D]" />
+                </div>
+                <h3 className="text-[1.375rem] font-bold text-[#2D2D2D] mb-4">{item.title}</h3>
+                <p className="text-[#6B6B6B] leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="py-24 px-8 bg-white">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">Why Professionals Choose Us</h2>
+            <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">Studio-quality headshots without the studio price tag</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { icon: Zap, title: 'Results in 30 Minutes', desc: 'Upload your selfies and receive professional headshots in under 30 minutes. No waiting days for a photographer.' },
+              { icon: Palette, title: '93+ Curated Styles', desc: 'Corporate executive, smart casual, creative, full body, sunglasses, black tie — hand-tuned for consistent quality.' },
+              { icon: Gem, title: 'Powered by FLUX AI', desc: 'We use the most advanced AI model available, specifically fine-tuned on your photos for maximum realism.' },
+              { icon: Lock, title: 'Your Photos Stay Private', desc: 'Your photos are encrypted, never shared or sold, and automatically deleted after your order is complete.' },
+              { icon: BadgeDollarSign, title: 'Save $200–$500', desc: 'A professional photographer charges $300–700 for one session. Get unlimited variations starting at just $29.' },
+              { icon: ShieldCheck, title: 'Profile-Worthy Guarantee', desc: 'We guarantee at least 1 profile-worthy headshot in every order — or your money back within 7 days. No questions asked.' },
+            ].map((feature) => (
+              <div key={feature.title} className="bg-[#FAFAF9] p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300">
+                <div className="w-14 h-14 bg-[#F0EEF8] rounded-2xl flex items-center justify-center mb-6">
+                  <feature.icon className="w-7 h-7 text-[#5B4E9D]" />
+                </div>
+                <h3 className="text-[1.375rem] font-bold text-[#2D2D2D] mb-4">{feature.title}</h3>
+                <p className="text-[#6B6B6B] leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-24 px-8 bg-[#FAFAF9]">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5">Simple, Honest Pricing</h2>
+            <p className="text-xl text-[#6B6B6B]">One-time payment. No subscriptions. No hidden fees.</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+
+            {/* Starter */}
+            <div className="bg-white p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
+              <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
+                <Camera className="w-6 h-6 text-[#5B4E9D]" />
+              </div>
+              <h3 className="text-[1.5rem] font-bold mb-2">Starter</h3>
+              <p className="text-[#9B9B9B] text-sm mb-4">40 headshots</p>
+              <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>29</div>
+              <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
+              <ul className="space-y-3 mb-8">
+                {['1 AI model trained on you', '40 headshots', '40 styles to choose from', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                  <li key={f} className="flex items-start gap-3">
+                    <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
+                    <span className="text-[#6B6B6B] text-sm">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/login" className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
+            </div>
+
+            {/* Pro */}
+            <div className="bg-gradient-to-br from-[#5B4E9D] to-[#483A7C] p-8 rounded-[28px] border-2 border-[#D4AF37] text-white relative scale-105 shadow-2xl">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-[#2D2D2D] px-4 py-1.5 rounded-full text-sm font-bold shadow-md">Best Value</div>
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                <Star className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-[1.5rem] font-bold mb-2">Pro</h3>
+              <p className="text-white/60 text-sm mb-4">80 headshots</p>
+              <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>39</div>
+              <p className="text-white/60 mb-6 text-sm">One-time payment</p>
+              <ul className="space-y-3 mb-8">
+                {['1 AI model trained on you', '80 headshots', '80 styles to choose from', 'HD quality', 'Priority generation', 'Ready in 30 minutes'].map((f) => (
+                  <li key={f} className="flex items-start gap-3">
+                    <Check className="w-4 h-4 text-[#D4AF37] mt-0.5 shrink-0 stroke-[3]" />
+                    <span className="text-white/90 text-sm">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/login" className="block w-full bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
+            </div>
+
+            {/* Premium */}
+            <div className="bg-white p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
+              <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
+                <Sparkles className="w-6 h-6 text-[#5B4E9D]" />
+              </div>
+              <h3 className="text-[1.5rem] font-bold mb-2">Premium</h3>
+              <p className="text-[#9B9B9B] text-sm mb-4">120 headshots</p>
+              <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>49</div>
+              <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
+              <ul className="space-y-3 mb-8">
+                {['2 AI models trained on you', '120 headshots', 'All 93+ styles included', 'HD quality', 'Priority support', 'Ready in 30 minutes'].map((f) => (
+                  <li key={f} className="flex items-start gap-3">
+                    <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
+                    <span className="text-[#6B6B6B] text-sm">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/login" className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
+            </div>
+
+          </div>
+
+          {/* GUARANTEE BANNER */}
+          <div className="mt-12 bg-white border-2 border-[#0D9488]/30 rounded-3xl p-8 max-w-2xl mx-auto text-center shadow-sm">
+            <div className="text-4xl mb-3">🛡️</div>
+            <h3 className="font-serif text-2xl text-[#2D2D2D] font-semibold mb-3">Profile-Worthy Guarantee</h3>
+            <p className="text-[#6B6B6B] leading-relaxed mb-5">
+              Not every photo will be perfect — that&apos;s the nature of AI. But we guarantee you&apos;ll get at least <span className="text-[#2D2D2D] font-semibold">1 profile-worthy headshot</span> in every order. If not, we refund you in full within 7 days. No forms, no hassle.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              {['Full refund within 7 days', 'No questions asked', 'No forms or hassle'].map((item) => (
+                <div key={item} className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-[#0D9488] rounded-full flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 text-white stroke-[3]" />
+                  </div>
+                  <span className="text-[#6B6B6B] text-sm font-medium">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-center text-[#9B9B9B] mt-6 text-sm">One-time payment • No subscription ever</p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-24 px-8 bg-white">
+        <div className="max-w-[880px] mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D]">Common Questions</h2>
+          </div>
+          <div className="space-y-5">
+            {[
+              { q: 'How realistic are the AI-generated headshots?', a: 'We use FLUX LoRA — the most advanced AI portrait model available. The AI is trained specifically on your photos, which means the results look like you, not a generic AI person.' },
+              { q: 'What kind of photos should I upload?', a: 'Upload 10–20 clear solo photos with good lighting from different angles. Avoid group photos, sunglasses, heavy filters, or blurry images. The more variety, the better the result.' },
+              { q: 'How long does it take?', a: 'Training your personal AI model takes about 20–25 minutes. After that, each headshot generates in about 30 seconds.' },
+              { q: 'Are my photos safe?', a: 'Yes. Your photos are stored securely, never shared with third parties, and deleted automatically after your order is complete.' },
+              { q: 'What if I am not happy with the results?', a: 'We guarantee at least 1 profile-worthy headshot in every order. If not, we refund you in full within 7 days. No forms, no hassle — just contact us.' },
+              { q: 'Can I use these headshots commercially?', a: 'Yes. You own the rights to every headshot we generate for you. Use them on LinkedIn, your website, business cards, or anywhere else.' },
+            ].map((faq) => (
+              <div key={faq.q} className="bg-[#FAFAF9] rounded-2xl p-7 border border-[#E8E6E0] hover:border-[#7D6FB8] transition">
+                <h3 className="font-semibold text-lg text-[#2D2D2D] mb-3">{faq.q}</h3>
+                <p className="text-[#6B6B6B] leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-32 px-8 bg-gradient-to-br from-[#3A2D63] via-[#5B4E9D] to-[#0D9488] text-white text-center relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/10 rounded-full blur-3xl"></div>
+        <div className="max-w-[720px] mx-auto relative z-10">
+          <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] mb-7">Your Best Photo Is One Upload Away</h2>
+          <p className="text-[1.375rem] mb-12 opacity-95">No photographer. No studio. No awkward posing. Just upload your selfies and let the AI do the work.</p>
+          <Link href="/login" className="inline-block bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] px-10 py-4 rounded-full font-bold text-lg transition shadow-xl hover:scale-105">
+            Get Started — From $29 →
+          </Link>
+          <div className="mt-10 inline-flex items-center gap-3 bg-white/15 backdrop-blur-sm px-7 py-4 rounded-full">
+            <ShieldCheck className="w-6 h-6" />
+            <span className="font-semibold">Profile-Worthy Guarantee • Zero Risk</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#2D2D2D] text-white py-16 px-8">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="grid md:grid-cols-4 gap-12 mb-14">
+            <div><h4 className="font-bold mb-5 text-lg">Product</h4><ul className="space-y-3">{['Features', 'Pricing', 'How It Works', 'FAQ'].map(i => <li key={i}><Link href={`#${i.toLowerCase().replace(' ', '-')}`} className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Company</h4><ul className="space-y-3">{['About', 'Blog', 'Contact'].map(i => <li key={i}><Link href="#" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Use Cases</h4><ul className="space-y-3">{['LinkedIn Headshots', 'Resume Photos', 'Dating Profile', 'Business Portraits'].map(i => <li key={i}><Link href="#" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Legal</h4><ul className="space-y-3">{['Terms of Service', 'Privacy Policy', 'Refund Policy', 'Cookie Policy'].map(i => <li key={i}><Link href="#" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+          </div>
+          <div className="pt-8 border-t border-white/10 text-center text-white/60">© 2025 Nova Imago • All rights reserved</div>
+        </div>
+      </footer>
+
     </div>
   )
 }
