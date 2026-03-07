@@ -43,6 +43,15 @@ const HAIR_COLOR_OPTIONS = [
   { id: 'white', label: 'White', hex: '#E0E0E0' },
 ]
 
+const AGE_RANGE_OPTIONS = [
+  { id: '18-24', label: '18-24' },
+  { id: '25-34', label: '25-34' },
+  { id: '35-44', label: '35-44' },
+  { id: '45-54', label: '45-54' },
+  { id: '55-64', label: '55-64' },
+  { id: '65+', label: '65+' },
+]
+
 export default function CreateOrderDetailsPage() {
   const router = useRouter()
   
@@ -57,8 +66,9 @@ export default function CreateOrderDetailsPage() {
   const [hairColor, setHairColor] = useState<string>('')
   const [isBald, setIsBald] = useState<boolean>(false)
   const [hasGlasses, setHasGlasses] = useState<boolean>(false)
+  const [ageRange, setAgeRange] = useState<string>('')
 
-  const isProfileComplete = gender && ethnicity && eyeColor && (isBald || hairColor)
+  const isProfileComplete = gender && ethnicity && eyeColor && (isBald || hairColor) && ageRange
 
   useEffect(() => {
     async function fetchUser() {
@@ -81,6 +91,7 @@ export default function CreateOrderDetailsPage() {
           if (userData.hair_color) setHairColor(userData.hair_color)
           if (userData.is_bald) setIsBald(userData.is_bald)
           if (userData.has_glasses) setHasGlasses(userData.has_glasses)
+          if (userData.age_range) setAgeRange(userData.age_range)
         }
       } catch (error) {
         console.error('Error:', error)
@@ -105,6 +116,7 @@ export default function CreateOrderDetailsPage() {
           hair_color: isBald ? null : hairColor,
           is_bald: isBald,
           has_glasses: hasGlasses,
+          age_range: ageRange,
         })
         .eq('id', userId)
 
@@ -262,7 +274,7 @@ export default function CreateOrderDetailsPage() {
                     ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
                     : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
                 }`}
-              >👁️ No</button>
+              >No</button>
               <button
                 onClick={() => setHasGlasses(true)}
                 className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all ${
@@ -270,7 +282,28 @@ export default function CreateOrderDetailsPage() {
                     ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
                     : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
                 }`}
-              >👓 Yes</button>
+              >Yes</button>
+            </div>
+          </div>
+
+          {/* AGE RANGE */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <label className="block text-white font-semibold mb-2 text-lg">Age Range *</label>
+            <p className="text-gray-400 text-sm mb-4">Helps the AI match realistic skin and facial features for your age.</p>
+            <div className="grid grid-cols-3 gap-2">
+              {AGE_RANGE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setAgeRange(opt.id)}
+                  className={`py-3 px-4 rounded-xl font-medium text-sm transition-all ${
+                    ageRange === opt.id
+                      ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
+                      : 'bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -293,7 +326,7 @@ export default function CreateOrderDetailsPage() {
                 Saving...
               </>
             ) : (
-              <>Continue to Select Styles →</>
+              <>Continue to Select Styles -&gt;</>
             )}
           </button>
 
