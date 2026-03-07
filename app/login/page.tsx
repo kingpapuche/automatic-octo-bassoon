@@ -98,9 +98,9 @@ export default function LoginPage() {
                 ))}
               </div>
               <p className="text-white text-sm italic">
-                &quot;I honestly didn't expect this. I look more professional here than in any photo ever taken of me.&quot;
+                
               </p>
-              <p className="text-white/60 text-sm mt-2">— Nick E.</p>
+              <p className="text-white/60 text-sm mt-2"></p>
             </div>
             
             {/* AI badge */}
@@ -175,7 +175,7 @@ export default function LoginPage() {
             {/* Trust badges */}
             <div className="mt-8 space-y-3">
               {[
-                '100% money-back guarantee',
+                'Profile-Worthy Guarantee',
                 'Your photos in under 30 minutes',
                 'We respect your privacy',
                 'No subscription, pay once',
