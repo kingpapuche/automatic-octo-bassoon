@@ -124,7 +124,7 @@ export default function CreateOrderDetailsPage() {
         alert('Failed to save. Please try again.')
         console.error(error)
       } else {
-        router.push('/create/styles')
+        router.push('/upload')
       }
     } catch (err) {
       console.error(err)
