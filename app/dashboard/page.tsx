@@ -99,7 +99,7 @@ export default function DashboardPage() {
             <div className="text-sm opacity-90 mb-1">Your Credits</div>
             <div className="text-5xl font-bold">{credits}</div>
             <div className="text-sm opacity-90 mt-2">
-              Each credit = 1 style (4 photo variations)
+              Each credit = 1 generated photo
             </div>
           </div>
         </div>
