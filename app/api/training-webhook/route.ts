@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     if (user.email) {
       try {
         await resend.emails.send({
-          from: 'Nova Imago <novaimagosupport@gmail.com>',
+          from: 'Nova Imago <onboarding@resend.dev>',
           to: user.email,
           subject: '🎉 Your AI model is ready — generate your headshots now!',
           html: `
