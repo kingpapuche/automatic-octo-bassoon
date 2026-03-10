@@ -137,7 +137,7 @@ export default function DashboardPage() {
               Upload 10-20 selfies to create your custom AI
             </p>
             <button 
-              onClick={() => router.push('/upload')}
+              onClick={() => router.push('/create')}
               className="w-full bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] hover:from-[#483A7C] hover:to-[#5B4E9D] text-white py-3 rounded-lg font-semibold transition"
             >
               {hasModel ? 'Retrain Model →' : 'Start Training →'}
