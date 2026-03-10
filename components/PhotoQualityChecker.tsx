@@ -11,6 +11,10 @@ interface PhotoCheck {
 }
 
 const GOOD_PHOTO_TIPS = [
+  '10–20 photos give the best results',
+  'Mix smiling and neutral expressions',
+  'Different angles — front, three-quarter, slight side',
+  'Good lighting — natural daylight, no heavy filters',
   'Well-lit face — no backlighting or dark shadows',
   'Only yourself in the photo — no group shots',
   'Face clearly visible — no sunglasses or hats',

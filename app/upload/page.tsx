@@ -349,17 +349,6 @@ export default function UploadPage() {
                   ))}
                 </div>
               </div>
-              <div className="bg-[#7D6FB8]/10 border border-[#7D6FB8]/30 rounded-2xl p-4 mb-4">
-                <h3 className="text-white font-semibold text-sm mb-2">Tips for the best results</h3>
-                <ul className="text-[#94a3b8] text-xs space-y-1.5">
-                  <li className="flex items-start gap-2"><span className="text-[#7D6FB8] shrink-0">•</span><span><strong className="text-white">10–20 photos</strong> give the best results</span></li>
-                  <li className="flex items-start gap-2"><span className="text-[#7D6FB8] shrink-0">•</span><span>Mix <strong className="text-white">smiling</strong> and <strong className="text-white">neutral</strong> expressions</span></li>
-                  <li className="flex items-start gap-2"><span className="text-[#7D6FB8] shrink-0">•</span><span>Different <strong className="text-white">angles</strong> — front, three-quarter, slight side</span></li>
-                  <li className="flex items-start gap-2"><span className="text-[#7D6FB8] shrink-0">•</span><span>Good <strong className="text-white">lighting</strong> — natural daylight, no heavy filters</span></li>
-                  <li className="flex items-start gap-2"><span className="text-[#7D6FB8] shrink-0">•</span><span>Solo photos only — no sunglasses, hats, or other people</span></li>
-                </ul>
-              </div>
-
               <div className="bg-[#1e293b] rounded-2xl border border-[#334155] mb-4 overflow-hidden">
                 <PhotoQualityChecker onPhotosApproved={handlePhotosApproved} minPhotos={10} maxPhotos={20} />
               </div>
