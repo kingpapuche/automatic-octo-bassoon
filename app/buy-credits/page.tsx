@@ -73,6 +73,11 @@ export default function BuyCreditsPage() {
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState<string | null>(null)
 
+  // Business fields
+  const [isBusiness, setIsBusiness] = useState(false)
+  const [companyName, setCompanyName] = useState('')
+  const [vatNumber, setVatNumber] = useState('')
+
   useEffect(() => {
     async function fetchUser() {
       const { data: { session } } = await supabase.auth.getSession()
@@ -97,6 +102,10 @@ export default function BuyCreditsPage() {
 
   const handlePurchase = async (tier: PricingTier) => {
     if (!user) return
+    if (isBusiness && (!companyName || !vatNumber)) {
+      alert('Please fill in your company name and VAT number.')
+      return
+    }
     
     setPurchasing(tier.id)
     
@@ -109,6 +118,9 @@ export default function BuyCreditsPage() {
           priceId: tier.id,
           credits: tier.credits,
           amount: tier.price,
+          isBusiness,
+          companyName: isBusiness ? companyName : null,
+          vatNumber: isBusiness ? vatNumber : null,
         }),
       })
 
@@ -250,6 +262,46 @@ export default function BuyCreditsPage() {
             ))}
           </div>
 
+          {/* BUSINESS CHECKBOX */}
+          <div className="mt-10 max-w-2xl mx-auto bg-white/5 border border-white/10 rounded-2xl p-6">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isBusiness}
+                onChange={(e) => setIsBusiness(e.target.checked)}
+                className="w-5 h-5 rounded accent-violet-500 cursor-pointer"
+              />
+              <span className="text-white font-medium">I am purchasing as a business / self-employed</span>
+            </label>
+
+            {isBusiness && (
+              <div className="mt-5 space-y-4">
+                <p className="text-gray-400 text-sm">Please provide your business details for invoicing purposes.</p>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Company Name *</label>
+                  <input
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Your company name"
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">VAT Number *</label>
+                  <input
+                    type="text"
+                    value={vatNumber}
+                    onChange={(e) => setVatNumber(e.target.value)}
+                    placeholder="e.g. BE0123456789"
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
+                  />
+                </div>
+                <p className="text-yellow-400/80 text-xs">⚠️ You will receive an invoice at your account email address after purchase.</p>
+              </div>
+            )}
+          </div>
+
           {/* GUARANTEE BANNER */}
           <div className="mt-10 bg-gradient-to-br from-emerald-900/30 to-teal-900/20 border border-emerald-500/30 rounded-2xl p-8 max-w-2xl mx-auto text-center">
             <div className="text-4xl mb-3">🛡️</div>
@@ -292,39 +344,6 @@ export default function BuyCreditsPage() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 <span className="text-sm">Instant Delivery</span>
-              </div>
-            </div>
-          </div>
-
-          {/* FAQ Section */}
-          <div className="mt-20">
-            <h2 className="text-2xl font-bold text-white text-center mb-10">
-              Frequently Asked Questions
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                <h3 className="text-white font-semibold mb-2">How does it work?</h3>
-                <p className="text-gray-400 text-sm">
-                  Upload 10-15 selfies, our AI trains a model of your face, then generate unlimited professional headshots in any style you choose.
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                <h3 className="text-white font-semibold mb-2">How long does it take?</h3>
-                <p className="text-gray-400 text-sm">
-                  Training takes about 15-20 minutes. After that, generating each headshot takes just a few seconds.
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                <h3 className="text-white font-semibold mb-2">Can I get a refund?</h3>
-                <p className="text-gray-400 text-sm">
-                  Yes! We guarantee at least 1 profile-worthy headshot in every order. If not, contact us within 7 days for a full refund. No forms, no hassle.
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                <h3 className="text-white font-semibold mb-2">What resolution are the images?</h3>
-                <p className="text-gray-400 text-sm">
-                  Starter pack includes 2K resolution. Pro and Premium packs include 4K high-resolution images.
-                </p>
               </div>
             </div>
           </div>

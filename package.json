@@ -18,7 +18,7 @@
     "react-dom": "19.2.3",
     "react-dropzone": "^14.3.8",
     "replicate": "^0.32.1",
-    "resend": "^6.6.0",
+    "resend": "^6.9.3",
     "stripe": "^20.1.2",
     "uuid": "^13.0.0"
   },
