@@ -127,7 +127,7 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          {/* Upload Photos */}
+          {/* Train a Model */}
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-white/10">
             <div className="w-14 h-14 bg-gradient-to-br from-[#5B4E9D] to-[#7D6FB8] rounded-full flex items-center justify-center mb-4">
               <Upload className="w-7 h-7 text-white" />
@@ -137,7 +137,7 @@ export default function DashboardPage() {
               Upload 10-20 selfies to create your custom AI
             </p>
             <button 
-              onClick={() => router.push('/create')}
+              onClick={() => router.push('/upload')}
               className="w-full bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] hover:from-[#483A7C] hover:to-[#5B4E9D] text-white py-3 rounded-lg font-semibold transition"
             >
               {hasModel ? 'Retrain Model →' : 'Start Training →'}
@@ -155,7 +155,7 @@ export default function DashboardPage() {
             </p>
             {hasModel ? (
               <button 
-                onClick={() => router.push('/create')}
+                onClick={() => router.push('/create/styles')}
                 className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white py-3 rounded-lg font-semibold transition"
               >
                 Generate Headshots →
