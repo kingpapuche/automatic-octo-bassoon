@@ -197,7 +197,7 @@ export default function UploadPage() {
   // ── Final submit ──────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!user) { router.push('/login'); return }
-    if (photos.length < 8) { setError('Please upload at least 8 photos'); return }
+    if (photos.length < 10) { setError('Please upload at least 8 photos'); return }
     if (user.credits < 1) { setError('You need credits to train a model.'); return }
 
     setUploading(true); setError(''); setStatus('Uploading photos...')
@@ -237,7 +237,7 @@ export default function UploadPage() {
   )
 
   const photoCount = photos.length
-  const isReady = photoCount >= 8
+  const isReady = photoCount >= 10
 
   // ── Shared pill style ─────────────────────────────────────────
   const pillBase = 'py-1.5 px-3 rounded-xl text-sm font-medium transition border cursor-pointer'
@@ -521,7 +521,7 @@ export default function UploadPage() {
                   <div className="flex items-center gap-3">
                     <span className={`text-sm font-semibold ${
                       photoCount >= 10 ? 'text-emerald-400' :
-                      photoCount >= 8  ? 'text-amber-400'  : 'text-gray-400'
+                      photoCount >= 10  ? 'text-amber-400'  : 'text-gray-400'
                     }`}>
                       {photoCount}/20 photos{photoCount >= 10 && ' ✓'}
                     </span>
@@ -576,10 +576,10 @@ export default function UploadPage() {
             </div>
 
             {/* Not enough photos warning */}
-            {photoCount > 0 && photoCount < 8 && (
+            {photoCount > 0 && photoCount < 10 && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
                 <p className="text-amber-400 text-sm font-medium">
-                  Upload {8 - photoCount} more photo{8 - photoCount !== 1 ? 's' : ''} to continue (minimum 8)
+                  Upload {10 - photoCount} more photo{10 - photoCount !== 1 ? 's' : ''} to continue (minimum 10)
                 </p>
               </div>
             )}
@@ -609,8 +609,8 @@ export default function UploadPage() {
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Uploading photos...</>
               ) : training ? (
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Starting AI training...</>
-              ) : photoCount < 8 ? (
-                `Upload ${8 - photoCount} more photo${8 - photoCount !== 1 ? 's' : ''} to continue`
+              ) : photoCount < 10 ? (
+                `Upload ${10 - photoCount} more photo${10 - photoCount !== 1 ? 's' : ''} to continue`
               ) : (
                 <><span className="text-xl">🚀</span> Start AI Training ({photoCount} photos)</>
               )}
