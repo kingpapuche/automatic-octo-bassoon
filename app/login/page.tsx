@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
-  const { signInWithMagicLink, signInWithGoogle } = useAuth()
+  const { signInWithEmail: signInWithMagicLink, signInWithGoogle } = useAuth()
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
