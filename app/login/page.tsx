@@ -40,7 +40,6 @@ export default function LoginPage() {
     }
   }
 
-  // Magic link sent confirmation screen
   if (magicLinkSent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-4">
@@ -77,7 +76,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-4">
       <div className="flex flex-col lg:flex-row w-full max-w-5xl gap-8 items-center">
         
-        {/* Left side - Hero image with testimonial */}
+        {/* Left side - Hero image */}
         <div className="hidden lg:block flex-1">
           <div className="relative">
             <div className="aspect-[9/16] max-w-sm mx-auto rounded-3xl overflow-hidden shadow-2xl">
@@ -88,19 +87,6 @@ export default function LoginPage() {
                 className="object-cover object-top"
                 priority
               />
-            </div>
-            
-            {/* Floating testimonial */}
-            <div className="absolute bottom-8 left-4 right-4 bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-              <div className="flex items-center gap-1 mb-2">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400">★</span>
-                ))}
-              </div>
-              <p className="text-white text-sm italic">
-                
-              </p>
-              <p className="text-white/60 text-sm mt-2"></p>
             </div>
             
             {/* AI badge */}
