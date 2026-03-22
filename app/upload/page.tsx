@@ -35,15 +35,18 @@ const EYE_COLOR_OPTIONS = [
   { value: 'black',  label: 'Black',  color: '#1a1a1a' },
   { value: 'honey',  label: 'Honey',  color: '#EB9605' },
   { value: 'gray',   label: 'Gray',   color: '#808080' },
+  { value: 'hazel',  label: 'Hazel',  color: '#8E7618' },
 ]
 
 const HAIR_COLOR_OPTIONS = [
-  { value: 'black',  label: 'Black',  color: '#1a1a1a' },
-  { value: 'brown',  label: 'Brown',  color: '#8B4513' },
-  { value: 'blonde', label: 'Blonde', color: '#F4D03F' },
-  { value: 'red',    label: 'Red',    color: '#B7410E' },
-  { value: 'gray',   label: 'Gray',   color: '#808080' },
-  { value: 'white',  label: 'White',  color: '#E5E5E5' },
+  { value: 'black',   label: 'Black',   color: '#1a1a1a' },
+  { value: 'brown',   label: 'Brown',   color: '#8B4513' },
+  { value: 'blonde',  label: 'Blonde',  color: '#F4D03F' },
+  { value: 'red',     label: 'Red',     color: '#B7410E' },
+  { value: 'gray',    label: 'Gray',    color: '#808080' },
+  { value: 'white',   label: 'White',   color: '#E5E5E5' },
+  { value: 'auburn',  label: 'Auburn',  color: '#922B21' },
+  { value: 'dark brown', label: 'Dark Brown', color: '#4A235A' },
 ]
 
 const USE_CASE_OPTIONS = [
@@ -138,22 +141,35 @@ export default function UploadPage() {
     characteristics.age_range !== '' &&
     (characteristics.is_bald || characteristics.hair_color !== '')
 
+  // ── Step 1 submit via API route (admin client — werkt altijd!) ──
   const handleStep1Submit = async () => {
     if (!isStep1Valid() || !user) return
     setError('')
     try {
-      await supabase.from('users').update({
-        full_name:         characteristics.full_name,
-        gender:            characteristics.gender,
-        ethnicity:         characteristics.ethnicity,
-        eye_color:         characteristics.eye_color,
-        hair_color:        characteristics.is_bald ? null : characteristics.hair_color,
-        is_bald:           characteristics.is_bald,
-        has_glasses:       characteristics.has_glasses,
-        use_cases:         characteristics.use_cases,
-        age_range:         characteristics.age_range,
-        allow_photo_usage: allowPhotoUsage,
-      }).eq('id', user.id)
+      const response = await fetch('/api/save-characteristics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId:            user.id,
+          full_name:         characteristics.full_name,
+          gender:            characteristics.gender,
+          ethnicity:         characteristics.ethnicity,
+          eye_color:         characteristics.eye_color,
+          hair_color:        characteristics.hair_color,
+          is_bald:           characteristics.is_bald,
+          has_glasses:       characteristics.has_glasses,
+          use_cases:         characteristics.use_cases,
+          age_range:         characteristics.age_range,
+          allow_photo_usage: allowPhotoUsage,
+        }),
+      })
+
+      const data = await response.json()
+      if (!response.ok || data.error) {
+        setError('Failed to save your details. Please try again.')
+        return
+      }
+
       setStep(2)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
@@ -185,7 +201,6 @@ export default function UploadPage() {
 
   const removePhoto = (index: number) => setPhotos(prev => prev.filter((_, i) => i !== index))
 
-  // ── Upload via API route (gebruikt admin client — geen auth problemen!) ──
   const handleSubmit = async () => {
     if (!user) { router.push('/login'); return }
     if (photos.length < 10) { setError('Please upload at least 10 photos'); return }
@@ -215,13 +230,11 @@ export default function UploadPage() {
         })
 
         const data = await response.json()
-
         if (!response.ok || data.error) {
           throw new Error(`Failed to upload photo ${i + 1}: ${data.error}`)
         }
 
         photoUrls.push(data.url)
-
         const progress = Math.round(((i + 1) / photos.length) * 100)
         setUploadProgress(progress)
         setStatus(`Uploading photos... ${i + 1}/${photos.length}`)
