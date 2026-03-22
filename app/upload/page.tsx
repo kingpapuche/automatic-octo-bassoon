@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { useDropzone } from 'react-dropzone'
 import { supabase } from '@/lib/supabase'
 
-// ─── OPTIONS ───────────────────────────────────────────────────────────────
-
 const AGE_RANGE_OPTIONS = [
   { id: '18-24', label: '18–24' },
   { id: '25-34', label: '25–34' },
@@ -49,31 +47,27 @@ const HAIR_COLOR_OPTIONS = [
 ]
 
 const USE_CASE_OPTIONS = [
-  { value: 'website',        label: 'Website / About Us' },
-  { value: 'social-media',   label: 'Social Media' },
-  { value: 'cv',             label: 'CV / Resume' },
-  { value: 'dating',         label: 'Dating Profile' },
-  { value: 'portfolio',      label: 'Portfolio' },
-  { value: 'business-cards', label: 'Business Cards' },
+  { value: 'website',          label: 'Website / About Us' },
+  { value: 'social-media',     label: 'Social Media' },
+  { value: 'cv',               label: 'CV / Resume' },
+  { value: 'dating',           label: 'Dating Profile' },
+  { value: 'portfolio',        label: 'Portfolio' },
+  { value: 'business-cards',   label: 'Business Cards' },
   { value: 'online-platforms', label: 'Online Platforms' },
-  { value: 'other',          label: 'Other' },
+  { value: 'other',            label: 'Other' },
 ]
 
-// ─── TYPES ─────────────────────────────────────────────────────────────────
-
 interface UserCharacteristics {
-  full_name:    string
-  gender:       'male' | 'female' | 'non-binary' | ''
-  ethnicity:    string
-  eye_color:    string
-  hair_color:   string
-  is_bald:      boolean
-  has_glasses:  boolean
-  use_cases:    string[]
-  age_range:    string
+  full_name:   string
+  gender:      'male' | 'female' | 'non-binary' | ''
+  ethnicity:   string
+  eye_color:   string
+  hair_color:  string
+  is_bald:     boolean
+  has_glasses: boolean
+  use_cases:   string[]
+  age_range:   string
 }
-
-// ─── COMPONENT ─────────────────────────────────────────────────────────────
 
 export default function UploadPage() {
   const router = useRouter()
@@ -83,6 +77,7 @@ export default function UploadPage() {
   const [training, setTraining] = useState(false)
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [step, setStep] = useState(1)
   const [allowPhotoUsage, setAllowPhotoUsage] = useState(true)
 
@@ -92,7 +87,6 @@ export default function UploadPage() {
     use_cases: [], age_range: '',
   })
 
-  // ── Load user ─────────────────────────────────────────────────
   useEffect(() => {
     async function getUser() {
       const { data: { session } } = await supabase.auth.getSession()
@@ -119,7 +113,6 @@ export default function UploadPage() {
     getUser()
   }, [router])
 
-  // ── Helpers ───────────────────────────────────────────────────
   const updateChar = (key: keyof UserCharacteristics, value: any) => {
     setCharacteristics(prev => {
       const next = { ...prev, [key]: value }
@@ -145,21 +138,20 @@ export default function UploadPage() {
     characteristics.age_range !== '' &&
     (characteristics.is_bald || characteristics.hair_color !== '')
 
-  // ── Step 1 submit ─────────────────────────────────────────────
   const handleStep1Submit = async () => {
     if (!isStep1Valid() || !user) return
     setError('')
     try {
       await supabase.from('users').update({
-        full_name:    characteristics.full_name,
-        gender:       characteristics.gender,
-        ethnicity:    characteristics.ethnicity,
-        eye_color:    characteristics.eye_color,
-        hair_color:   characteristics.is_bald ? null : characteristics.hair_color,
-        is_bald:      characteristics.is_bald,
-        has_glasses:  characteristics.has_glasses,
-        use_cases:    characteristics.use_cases,
-        age_range:    characteristics.age_range,
+        full_name:         characteristics.full_name,
+        gender:            characteristics.gender,
+        ethnicity:         characteristics.ethnicity,
+        eye_color:         characteristics.eye_color,
+        hair_color:        characteristics.is_bald ? null : characteristics.hair_color,
+        is_bald:           characteristics.is_bald,
+        has_glasses:       characteristics.has_glasses,
+        use_cases:         characteristics.use_cases,
+        age_range:         characteristics.age_range,
         allow_photo_usage: allowPhotoUsage,
       }).eq('id', user.id)
       setStep(2)
@@ -169,7 +161,6 @@ export default function UploadPage() {
     }
   }
 
-  // ── Dropzone ──────────────────────────────────────────────────
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError('')
     if (photos.length + acceptedFiles.length > 20) { setError('Maximum 20 photos allowed'); return }
@@ -194,42 +185,72 @@ export default function UploadPage() {
 
   const removePhoto = (index: number) => setPhotos(prev => prev.filter((_, i) => i !== index))
 
-  // ── Final submit ──────────────────────────────────────────────
+  // ── Upload via API route (gebruikt admin client — geen auth problemen!) ──
   const handleSubmit = async () => {
     if (!user) { router.push('/login'); return }
-    if (photos.length < 10) { setError('Please upload at least 8 photos'); return }
+    if (photos.length < 10) { setError('Please upload at least 10 photos'); return }
     if (user.credits < 1) { setError('You need credits to train a model.'); return }
 
-    setUploading(true); setError(''); setStatus('Uploading photos...')
-    try {
-      const uploadFormData = new FormData()
-      uploadFormData.append('userId', user.id)
-      photos.forEach(photo => uploadFormData.append('photos', photo))
+    setUploading(true)
+    setError('')
+    setStatus('Uploading photos...')
+    setUploadProgress(0)
 
-      const uploadResponse = await fetch('/api/upload', { method: 'POST', body: uploadFormData })
-      const uploadData = await uploadResponse.json()
-      if (!uploadResponse.ok || uploadData.error) throw new Error(uploadData.error || 'Failed to upload photos')
+    try {
+      const photoUrls: string[] = []
+      const timestamp = Date.now()
+
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i]
+        const filename = `uploads/${user.id}/${timestamp}-${i}.jpg`
+
+        const formData = new FormData()
+        formData.append('file', photo)
+        formData.append('userId', user.id)
+        formData.append('filename', filename)
+
+        const response = await fetch('/api/upload-photo', {
+          method: 'POST',
+          body: formData,
+        })
+
+        const data = await response.json()
+
+        if (!response.ok || data.error) {
+          throw new Error(`Failed to upload photo ${i + 1}: ${data.error}`)
+        }
+
+        photoUrls.push(data.url)
+
+        const progress = Math.round(((i + 1) / photos.length) * 100)
+        setUploadProgress(progress)
+        setStatus(`Uploading photos... ${i + 1}/${photos.length}`)
+      }
 
       setStatus('Photos uploaded! Starting AI training...')
-      setUploading(false); setTraining(true)
+      setUploading(false)
+      setTraining(true)
 
       const trainResponse = await fetch('/api/train', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, photoUrls: uploadData.photoUrls }),
+        body: JSON.stringify({ userId: user.id, photoUrls }),
       })
       const trainData = await trainResponse.json()
       if (!trainResponse.ok || trainData.error) throw new Error(trainData.error || 'Failed to start training')
 
       setStatus('Training started! 🎉')
       setTimeout(() => router.push('/dashboard?training=started'), 2000)
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
-      setUploading(false); setTraining(false); setStatus('')
+      setUploading(false)
+      setTraining(false)
+      setStatus('')
+      setUploadProgress(0)
     }
   }
 
-  // ── Loading screen ────────────────────────────────────────────
   if (!user) return (
     <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
       <div className="text-white text-xl">Loading...</div>
@@ -239,16 +260,13 @@ export default function UploadPage() {
   const photoCount = photos.length
   const isReady = photoCount >= 10
 
-  // ── Shared pill style ─────────────────────────────────────────
   const pillBase = 'py-1.5 px-3 rounded-xl text-sm font-medium transition border cursor-pointer'
   const pillActive = 'bg-violet-600 border-violet-600 text-white'
   const pillInactive = 'bg-white/5 border-white/10 text-gray-400 hover:border-violet-500/50'
 
-  // ── Render ────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#0a0f1a]">
 
-      {/* NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 bg-[#0a0f1a]/95 backdrop-blur-xl border-b border-white/5 z-50">
         <div className="max-w-[1200px] mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-3">
@@ -270,7 +288,6 @@ export default function UploadPage() {
 
       <div className="pt-[100px] pb-[60px] max-w-[700px] mx-auto px-6">
 
-        {/* ── STEP INDICATOR ── */}
         <div className="flex items-center justify-center gap-3 mb-8">
           {[1, 2].map(s => (
             <div key={s} className="flex items-center gap-3">
@@ -289,21 +306,16 @@ export default function UploadPage() {
           ))}
         </div>
 
-        {/* ════════════════════════════════════════════
-            STEP 1 — CHARACTERISTICS
-        ════════════════════════════════════════════ */}
         {step === 1 && (
           <>
-            {/* HEADER */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Train Your AI Model</h1>
               <p className="text-gray-400 text-lg">Tell us a bit about yourself so your AI model gets it right.</p>
             </div>
 
-            {/* NAME */}
             <div className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border border-violet-500/20 rounded-2xl p-6 mb-5">
               <label className="block text-white font-semibold mb-1">Who are these photos for? *</label>
-              <p className="text-gray-500 text-sm mb-3">This name identifies your AI model — handy if you train multiple models.</p>
+              <p className="text-gray-500 text-sm mb-3">This name identifies your AI model.</p>
               <input
                 type="text"
                 value={characteristics.full_name}
@@ -313,11 +325,9 @@ export default function UploadPage() {
               />
             </div>
 
-            {/* CHARACTERISTICS */}
             <div className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border border-violet-500/20 rounded-2xl p-6 mb-5 space-y-6">
               <h3 className="text-white font-semibold">About You <span className="text-gray-500 font-normal text-sm">(helps the AI get the details right)</span></h3>
 
-              {/* Gender */}
               <div>
                 <label className="block text-white font-semibold mb-2 text-sm">Gender *</label>
                 <div className="flex flex-wrap gap-2">
@@ -330,7 +340,6 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              {/* Age Range */}
               <div>
                 <label className="block text-white font-semibold mb-2 text-sm">Age Range *</label>
                 <div className="flex flex-wrap gap-2">
@@ -343,7 +352,6 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              {/* Ethnicity */}
               <div>
                 <label className="block text-white font-semibold mb-2 text-sm">Ethnicity *</label>
                 <div className="flex flex-wrap gap-2">
@@ -356,7 +364,6 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              {/* Eye Color */}
               <div>
                 <label className="block text-white font-semibold mb-2 text-sm">Eye Color *</label>
                 <div className="flex flex-wrap gap-2">
@@ -370,7 +377,6 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              {/* Bald + Glasses */}
               <div className="flex gap-6">
                 <label className="flex items-center gap-3 cursor-pointer" onClick={() => updateChar('is_bald', !characteristics.is_bald)}>
                   <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
@@ -390,7 +396,6 @@ export default function UploadPage() {
                 </label>
               </div>
 
-              {/* Hair Color (hidden when bald) */}
               {!characteristics.is_bald && (
                 <div>
                   <label className="block text-white font-semibold mb-2 text-sm">Hair Color *</label>
@@ -406,7 +411,6 @@ export default function UploadPage() {
                 </div>
               )}
 
-              {/* Use Cases (optional) */}
               <div>
                 <label className="block text-white font-semibold mb-1 text-sm">
                   What will you use these for?
@@ -426,7 +430,6 @@ export default function UploadPage() {
               </div>
             </div>
 
-            {/* OPT-IN */}
             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-5">
               <label className="flex items-start gap-4 cursor-pointer" onClick={() => setAllowPhotoUsage(!allowPhotoUsage)}>
                 <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
@@ -436,7 +439,7 @@ export default function UploadPage() {
                 </div>
                 <div>
                   <p className="text-white font-medium text-sm">Allow Nova Imago to use my photos as examples</p>
-                  <p className="text-gray-500 text-xs mt-1">Your photos may be shown on our website to help future customers. No personal info is shared. You can uncheck this if you prefer.</p>
+                  <p className="text-gray-500 text-xs mt-1">Your photos may be shown on our website to help future customers. No personal info is shared.</p>
                 </div>
               </label>
             </div>
@@ -447,7 +450,6 @@ export default function UploadPage() {
               </div>
             )}
 
-            {/* STEP 1 BUTTON */}
             <button
               onClick={handleStep1Submit}
               disabled={!isStep1Valid()}
@@ -461,20 +463,15 @@ export default function UploadPage() {
           </>
         )}
 
-        {/* ════════════════════════════════════════════
-            STEP 2 — PHOTO UPLOAD
-        ════════════════════════════════════════════ */}
         {step === 2 && (
           <>
-            {/* HEADER */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Upload Your Photos</h1>
               <p className="text-gray-400 text-lg">Upload <strong className="text-white">10–20 photos</strong> for the best results.</p>
             </div>
 
-            {/* SUMMARY TAGS */}
             <div className="flex flex-wrap gap-2 mb-6 items-center">
-              <button onClick={() => setStep(1)} className="text-gray-400 hover:text-white text-sm transition flex items-center gap-1">
+              <button onClick={() => setStep(1)} className="text-gray-400 hover:text-white text-sm transition">
                 ← Edit details
               </button>
               <div className="w-px h-4 bg-white/10" />
@@ -493,7 +490,6 @@ export default function UploadPage() {
               ))}
             </div>
 
-            {/* TIPS */}
             <div className="bg-gradient-to-br from-violet-900/30 to-fuchsia-900/20 border border-violet-500/30 rounded-2xl p-6 mb-6">
               <h3 className="text-white font-semibold mb-4">💡 Tips for the best results</h3>
               <div className="grid grid-cols-2 gap-x-8 gap-y-2">
@@ -513,16 +509,12 @@ export default function UploadPage() {
               </div>
             </div>
 
-            {/* DROPZONE */}
             <div className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border border-violet-500/20 rounded-2xl p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold">Upload Photos</h3>
                 {photoCount > 0 && (
                   <div className="flex items-center gap-3">
-                    <span className={`text-sm font-semibold ${
-                      photoCount >= 10 ? 'text-emerald-400' :
-                      photoCount >= 10  ? 'text-amber-400'  : 'text-gray-400'
-                    }`}>
+                    <span className={`text-sm font-semibold ${photoCount >= 10 ? 'text-emerald-400' : 'text-gray-400'}`}>
                       {photoCount}/20 photos{photoCount >= 10 && ' ✓'}
                     </span>
                     <button onClick={() => setPhotos([])} className="text-xs text-gray-500 hover:text-red-400 transition">
@@ -535,9 +527,7 @@ export default function UploadPage() {
               <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
-                  isDragActive
-                    ? 'border-violet-500 bg-violet-500/10'
-                    : 'border-white/10 hover:border-violet-500/50 hover:bg-white/[0.03]'
+                  isDragActive ? 'border-violet-500 bg-violet-500/10' : 'border-white/10 hover:border-violet-500/50 hover:bg-white/[0.03]'
                 }`}>
                 <input {...getInputProps()} />
                 <div className="w-14 h-14 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -554,7 +544,6 @@ export default function UploadPage() {
                 )}
               </div>
 
-              {/* Photo grid */}
               {photos.length > 0 && (
                 <div className="mt-6 grid grid-cols-5 gap-3">
                   {photos.map((photo, index) => (
@@ -575,12 +564,26 @@ export default function UploadPage() {
               )}
             </div>
 
-            {/* Not enough photos warning */}
             {photoCount > 0 && photoCount < 10 && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
                 <p className="text-amber-400 text-sm font-medium">
                   Upload {10 - photoCount} more photo{10 - photoCount !== 1 ? 's' : ''} to continue (minimum 10)
                 </p>
+              </div>
+            )}
+
+            {uploading && (
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-gray-400">{status}</span>
+                  <span className="text-violet-400 font-semibold">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-white/10 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
               </div>
             )}
 
@@ -590,13 +593,12 @@ export default function UploadPage() {
               </div>
             )}
 
-            {status && (
+            {training && (
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 mb-6">
                 <p className="text-emerald-400 text-sm font-semibold">{status}</p>
               </div>
             )}
 
-            {/* SUBMIT BUTTON */}
             <button
               onClick={handleSubmit}
               disabled={uploading || training || !isReady}
@@ -606,7 +608,7 @@ export default function UploadPage() {
                   : 'bg-white/10 text-gray-500 cursor-not-allowed'
               }`}>
               {uploading ? (
-                <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Uploading photos...</>
+                <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>{status}</>
               ) : training ? (
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Starting AI training...</>
               ) : photoCount < 10 ? (
@@ -621,7 +623,6 @@ export default function UploadPage() {
             </p>
           </>
         )}
-
       </div>
     </div>
   )
