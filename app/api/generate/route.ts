@@ -32,7 +32,7 @@ interface UserCharacteristics {
 }
 
 // ===========================================
-// FIX: SKIN TONE MAPPING
+// SKIN TONE MAPPING
 // Zonder skin tone → AI verzint eigen huid → plastic/airbrushed look
 // Met skin tone → realistisch, klopt met echte persoon
 // ===========================================
@@ -47,6 +47,8 @@ const skinToneMap: Record<string, string> = {
   'mixed': 'warm medium brown skin',
   'south asian': 'warm brown skin',
   'african': 'deep brown skin',
+  'arabic': 'olive warm skin',
+  'indian': 'warm brown skin',
 }
 
 function buildPersonDescription(characteristics: UserCharacteristics): string {
@@ -59,8 +61,6 @@ function buildPersonDescription(characteristics: UserCharacteristics): string {
     parts.push(`a ${characteristics.gender}`)
   }
 
-  // === KRITIEKE FIX: Skin tone toevoegen ===
-  // Zonder dit genereert de AI een onrealistische "plastic" huid
   if (characteristics.ethnicity) {
     const skinTone = skinToneMap[characteristics.ethnicity.toLowerCase()]
     if (skinTone) {
@@ -161,21 +161,19 @@ async function resolveModelVersionId(userId: string, trainedModelId: string): Pr
 // ===========================================
 // STYLE PROMPTS
 //
-// REGELS (niet vergeten!):
+// REGELS:
 // ✅ Korte keywords, geen volzinnen
 // ✅ "natural lighting" of "soft natural light" → realistisch
 // ✅ "outdoor" → altijd realistischer dan studio
 // ❌ GEEN "studio lighting" → geeft plastic look
-// ❌ GEEN "professional photography" → geeft plastic look  
+// ❌ GEEN "professional photography" → geeft plastic look
 // ❌ GEEN "bokeh" → geeft te cinematisch effect
 // ❌ GEEN "high contrast" → geeft onnatuurlijk licht
 // ===========================================
 
 const STYLE_PROMPTS: Record<string, string> = {
 
-  // ===== FORMAL / CORPORATE (13 styles) =====
-  // Let op: corporate styles werken minder goed door harde verlichting
-  // Gebruik "natural lighting" ipv "studio lighting" ook hier
+  // ===== FORMAL / CORPORATE =====
   'corporate-classic': '[TRIGGER], professional headshot, navy blue suit, white dress shirt, modern office background with windows, natural light, sharp focus',
   'executive-navy': '[TRIGGER], half body portrait, arms crossed, navy blue suit with tie, office background with city view, soft natural light, confident pose',
   'ceo-black': '[TRIGGER], headshot portrait, black suit, white shirt, light gray background, soft natural light, strong presence',
@@ -190,7 +188,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'investor-meeting': '[TRIGGER], professional headshot, charcoal suit, white shirt, light neutral background, trustworthy expression, soft natural light',
   'formal-black': '[TRIGGER], headshot portrait, black formal suit, white shirt, neutral background, soft natural light, elegant',
 
-  // ===== SMART CASUAL (12 styles) =====
+  // ===== SMART CASUAL =====
   'teal-blazer': '[TRIGGER], half body portrait, arms crossed, teal blazer, white t-shirt, light background, soft natural light, modern professional',
   'beige-elegance': '[TRIGGER], half body portrait, watch visible on wrist, beige linen suit, dark background, warm ambient light, sophisticated',
   'gray-blazer-blue': '[TRIGGER], half body portrait, arms crossed, gray blazer, light background, soft window light, approachable professional',
@@ -204,7 +202,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'tech-lead': '[TRIGGER], headshot portrait, gray sport coat, crew neck, clean background, soft window light, natural expression',
   'consultant-look': '[TRIGGER], half body portrait, light gray suit, no tie, arms relaxed, modern office, soft natural light, confident',
 
-  // ===== CASUAL PROFESSIONAL (10 styles) =====
+  // ===== CASUAL PROFESSIONAL =====
   'white-tee-orange': '[TRIGGER], half body portrait, white t-shirt, warm orange toned background, fresh modern look, soft natural light',
   'black-tee-urban': '[TRIGGER], medium shot portrait, black t-shirt, city street background, natural daylight, confident casual',
   'navy-polo-clean': '[TRIGGER], headshot portrait, navy blue polo shirt, clean background, soft natural light, friendly expression',
@@ -216,7 +214,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'knit-sweater': '[TRIGGER], half body portrait, chunky knit sweater, warm ambient light, cozy background, approachable',
   'linen-summer': '[TRIGGER], half body portrait, white linen shirt, bright outdoor background, natural sunlight, relaxed',
 
-  // ===== CREATIVE / EDGY (8 styles) =====
+  // ===== CREATIVE / EDGY =====
   'leather-jacket-city': '[TRIGGER], medium shot, black leather jacket, white t-shirt, city street background, natural evening light, edgy professional',
   'night-life': '[TRIGGER], medium shot, black outfit, leather jacket, city background with ambient lights, confident urban style',
   'turtleneck-modern': '[TRIGGER], close up portrait, gray turtleneck sweater, white curtain background, soft natural light, minimalist modern',
@@ -226,9 +224,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'creative-colorful': '[TRIGGER], headshot portrait, colorful patterned shirt, light background, soft natural light, creative professional',
   'rebel-professional': '[TRIGGER], medium shot, dark blazer, casual t-shirt underneath, urban outdoor background, natural light, creative style',
 
-  // ===== OUTDOOR / NATURAL (8 styles) - BESTE RESULTATEN =====
-  // Deze categorie geeft altijd de meest realistische resultaten
-  // Outdoor licht = realistisch → geen plastic look
+  // ===== OUTDOOR / NATURAL — BESTE RESULTATEN =====
   'park-portrait': '[TRIGGER], medium shot, outdoor park setting, casual shirt, dappled sunlight, relaxed natural pose',
   'rooftop-view': '[TRIGGER], medium shot, rooftop setting, city skyline background, smart casual outfit, natural daylight',
   'golden-hour': '[TRIGGER], portrait, golden hour lighting, outdoor, warm natural tones, lifestyle photography style',
@@ -238,7 +234,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'beach-professional': '[TRIGGER], medium shot, beach boardwalk, light linen shirt, ocean background, natural golden light',
   'architectural': '[TRIGGER], half body portrait, modern architecture background, business casual outfit, natural light, editorial style',
 
-  // ===== SPECIALTY POSES (7 styles - profile-angle verwijderd) =====
+  // ===== SPECIALTY POSES =====
   'arms-crossed-power': '[TRIGGER], half body portrait, arms crossed, dark suit, natural background light, authoritative pose',
   'holding-tablet': '[TRIGGER], half body portrait, holding tablet device, business casual, modern office, natural daylight',
   'sitting-confident': '[TRIGGER], medium shot, sitting confidently in chair, blazer, office setting, natural window light',
@@ -247,8 +243,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'thoughtful-pose': '[TRIGGER], headshot portrait, hand near chin, professional attire, soft background, natural window light',
   'looking-up': '[TRIGGER], headshot portrait, looking up confidently, professional attire, bright outdoor background, natural light',
 
-  // ===== COLORED BACKGROUNDS (6 styles) =====
-  // Tip: zelfs hier "soft light" ipv "studio lighting" gebruiken
+  // ===== COLORED BACKGROUNDS =====
   'blue-studio': '[TRIGGER], professional headshot, business attire, solid blue background, soft even lighting, clean look',
   'green-studio': '[TRIGGER], half body portrait, smart casual outfit, solid green background, soft natural-style light',
   'purple-creative': '[TRIGGER], headshot portrait, dark outfit, purple background, soft creative lighting',
@@ -256,7 +251,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'red-bold': '[TRIGGER], headshot portrait, dark outfit, red background, bold, confident, soft even light',
   'gradient-modern': '[TRIGGER], professional headshot, modern outfit, gradient background, contemporary style, soft light',
 
-  // ===== FULL BODY (6 styles) =====
+  // ===== FULL BODY =====
   'fullbody-navy-suit': '[TRIGGER], full body portrait, standing confidently, navy blue suit, white shirt, light neutral background, natural light, head to toe',
   'fullbody-black-outfit': '[TRIGGER], full body portrait, standing tall, all black outfit, dark background, soft ambient light, full length',
   'fullbody-casual-white': '[TRIGGER], full body portrait, standing relaxed, white t-shirt, light jeans, white background, natural light, full length',
@@ -264,38 +259,38 @@ const STYLE_PROMPTS: Record<string, string> = {
   'fullbody-city-street': '[TRIGGER], full body portrait, city street, smart casual outfit, natural daylight, lifestyle photography',
   'fullbody-outdoor': '[TRIGGER], full body portrait, park setting, casual smart outfit, green background blurred, natural light, relaxed full body',
 
-  // ===== ZONNEBRIL (4 styles) =====
+  // ===== ZONNEBRIL =====
   'sunglasses-city': '[TRIGGER], half body portrait, stylish sunglasses, dark blazer, city street background, natural daylight, cool confident',
   'sunglasses-outdoor': '[TRIGGER], medium shot, sunglasses, casual jacket, outdoor sunny background, natural daylight, relaxed',
   'sunglasses-black-suit': '[TRIGGER], half body portrait, dark sunglasses, black suit, urban background, natural light, confident',
   'sunglasses-casual': '[TRIGGER], headshot portrait, sunglasses, white t-shirt, outdoor bright background, natural light, casual cool',
 
-  // ===== LUXURY / WATCH (3 styles) =====
+  // ===== LUXURY / WATCH =====
   'watch-showcase': '[TRIGGER], half body portrait, hand visible with luxury watch, beige blazer, dark background, warm ambient light, sophisticated',
   'watch-luxury-outdoor': '[TRIGGER], medium shot, sitting relaxed, luxury watch on wrist, smart casual blazer, outdoor nature background, natural light',
   'watch-dark-elegant': '[TRIGGER], half body portrait, hand showing watch, dark suit, dark background, soft ambient light, luxury style',
 
-  // ===== GEKLEURDE PAKKEN (5 styles) =====
+  // ===== GEKLEURDE PAKKEN =====
   'teal-suit': '[TRIGGER], half body portrait, arms crossed, teal suit, white shirt, light background, soft natural light, bold professional',
   'green-suit': '[TRIGGER], half body portrait, green blazer suit, light background, soft natural light, fresh bold look',
   'pink-blazer': '[TRIGGER], half body portrait, pink blazer, white top, light background, soft natural light, stylish modern',
   'orange-suit': '[TRIGGER], half body portrait, orange blazer, white shirt, vibrant background, natural light, energetic professional',
   'brown-suit-elegant': '[TRIGGER], half body portrait, warm brown suit, open collar, dark background, warm ambient light, elegant',
 
-  // ===== TUXEDO / BLACK TIE (2 styles) =====
+  // ===== TUXEDO / BLACK TIE =====
   'tuxedo-classic': '[TRIGGER], half body portrait, black tuxedo, white dress shirt, black bow tie, dark elegant background, soft ambient light',
   'tuxedo-modern': '[TRIGGER], headshot portrait, modern slim tuxedo, no tie, open collar, soft dramatic light, elegant evening',
 
-  // ===== MOTOR / LIFESTYLE (2 styles) =====
+  // ===== MOTOR / LIFESTYLE =====
   'moto-leather': '[TRIGGER], medium shot, leaning against motorcycle, brown leather jacket, white t-shirt, outdoor urban background, natural light',
   'moto-city': '[TRIGGER], half body portrait, standing next to motorbike, black leather jacket, city street, natural daylight, confident',
 
-  // ===== ZITTEND CASUAL (3 styles) =====
+  // ===== ZITTEND CASUAL =====
   'sitting-ground': '[TRIGGER], medium shot, sitting casually on ground, knees up, casual outfit, soft outdoor light, relaxed approachable',
   'sitting-steps': '[TRIGGER], medium shot, sitting on outdoor steps, smart casual outfit, urban background, natural daylight, candid feel',
   'sitting-chair-casual': '[TRIGGER], medium shot, sitting sideways in chair, arms on backrest, smart casual outfit, modern interior, soft window light',
 
-  // ===== CLOSE-UP HEADSHOTS (3 styles) =====
+  // ===== CLOSE-UP HEADSHOTS =====
   'closeup-dramatic': '[TRIGGER], extreme close up headshot, side window light, dark background, intense gaze, cinematic portrait',
   'closeup-warm': '[TRIGGER], close up headshot, soft warm window light, light background, genuine warm smile, approachable',
   'closeup-outdoor': '[TRIGGER], close up headshot, outdoor natural light, blurred green background, fresh natural look, candid feel',
@@ -363,9 +358,9 @@ export async function POST(request: NextRequest) {
     const failedStyles: string[] = []
 
     // ===========================================
-    // BEWEZEN NEGATIVE PROMPT — NIET AANPASSEN
+    // NEGATIVE PROMPT — geoptimaliseerd voor realisme
     // ===========================================
-    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette"
+    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette, studio strobe lighting, artificial lighting"
 
     const fullNegativePrompt = negativeAdditions 
       ? `${baseNegativePrompt}, ${negativeAdditions}`
@@ -378,7 +373,8 @@ export async function POST(request: NextRequest) {
         ? `${triggerWord}, ${personDescription}`
         : triggerWord
       
-      const realism = 'natural skin texture, photorealistic, candid feel'
+      // Gebaseerd op onderzoek: film grain + 50mm lens + subtle imperfections → meest realistisch
+      const realism = 'natural skin texture, photorealistic, candid feel, film grain, shot on 50mm lens, subtle skin imperfections'
       const fullPrompt = promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription) + `, ${realism}`
 
       console.log(`🎨 Generating style: ${styleId}`)
@@ -393,15 +389,18 @@ export async function POST(request: NextRequest) {
               negative_prompt: fullNegativePrompt,
               model: "dev",
               // ===========================================
-              // BEWEZEN AI SETTINGS — NOOIT AANPASSEN
+              // AI SETTINGS — geoptimaliseerd op basis van onderzoek
+              // guidance_scale: 3.0 → minder plastisch dan 3.5
+              // num_inference_steps: 35 → betere kwaliteit dan 28
+              // Bronnen: pelayoarbues.com, apatero.com, dataloop.ai, toolify.ai, socialmediaexaminer.com
               // ===========================================
               lora_scale: 1,
               num_outputs: 1,
               aspect_ratio: aspectRatio || "3:4",
               output_format: "webp",
-              guidance_scale: 3.5,
+              guidance_scale: 3.0,
               output_quality: 90,
-              num_inference_steps: 28,
+              num_inference_steps: 35,
               disable_safety_checker: false,
             },
           }
@@ -459,6 +458,7 @@ export async function POST(request: NextRequest) {
       }))
       await supabase.from('style_analytics').insert(analyticsRows)
     }
+
     if (failedStyles.length > 0) {
       console.log(`⚠️ Failed styles: ${failedStyles.join(', ')}`)
     }
