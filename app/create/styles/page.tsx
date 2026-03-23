@@ -121,7 +121,6 @@ const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'leaning-casual', label: 'Leaning Casual', description: 'Against wall', icon: '🚪' },
       { id: 'hands-in-pockets', label: 'Hands in Pockets', description: 'Blazer + jeans', icon: '🤙' },
       { id: 'thoughtful-pose', label: 'Thoughtful', description: 'Hand near chin', icon: '🤔' },
-      { id: 'profile-angle', label: 'Profile Angle', description: 'Three quarter view', icon: '📷' },
       { id: 'looking-up', label: 'Looking Up', description: 'From below', icon: '⬆️' },
     ],
   },
@@ -138,7 +137,6 @@ const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'gradient-modern', label: 'Gradient Modern', description: 'Blue to purple', icon: '🌀' },
     ],
   },
-  // ===== NIEUWE CATEGORIEËN =====
   {
     id: 'fullbody',
     name: 'Full Body',
@@ -221,6 +219,51 @@ const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'closeup-dramatic', label: 'Dramatic Close-Up', description: 'Cinematic, dark bg', icon: '🎬' },
       { id: 'closeup-warm', label: 'Warm Close-Up', description: 'Warm light, genuine smile', icon: '☀️' },
       { id: 'closeup-outdoor', label: 'Outdoor Close-Up', description: 'Natural light, green bg', icon: '🌿' },
+    ],
+  },
+
+  // ===== VROUWENSTIJLEN =====
+  {
+    id: 'women-dresses',
+    name: 'Women — Jurken',
+    icon: '👗',
+    styles: [
+      { id: 'sheath-dress-navy', label: 'Sheath Dress Navy', description: 'Navy jurk, kantoor', icon: '🔵' },
+      { id: 'sheath-dress-burgundy', label: 'Sheath Dress Burgundy', description: 'Bordeaux jurk, elegant', icon: '🍷' },
+      { id: 'wrap-dress-emerald', label: 'Wrap Dress Emerald', description: 'Groene wikkel jurk, outdoor', icon: '💚' },
+      { id: 'jewel-dress-sapphire', label: 'Sapphire Dress', description: 'Saffier blauwe jurk', icon: '💙' },
+      { id: 'sheath-dress-with-blazer', label: 'Jurk + Blazer', description: 'Navy jurk met blazer', icon: '👔' },
+    ],
+  },
+  {
+    id: 'women-blazers',
+    name: 'Women — Blazer Combinaties',
+    icon: '💼',
+    styles: [
+      { id: 'women-blazer-white-blouse', label: 'Blazer + Witte Blouse', description: 'Navy blazer, witte blouse', icon: '🤍' },
+      { id: 'women-blazer-camisole', label: 'Blazer + Camisole', description: 'Zwarte blazer, camisole', icon: '✨' },
+      { id: 'women-emerald-blazer', label: 'Emerald Blazer', description: 'Groene blazer, wit top', icon: '💚' },
+      { id: 'women-burgundy-blazer', label: 'Burgundy Blazer', description: 'Bordeaux blazer, kantoor', icon: '🍷' },
+    ],
+  },
+  {
+    id: 'women-soft',
+    name: 'Women — Soft & Warm',
+    icon: '🧶',
+    styles: [
+      { id: 'cardigan-professional', label: 'Cardigan Professional', description: 'Crème cardigan, warm', icon: '🤍' },
+      { id: 'soft-knit-sage', label: 'Soft Knit Sage', description: 'Saliegroen trui, rustig', icon: '🌿' },
+      { id: 'fine-knit-camel', label: 'Fine Knit Camel', description: 'Kameel coltrui, elegant', icon: '🤎' },
+    ],
+  },
+  {
+    id: 'women-blouses',
+    name: 'Women — Blouses',
+    icon: '👚',
+    styles: [
+      { id: 'silk-blouse-jewel', label: 'Silk Blouse Jewel Tone', description: 'Zijden blouse, juweel kleur', icon: '💎' },
+      { id: 'vneck-blouse-professional', label: 'V-Neck Blouse', description: 'Teal v-hals blouse', icon: '💠' },
+      { id: 'soft-blouse-outdoor', label: 'Soft Blouse Outdoor', description: 'Roze blouse, outdoor', icon: '🌸' },
     ],
   },
 ]

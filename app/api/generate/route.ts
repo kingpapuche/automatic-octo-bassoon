@@ -17,10 +17,6 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN!,
 })
 
-// ===========================================
-// PERSOONLIJKE KENMERKEN
-// ===========================================
-
 interface UserCharacteristics {
   gender?: string
   ethnicity?: string
@@ -28,14 +24,8 @@ interface UserCharacteristics {
   hair_color?: string
   is_bald?: boolean
   has_glasses?: boolean
-  age_range?: string
 }
 
-// ===========================================
-// SKIN TONE MAPPING
-// Zonder skin tone → AI verzint eigen huid → plastic/airbrushed look
-// Met skin tone → realistisch, klopt met echte persoon
-// ===========================================
 const skinToneMap: Record<string, string> = {
   'caucasian': 'fair skin',
   'latin american': 'warm medium brown skin',
@@ -63,14 +53,10 @@ function buildPersonDescription(characteristics: UserCharacteristics): string {
 
   if (characteristics.ethnicity) {
     const skinTone = skinToneMap[characteristics.ethnicity.toLowerCase()]
-    if (skinTone) {
-      parts.push(skinTone)
-    }
+    if (skinTone) parts.push(skinTone)
   }
   
-  if (characteristics.eye_color) {
-    parts.push(`with ${characteristics.eye_color} eyes`)
-  }
+  if (characteristics.eye_color) parts.push(`with ${characteristics.eye_color} eyes`)
   
   if (characteristics.is_bald) {
     parts.push(`bald head`)
@@ -78,13 +64,11 @@ function buildPersonDescription(characteristics: UserCharacteristics): string {
     parts.push(`${characteristics.hair_color} hair`)
   }
   
-  if (characteristics.has_glasses) {
-    parts.push(`wearing glasses`)
-  }
-  
-  if (characteristics.age_range) {
-    parts.push(`${characteristics.age_range} years old`)
-  }
+  if (characteristics.has_glasses) parts.push(`wearing glasses`)
+
+  // AGE RANGE BEWUST WEGGELATEN
+  // Model is getraind op echte foto's — leeftijd zit ingebakken
+  // Age range in prompt voegt ongewenste veroudering toe
 
   return parts.join(', ')
 }
@@ -109,24 +93,16 @@ function buildNegativePromptAdditions(characteristics: UserCharacteristics): str
   return negatives.join(', ')
 }
 
-// ===========================================
-// AUTOMATISCH VERSIE ID OPHALEN
-// ===========================================
-
 async function resolveModelVersionId(userId: string, trainedModelId: string): Promise<string> {
   const isVersionId = /^[a-f0-9]{64}$/.test(trainedModelId)
-  
-  if (isVersionId) {
-    return trainedModelId
-  }
+  if (isVersionId) return trainedModelId
   
   console.log(`🔍 Training job ID gevonden, versie ID ophalen bij Replicate...`)
-  
   const training = await replicate.trainings.get(trainedModelId)
   console.log(`📊 Training status: ${training.status}`)
   
   if (training.status !== 'succeeded') {
-    throw new Error(`Model nog niet klaar. Status: ${training.status}. Wacht tot de training voltooid is.`)
+    throw new Error(`Model nog niet klaar. Status: ${training.status}.`)
   }
   
   const output = training.output as any
@@ -134,42 +110,16 @@ async function resolveModelVersionId(userId: string, trainedModelId: string): Pr
   
   if (output?.version) {
     versionId = output.version
-    if (versionId && versionId.includes(':')) {
-      versionId = versionId.split(':')[1]
-    }
+    if (versionId && versionId.includes(':')) versionId = versionId.split(':')[1]
   } else if (typeof output === 'string' && output.includes(':')) {
     versionId = output.split(':')[1]
   }
   
-  if (!versionId) {
-    console.error('❌ Geen versie ID gevonden in training output:', JSON.stringify(output, null, 2))
-    throw new Error('Kon versie ID niet ophalen. Controleer je Replicate dashboard.')
-  }
+  if (!versionId) throw new Error('Kon versie ID niet ophalen.')
   
-  console.log(`✅ Versie ID gevonden: ${versionId}`)
-  
-  await supabase
-    .from('users')
-    .update({ trained_model_id: versionId })
-    .eq('id', userId)
-  
-  console.log(`💾 Versie ID opgeslagen in database voor user ${userId}`)
-  
+  await supabase.from('users').update({ trained_model_id: versionId }).eq('id', userId)
   return versionId
 }
-
-// ===========================================
-// STYLE PROMPTS
-//
-// REGELS:
-// ✅ Korte keywords, geen volzinnen
-// ✅ "natural lighting" of "soft natural light" → realistisch
-// ✅ "outdoor" → altijd realistischer dan studio
-// ❌ GEEN "studio lighting" → geeft plastic look
-// ❌ GEEN "professional photography" → geeft plastic look
-// ❌ GEEN "bokeh" → geeft te cinematisch effect
-// ❌ GEEN "high contrast" → geeft onnatuurlijk licht
-// ===========================================
 
 const STYLE_PROMPTS: Record<string, string> = {
 
@@ -224,7 +174,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'creative-colorful': '[TRIGGER], headshot portrait, colorful patterned shirt, light background, soft natural light, creative professional',
   'rebel-professional': '[TRIGGER], medium shot, dark blazer, casual t-shirt underneath, urban outdoor background, natural light, creative style',
 
-  // ===== OUTDOOR / NATURAL — BESTE RESULTATEN =====
+  // ===== OUTDOOR / NATURAL =====
   'park-portrait': '[TRIGGER], medium shot, outdoor park setting, casual shirt, dappled sunlight, relaxed natural pose',
   'rooftop-view': '[TRIGGER], medium shot, rooftop setting, city skyline background, smart casual outfit, natural daylight',
   'golden-hour': '[TRIGGER], portrait, golden hour lighting, outdoor, warm natural tones, lifestyle photography style',
@@ -294,46 +244,52 @@ const STYLE_PROMPTS: Record<string, string> = {
   'closeup-dramatic': '[TRIGGER], extreme close up headshot, side window light, dark background, intense gaze, cinematic portrait',
   'closeup-warm': '[TRIGGER], close up headshot, soft warm window light, light background, genuine warm smile, approachable',
   'closeup-outdoor': '[TRIGGER], close up headshot, outdoor natural light, blurred green background, fresh natural look, candid feel',
+
+  // ===== VROUWENSTIJLEN — JURKEN =====
+  'sheath-dress-navy': '[TRIGGER], headshot portrait, navy blue sheath dress, knee length, clean lines, office background, soft natural light, elegant professional',
+  'sheath-dress-burgundy': '[TRIGGER], headshot portrait, deep burgundy sheath dress, modest neckline, neutral background, soft window light, confident sophisticated',
+  'wrap-dress-emerald': '[TRIGGER], half body portrait, emerald green wrap dress, v-neckline, outdoor nature background, soft natural light, warm confident',
+  'jewel-dress-sapphire': '[TRIGGER], headshot portrait, sapphire blue fitted dress, professional neckline, light neutral background, soft natural light, polished',
+  'sheath-dress-with-blazer': '[TRIGGER], half body portrait, navy sheath dress with matching blazer, office background with plants, natural daylight, executive look',
+
+  // ===== VROUWENSTIJLEN — BLAZER COMBINATIES =====
+  'women-blazer-white-blouse': '[TRIGGER], headshot portrait, navy blazer over crisp white blouse, clean neutral background, soft natural light, classic professional',
+  'women-blazer-camisole': '[TRIGGER], half body portrait, black blazer over silk camisole, modern office background, soft window light, sophisticated feminine',
+  'women-emerald-blazer': '[TRIGGER], headshot portrait, emerald green blazer, white top underneath, light background, soft natural light, bold professional feminine',
+  'women-burgundy-blazer': '[TRIGGER], half body portrait, burgundy blazer, neutral blouse, modern interior background, soft natural light, warm confident',
+
+  // ===== VROUWENSTIJLEN — SOFT & WARM =====
+  'cardigan-professional': '[TRIGGER], headshot portrait, cream cardigan over blouse, soft indoor background, warm window light, approachable warm professional',
+  'soft-knit-sage': '[TRIGGER], headshot portrait, sage green soft knit sweater, clean background, soft natural light, calm approachable look',
+  'fine-knit-camel': '[TRIGGER], close up headshot, camel fine knit turtleneck, neutral background, warm soft light, elegant understated',
+
+  // ===== VROUWENSTIJLEN — BLOUSES =====
+  'silk-blouse-jewel': '[TRIGGER], headshot portrait, jewel tone silk blouse, soft draping neckline, light neutral background, soft natural light, polished feminine',
+  'vneck-blouse-professional': '[TRIGGER], headshot portrait, professional v-neck blouse in deep teal, clean background, soft window light, approachable confident',
+  'soft-blouse-outdoor': '[TRIGGER], medium shot, flowing soft blouse in dusty rose, outdoor garden background, golden hour light, warm approachable',
 }
 
 export async function POST(request: NextRequest) {
   try {
     const { userId, styleIds, aspectRatio } = await request.json()
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
-    }
-
-    if (!styleIds || styleIds.length === 0) {
-      return NextResponse.json({ error: 'No styles selected' }, { status: 400 })
-    }
+    if (!userId) return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+    if (!styleIds || styleIds.length === 0) return NextResponse.json({ error: 'No styles selected' }, { status: 400 })
 
     console.log(`🚀 Starting generation for user: ${userId}`)
-    console.log(`🎨 Styles: ${styleIds.length}, Aspect: ${aspectRatio}`)
 
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    const { data: user, error: userError } = await supabase.from('users').select('*').eq('id', userId).single()
 
-    if (userError || !user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
+    if (userError || !user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
     const creditsNeeded = styleIds.length
     if (user.credits < creditsNeeded) {
-      return NextResponse.json({ 
-        error: `Not enough credits. Need ${creditsNeeded}, have ${user.credits}` 
-      }, { status: 400 })
+      return NextResponse.json({ error: `Not enough credits. Need ${creditsNeeded}, have ${user.credits}` }, { status: 400 })
     }
 
-    if (!user.trained_model_id) {
-      return NextResponse.json({ error: 'No trained model found' }, { status: 400 })
-    }
+    if (!user.trained_model_id) return NextResponse.json({ error: 'No trained model found' }, { status: 400 })
 
     const modelVersionId = await resolveModelVersionId(userId, user.trained_model_id)
-
     const triggerWord = user.trigger_word || 'HEADSHOT'
     
     const characteristics: UserCharacteristics = {
@@ -343,42 +299,28 @@ export async function POST(request: NextRequest) {
       hair_color: user.hair_color,
       is_bald: user.is_bald,
       has_glasses: user.has_glasses,
-      age_range: user.age_range,
     }
     
     const personDescription = buildPersonDescription(characteristics)
     const negativeAdditions = buildNegativePromptAdditions(characteristics)
     
     console.log(`✅ User has ${user.credits} credits, needs ${creditsNeeded}`)
-    console.log(`🧠 Using model version: ${modelVersionId}`)
-    console.log(`🔑 Using trigger word: ${triggerWord}`)
     console.log(`👤 Person description: ${personDescription}`)
 
     const generatedImages: string[] = []
     const failedStyles: string[] = []
 
-    // ===========================================
-    // NEGATIVE PROMPT — geoptimaliseerd voor realisme
-    // ===========================================
-    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette, studio strobe lighting, artificial lighting"
+    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette, studio strobe lighting, artificial lighting, added wrinkles, aging effects, jowls, sagging skin"
 
-    const fullNegativePrompt = negativeAdditions 
-      ? `${baseNegativePrompt}, ${negativeAdditions}`
-      : baseNegativePrompt
+    const fullNegativePrompt = negativeAdditions ? `${baseNegativePrompt}, ${negativeAdditions}` : baseNegativePrompt
 
     for (const styleId of styleIds) {
       const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional headshot portrait, natural lighting, clean background, sharp focus'
-      
-      const triggerWithDescription = personDescription 
-        ? `${triggerWord}, ${personDescription}`
-        : triggerWord
-      
-      // Gebaseerd op onderzoek: film grain + 50mm lens + subtle imperfections → meest realistisch
+      const triggerWithDescription = personDescription ? `${triggerWord}, ${personDescription}` : triggerWord
       const realism = 'natural skin texture, photorealistic, candid feel, film grain, shot on 50mm lens, subtle skin imperfections'
       const fullPrompt = promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription) + `, ${realism}`
 
       console.log(`🎨 Generating style: ${styleId}`)
-      console.log(`📝 Prompt: ${fullPrompt}`)
 
       try {
         const output = await replicate.run(
@@ -388,12 +330,6 @@ export async function POST(request: NextRequest) {
               prompt: fullPrompt,
               negative_prompt: fullNegativePrompt,
               model: "dev",
-              // ===========================================
-              // AI SETTINGS — geoptimaliseerd op basis van onderzoek
-              // guidance_scale: 3.0 → minder plastisch dan 3.5
-              // num_inference_steps: 35 → betere kwaliteit dan 28
-              // Bronnen: pelayoarbues.com, apatero.com, dataloop.ai, toolify.ai, socialmediaexaminer.com
-              // ===========================================
               lora_scale: 1,
               num_outputs: 1,
               aspect_ratio: aspectRatio || "3:4",
@@ -409,35 +345,26 @@ export async function POST(request: NextRequest) {
         if (Array.isArray(output)) {
           for (let i = 0; i < output.length; i++) {
             const imageUrl = output[i]
-            
             try {
               const response = await fetch(imageUrl as string)
               const arrayBuffer = await response.arrayBuffer()
               const buffer = Buffer.from(arrayBuffer)
-
               const filename = `generated/${userId}/${Date.now()}-${styleId}-${i}.webp`
 
-              const { error: uploadError } = await supabase.storage
-                .from('headshots')
-                .upload(filename, buffer, {
-                  contentType: 'image/webp',
-                  cacheControl: '31536000',
-                  upsert: true,
-                })
+              const { error: uploadError } = await supabase.storage.from('headshots').upload(filename, buffer, {
+                contentType: 'image/webp',
+                cacheControl: '31536000',
+                upsert: true,
+              })
 
               if (!uploadError) {
-                const { data: publicUrlData } = supabase.storage
-                  .from('headshots')
-                  .getPublicUrl(filename)
-
+                const { data: publicUrlData } = supabase.storage.from('headshots').getPublicUrl(filename)
                 generatedImages.push(publicUrlData.publicUrl)
                 console.log(`✅ Saved image ${generatedImages.length}: ${styleId}`)
               } else {
-                console.error('Upload error:', uploadError)
                 generatedImages.push(imageUrl as string)
               }
-            } catch (downloadError) {
-              console.error('Download error:', downloadError)
+            } catch {
               generatedImages.push(imageUrl as string)
             }
           }
@@ -448,59 +375,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log(`🎉 Generated ${generatedImages.length} images total`)
-
-    // === STYLE ANALYTICS ===
     if (generatedImages.length > 0) {
-      const analyticsRows = styleIds.map((styleId: string) => ({
-        style_id: styleId,
-        user_id: userId,
-      }))
-      await supabase.from('style_analytics').insert(analyticsRows)
-    }
-
-    if (failedStyles.length > 0) {
-      console.log(`⚠️ Failed styles: ${failedStyles.join(', ')}`)
+      await supabase.from('style_analytics').insert(styleIds.map((styleId: string) => ({ style_id: styleId, user_id: userId })))
     }
 
     const actualCreditsUsed = generatedImages.length
     const newCredits = user.credits - actualCreditsUsed
-    
-    const { error: creditError } = await supabase
-      .from('users')
-      .update({ credits: newCredits })
-      .eq('id', userId)
+    await supabase.from('users').update({ credits: newCredits }).eq('id', userId)
 
-    if (creditError) {
-      console.error('Failed to deduct credits:', creditError)
-    } else {
-      console.log(`💳 Deducted ${actualCreditsUsed} credits. New balance: ${newCredits}`)
-    }
+    const { data: generation } = await supabase.from('generations').insert({
+      user_id: userId,
+      result_urls: generatedImages,
+      styles_used: styleIds,
+      credits_used: actualCreditsUsed,
+      status: 'completed',
+    }).select().single()
 
-    const { data: generation, error: genRecordError } = await supabase
-      .from('generations')
-      .insert({
-        user_id: userId,
-        result_urls: generatedImages,
-        styles_used: styleIds,
-        credits_used: actualCreditsUsed,
-        status: 'completed',
-      })
-      .select()
-      .single()
-
-    if (genRecordError) {
-      console.error('Failed to save generation record:', genRecordError)
-    }
-
-    await supabase
-      .from('credits_transactions')
-      .insert({
-        user_id: userId,
-        amount: -actualCreditsUsed,
-        type: 'generation',
-        description: `Generated ${generatedImages.length} headshots (${styleIds.length} styles)`,
-      })
+    await supabase.from('credits_transactions').insert({
+      user_id: userId,
+      amount: -actualCreditsUsed,
+      type: 'generation',
+      description: `Generated ${generatedImages.length} headshots (${styleIds.length} styles)`,
+    })
 
     return NextResponse.json({
       success: true,
@@ -514,12 +410,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Generation error:', error)
-    return NextResponse.json(
-      {
-        error: 'Generation failed',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Generation failed', details: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }
