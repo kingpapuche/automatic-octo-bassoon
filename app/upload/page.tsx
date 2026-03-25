@@ -6,15 +6,6 @@ import Link from 'next/link'
 import { useDropzone } from 'react-dropzone'
 import { supabase } from '@/lib/supabase'
 
-const AGE_RANGE_OPTIONS = [
-  { id: '18-24', label: '18–24' },
-  { id: '25-34', label: '25–34' },
-  { id: '35-44', label: '35–44' },
-  { id: '45-54', label: '45–54' },
-  { id: '55-64', label: '55–64' },
-  { id: '65+',   label: '65+' },
-]
-
 const ETHNICITY_OPTIONS = [
   { value: 'caucasian',  label: 'Caucasian' },
   { value: 'hispanic',   label: 'Hispanic' },
@@ -69,7 +60,6 @@ interface UserCharacteristics {
   is_bald:     boolean
   has_glasses: boolean
   use_cases:   string[]
-  age_range:   string
 }
 
 interface PhotoWithStatus {
@@ -103,7 +93,7 @@ export default function UploadPage() {
   const [characteristics, setCharacteristics] = useState<UserCharacteristics>({
     full_name: '', gender: '', ethnicity: '', eye_color: '',
     hair_color: '', is_bald: false, has_glasses: false,
-    use_cases: [], age_range: '',
+    use_cases: [],
   })
 
   useEffect(() => {
@@ -124,7 +114,6 @@ export default function UploadPage() {
             is_bald:     userData.is_bald     || false,
             has_glasses: userData.has_glasses || false,
             use_cases:   userData.use_cases   || [],
-            age_range:   userData.age_range   || '',
           })
         }
       }
@@ -154,7 +143,6 @@ export default function UploadPage() {
     characteristics.gender !== '' &&
     characteristics.ethnicity !== '' &&
     characteristics.eye_color !== '' &&
-    characteristics.age_range !== '' &&
     (characteristics.is_bald || characteristics.hair_color !== '')
 
   const handleStep1Submit = async () => {
@@ -174,7 +162,6 @@ export default function UploadPage() {
           is_bald:           characteristics.is_bald,
           has_glasses:       characteristics.has_glasses,
           use_cases:         characteristics.use_cases,
-          age_range:         characteristics.age_range,
           allow_photo_usage: allowPhotoUsage,
         }),
       })
@@ -207,7 +194,6 @@ export default function UploadPage() {
       return
     }
 
-    // Stap 1: voeg alle foto's meteen toe met status 'checking'
     const newEntries: PhotoWithStatus[] = newFiles.map(file => ({
       file,
       previewUrl: URL.createObjectURL(file),
@@ -217,9 +203,6 @@ export default function UploadPage() {
 
     setPhotos(prev => [...prev, ...newEntries])
 
-    // Stap 2: check ALLE foto's tegelijkertijd (parallel)
-    // Vergelijk met één voor één: 15 foto's x 2s = 30s wachten
-    // Nu: alle 15 foto's starten tegelijk = max 2-3s totaal
     await Promise.all(
       newEntries.map(async (entry) => {
         try {
@@ -234,7 +217,6 @@ export default function UploadPage() {
           })
           const result = await res.json()
 
-          // Update alleen díe foto op basis van de unieke previewUrl
           setPhotos(prev =>
             prev.map(p =>
               p.previewUrl === entry.previewUrl
@@ -243,7 +225,6 @@ export default function UploadPage() {
             )
           )
         } catch {
-          // Bij fout: foto goedkeuren zodat gebruiker niet geblokkeerd wordt
           setPhotos(prev =>
             prev.map(p =>
               p.previewUrl === entry.previewUrl
@@ -423,18 +404,6 @@ export default function UploadPage() {
               </div>
 
               <div>
-                <label className="block text-white font-semibold mb-2 text-sm">Age Range *</label>
-                <div className="flex flex-wrap gap-2">
-                  {AGE_RANGE_OPTIONS.map(o => (
-                    <button key={o.id} onClick={() => updateChar('age_range', o.id)}
-                      className={`${pillBase} ${characteristics.age_range === o.id ? pillActive : pillInactive}`}>
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
                 <label className="block text-white font-semibold mb-2 text-sm">Ethnicity *</label>
                 <div className="flex flex-wrap gap-2">
                   {ETHNICITY_OPTIONS.map(o => (
@@ -561,7 +530,6 @@ export default function UploadPage() {
               {[
                 characteristics.full_name,
                 characteristics.gender,
-                characteristics.age_range,
                 characteristics.ethnicity,
                 `${characteristics.eye_color} eyes`,
                 characteristics.is_bald ? 'Bald' : `${characteristics.hair_color} hair`,
@@ -611,7 +579,6 @@ export default function UploadPage() {
                 )}
               </div>
 
-              {/* Dropzone */}
               <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
@@ -632,7 +599,6 @@ export default function UploadPage() {
                 )}
               </div>
 
-              {/* Foto grid */}
               {photos.length > 0 && (
                 <div className="mt-6 grid grid-cols-5 gap-3">
                   {photos.map((photo, index) => (
@@ -648,7 +614,6 @@ export default function UploadPage() {
                             : 'border-yellow-500/40'
                         }`}
                       />
-                      {/* Status badge */}
                       <div className={`absolute top-1.5 left-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shadow ${
                         photo.status === 'passed'
                           ? 'bg-emerald-500 text-white'
@@ -658,13 +623,11 @@ export default function UploadPage() {
                       }`}>
                         {photo.status === 'passed' ? '✓' : photo.status === 'failed' ? '✗' : '⏳'}
                       </div>
-                      {/* Reden bij afgekeurde foto */}
                       {photo.status === 'failed' && (
                         <div className="absolute bottom-0 left-0 right-0 bg-red-900/90 text-red-200 text-[10px] p-1 rounded-b-xl leading-tight">
                           {photo.message}
                         </div>
                       )}
-                      {/* Verwijder knop */}
                       <button
                         onClick={() => removePhoto(index)}
                         className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white w-5 h-5 rounded-full opacity-0 group-hover:opacity-100 transition text-xs font-bold flex items-center justify-center">
@@ -676,7 +639,6 @@ export default function UploadPage() {
               )}
             </div>
 
-            {/* Nog aan het checken */}
             {checkingCount > 0 && (
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
                 <p className="text-yellow-400 text-sm font-medium">
@@ -685,7 +647,6 @@ export default function UploadPage() {
               </div>
             )}
 
-            {/* Te weinig goedgekeurde foto's */}
             {photos.length > 0 && passedCount < 10 && checkingCount === 0 && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
                 <p className="text-amber-400 text-sm font-medium">
