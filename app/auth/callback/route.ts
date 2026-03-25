@@ -15,19 +15,4 @@ export async function GET(request: NextRequest) {
         cookies: {
           getAll() {
             return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
-            })
-          },
-        },
-      }
-    )
-
-    await supabase.auth.exchangeCodeForSession(code)
-    return response
-  }
-
-  return NextResponse.redirect(new URL('/dashboard', request.url))
-}
+         

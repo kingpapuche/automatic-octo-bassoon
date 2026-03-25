@@ -39,13 +39,13 @@ const EYE_COLOR_OPTIONS = [
 ]
 
 const HAIR_COLOR_OPTIONS = [
-  { value: 'black',   label: 'Black',   color: '#1a1a1a' },
-  { value: 'brown',   label: 'Brown',   color: '#8B4513' },
-  { value: 'blonde',  label: 'Blonde',  color: '#F4D03F' },
-  { value: 'red',     label: 'Red',     color: '#B7410E' },
-  { value: 'gray',    label: 'Gray',    color: '#808080' },
-  { value: 'white',   label: 'White',   color: '#E5E5E5' },
-  { value: 'auburn',  label: 'Auburn',  color: '#922B21' },
+  { value: 'black',      label: 'Black',      color: '#1a1a1a' },
+  { value: 'brown',      label: 'Brown',      color: '#8B4513' },
+  { value: 'blonde',     label: 'Blonde',     color: '#F4D03F' },
+  { value: 'red',        label: 'Red',        color: '#B7410E' },
+  { value: 'gray',       label: 'Gray',       color: '#808080' },
+  { value: 'white',      label: 'White',      color: '#E5E5E5' },
+  { value: 'auburn',     label: 'Auburn',     color: '#922B21' },
   { value: 'dark brown', label: 'Dark Brown', color: '#4A235A' },
 ]
 
@@ -72,16 +72,32 @@ interface UserCharacteristics {
   age_range:   string
 }
 
+interface PhotoWithStatus {
+  file:       File
+  previewUrl: string
+  status:     'checking' | 'passed' | 'failed'
+  message:    string
+}
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload  = () => resolve((reader.result as string).split(',')[1])
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
 export default function UploadPage() {
   const router = useRouter()
   const [user, setUser] = useState<{ id: string; email: string; credits: number } | null>(null)
-  const [photos, setPhotos] = useState<File[]>([])
+  const [photos, setPhotos] = useState<PhotoWithStatus[]>([])
   const [uploading, setUploading] = useState(false)
-  const [training, setTraining] = useState(false)
-  const [error, setError] = useState('')
-  const [status, setStatus] = useState('')
+  const [training,  setTraining]  = useState(false)
+  const [error,     setError]     = useState('')
+  const [status,    setStatus]    = useState('')
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [step, setStep] = useState(1)
+  const [step, setStep]           = useState(1)
   const [allowPhotoUsage, setAllowPhotoUsage] = useState(true)
 
   const [characteristics, setCharacteristics] = useState<UserCharacteristics>({
@@ -141,7 +157,6 @@ export default function UploadPage() {
     characteristics.age_range !== '' &&
     (characteristics.is_bald || characteristics.hair_color !== '')
 
-  // ── Step 1 submit via API route (admin client — werkt altijd!) ──
   const handleStep1Submit = async () => {
     if (!isStep1Valid() || !user) return
     setError('')
@@ -163,13 +178,8 @@ export default function UploadPage() {
           allow_photo_usage: allowPhotoUsage,
         }),
       })
-
       const data = await response.json()
-      if (!response.ok || data.error) {
-        setError('Failed to save your details. Please try again.')
-        return
-      }
-
+      if (!response.ok || data.error) { setError('Failed to save your details. Please try again.'); return }
       setStep(2)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
@@ -177,33 +187,95 @@ export default function UploadPage() {
     }
   }
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  // ── Alle foto's worden TEGELIJK gecheckt via Promise.all ──
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setError('')
-    if (photos.length + acceptedFiles.length > 20) { setError('Maximum 20 photos allowed'); return }
-    const validFiles = acceptedFiles.filter(f => f.type.startsWith('image/') && f.size < 10 * 1024 * 1024)
-    if (validFiles.length !== acceptedFiles.length)
-      setError('Some files were rejected. Only images under 10MB are allowed.')
-    const existing = new Set(photos.map(p => `${p.name}-${p.size}`))
-    const newFiles: File[] = []
-    validFiles.forEach(file => {
-      const key = `${file.name}-${file.size}`
-      if (!existing.has(key)) { newFiles.push(file); existing.add(key) }
+
+    const existingKeys = new Set(photos.map(p => `${p.file.name}-${p.file.size}`))
+
+    const newFiles = acceptedFiles.filter(f => {
+      const key = `${f.name}-${f.size}`
+      if (!f.type.startsWith('image/')) return false
+      if (f.size > 10 * 1024 * 1024) return false
+      if (existingKeys.has(key)) return false
+      existingKeys.add(key)
+      return true
     })
-    if (newFiles.length > 0) setPhotos(prev => [...prev, ...newFiles])
+
+    if (photos.length + newFiles.length > 20) {
+      setError('Maximum 20 photos allowed')
+      return
+    }
+
+    // Stap 1: voeg alle foto's meteen toe met status 'checking'
+    const newEntries: PhotoWithStatus[] = newFiles.map(file => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+      status:     'checking',
+      message:    'Checking photo...',
+    }))
+
+    setPhotos(prev => [...prev, ...newEntries])
+
+    // Stap 2: check ALLE foto's tegelijkertijd (parallel)
+    // Vergelijk met één voor één: 15 foto's x 2s = 30s wachten
+    // Nu: alle 15 foto's starten tegelijk = max 2-3s totaal
+    await Promise.all(
+      newEntries.map(async (entry) => {
+        try {
+          const base64 = await fileToBase64(entry.file)
+          const res    = await fetch('/api/check-photo', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+              imageBase64: base64,
+              mediaType:   entry.file.type,
+            }),
+          })
+          const result = await res.json()
+
+          // Update alleen díe foto op basis van de unieke previewUrl
+          setPhotos(prev =>
+            prev.map(p =>
+              p.previewUrl === entry.previewUrl
+                ? { ...p, status: result.passed ? 'passed' : 'failed', message: result.message }
+                : p
+            )
+          )
+        } catch {
+          // Bij fout: foto goedkeuren zodat gebruiker niet geblokkeerd wordt
+          setPhotos(prev =>
+            prev.map(p =>
+              p.previewUrl === entry.previewUrl
+                ? { ...p, status: 'passed', message: 'Photo looks good.' }
+                : p
+            )
+          )
+        }
+      })
+    )
   }, [photos])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] },
-    maxSize: 10 * 1024 * 1024,
+    accept:   { 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] },
+    maxSize:  10 * 1024 * 1024,
     multiple: true,
   })
 
-  const removePhoto = (index: number) => setPhotos(prev => prev.filter((_, i) => i !== index))
+  const removePhoto = (index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index))
+  }
 
   const handleSubmit = async () => {
     if (!user) { router.push('/login'); return }
-    if (photos.length < 10) { setError('Please upload at least 10 photos'); return }
+
+    const passedPhotos = photos.filter(p => p.status === 'passed')
+
+    if (passedPhotos.length < 10) {
+      setError(`You need at least 10 approved photos. Currently ${passedPhotos.length} approved.`)
+      return
+    }
     if (user.credits < 1) { setError('You need credits to train a model.'); return }
 
     setUploading(true)
@@ -215,29 +287,22 @@ export default function UploadPage() {
       const photoUrls: string[] = []
       const timestamp = Date.now()
 
-      for (let i = 0; i < photos.length; i++) {
-        const photo = photos[i]
+      for (let i = 0; i < passedPhotos.length; i++) {
+        const photo    = passedPhotos[i].file
         const filename = `uploads/${user.id}/${timestamp}-${i}.jpg`
 
         const formData = new FormData()
-        formData.append('file', photo)
-        formData.append('userId', user.id)
+        formData.append('file',     photo)
+        formData.append('userId',   user.id)
         formData.append('filename', filename)
 
-        const response = await fetch('/api/upload-photo', {
-          method: 'POST',
-          body: formData,
-        })
-
-        const data = await response.json()
-        if (!response.ok || data.error) {
-          throw new Error(`Failed to upload photo ${i + 1}: ${data.error}`)
-        }
+        const response = await fetch('/api/upload-photo', { method: 'POST', body: formData })
+        const data     = await response.json()
+        if (!response.ok || data.error) throw new Error(`Failed to upload photo ${i + 1}: ${data.error}`)
 
         photoUrls.push(data.url)
-        const progress = Math.round(((i + 1) / photos.length) * 100)
-        setUploadProgress(progress)
-        setStatus(`Uploading photos... ${i + 1}/${photos.length}`)
+        setUploadProgress(Math.round(((i + 1) / passedPhotos.length) * 100))
+        setStatus(`Uploading photos... ${i + 1}/${passedPhotos.length}`)
       }
 
       setStatus('Photos uploaded! Starting AI training...')
@@ -245,9 +310,9 @@ export default function UploadPage() {
       setTraining(true)
 
       const trainResponse = await fetch('/api/train', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, photoUrls }),
+        body:    JSON.stringify({ userId: user.id, photoUrls }),
       })
       const trainData = await trainResponse.json()
       if (!trainResponse.ok || trainData.error) throw new Error(trainData.error || 'Failed to start training')
@@ -270,11 +335,13 @@ export default function UploadPage() {
     </div>
   )
 
-  const photoCount = photos.length
-  const isReady = photoCount >= 10
+  const passedCount   = photos.filter(p => p.status === 'passed').length
+  const checkingCount = photos.filter(p => p.status === 'checking').length
+  const failedCount   = photos.filter(p => p.status === 'failed').length
+  const isReady       = passedCount >= 10 && checkingCount === 0
 
-  const pillBase = 'py-1.5 px-3 rounded-xl text-sm font-medium transition border cursor-pointer'
-  const pillActive = 'bg-violet-600 border-violet-600 text-white'
+  const pillBase     = 'py-1.5 px-3 rounded-xl text-sm font-medium transition border cursor-pointer'
+  const pillActive   = 'bg-violet-600 border-violet-600 text-white'
   const pillInactive = 'bg-white/5 border-white/10 text-gray-400 hover:border-violet-500/50'
 
   return (
@@ -301,6 +368,7 @@ export default function UploadPage() {
 
       <div className="pt-[100px] pb-[60px] max-w-[700px] mx-auto px-6">
 
+        {/* Stappen indicator */}
         <div className="flex items-center justify-center gap-3 mb-8">
           {[1, 2].map(s => (
             <div key={s} className="flex items-center gap-3">
@@ -319,6 +387,7 @@ export default function UploadPage() {
           ))}
         </div>
 
+        {/* ── STAP 1 ── */}
         {step === 1 && (
           <>
             <div className="text-center mb-8">
@@ -476,6 +545,7 @@ export default function UploadPage() {
           </>
         )}
 
+        {/* ── STAP 2 ── */}
         {step === 2 && (
           <>
             <div className="text-center mb-8">
@@ -525,11 +595,15 @@ export default function UploadPage() {
             <div className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border border-violet-500/20 rounded-2xl p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold">Upload Photos</h3>
-                {photoCount > 0 && (
+                {photos.length > 0 && (
                   <div className="flex items-center gap-3">
-                    <span className={`text-sm font-semibold ${photoCount >= 10 ? 'text-emerald-400' : 'text-gray-400'}`}>
-                      {photoCount}/20 photos{photoCount >= 10 && ' ✓'}
-                    </span>
+                    <span className="text-sm font-semibold text-emerald-400">{passedCount} ✓</span>
+                    {checkingCount > 0 && (
+                      <span className="text-sm font-semibold text-yellow-400">{checkingCount} ⏳</span>
+                    )}
+                    {failedCount > 0 && (
+                      <span className="text-sm font-semibold text-red-400">{failedCount} ✗</span>
+                    )}
                     <button onClick={() => setPhotos([])} className="text-xs text-gray-500 hover:text-red-400 transition">
                       Clear all
                     </button>
@@ -537,6 +611,7 @@ export default function UploadPage() {
                 )}
               </div>
 
+              {/* Dropzone */}
               <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
@@ -557,15 +632,39 @@ export default function UploadPage() {
                 )}
               </div>
 
+              {/* Foto grid */}
               {photos.length > 0 && (
                 <div className="mt-6 grid grid-cols-5 gap-3">
                   {photos.map((photo, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={URL.createObjectURL(photo)}
+                        src={photo.previewUrl}
                         alt={`Upload ${index + 1}`}
-                        className="w-full aspect-square object-cover rounded-xl border border-white/10 group-hover:border-violet-500/50 transition"
+                        className={`w-full aspect-square object-cover rounded-xl border transition ${
+                          photo.status === 'passed'
+                            ? 'border-emerald-500/60'
+                            : photo.status === 'failed'
+                            ? 'border-red-500/60 opacity-50'
+                            : 'border-yellow-500/40'
+                        }`}
                       />
+                      {/* Status badge */}
+                      <div className={`absolute top-1.5 left-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shadow ${
+                        photo.status === 'passed'
+                          ? 'bg-emerald-500 text-white'
+                          : photo.status === 'failed'
+                          ? 'bg-red-500 text-white'
+                          : 'bg-yellow-500 text-black'
+                      }`}>
+                        {photo.status === 'passed' ? '✓' : photo.status === 'failed' ? '✗' : '⏳'}
+                      </div>
+                      {/* Reden bij afgekeurde foto */}
+                      {photo.status === 'failed' && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-red-900/90 text-red-200 text-[10px] p-1 rounded-b-xl leading-tight">
+                          {photo.message}
+                        </div>
+                      )}
+                      {/* Verwijder knop */}
                       <button
                         onClick={() => removePhoto(index)}
                         className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white w-5 h-5 rounded-full opacity-0 group-hover:opacity-100 transition text-xs font-bold flex items-center justify-center">
@@ -577,10 +676,23 @@ export default function UploadPage() {
               )}
             </div>
 
-            {photoCount > 0 && photoCount < 10 && (
+            {/* Nog aan het checken */}
+            {checkingCount > 0 && (
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
+                <p className="text-yellow-400 text-sm font-medium">
+                  ⏳ Checking {checkingCount} photo{checkingCount > 1 ? 's' : ''} simultaneously...
+                </p>
+              </div>
+            )}
+
+            {/* Te weinig goedgekeurde foto's */}
+            {photos.length > 0 && passedCount < 10 && checkingCount === 0 && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
                 <p className="text-amber-400 text-sm font-medium">
-                  Upload {10 - photoCount} more photo{10 - photoCount !== 1 ? 's' : ''} to continue (minimum 10)
+                  {failedCount > 0
+                    ? `${failedCount} photo${failedCount > 1 ? 's were' : ' was'} rejected. Upload ${10 - passedCount} more approved photo${10 - passedCount !== 1 ? 's' : ''} to continue.`
+                    : `Upload ${10 - passedCount} more photo${10 - passedCount !== 1 ? 's' : ''} to continue (minimum 10)`
+                  }
                 </p>
               </div>
             )}
@@ -624,10 +736,12 @@ export default function UploadPage() {
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>{status}</>
               ) : training ? (
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Starting AI training...</>
-              ) : photoCount < 10 ? (
-                `Upload ${10 - photoCount} more photo${10 - photoCount !== 1 ? 's' : ''} to continue`
+              ) : checkingCount > 0 ? (
+                `⏳ Waiting for photo checks...`
+              ) : passedCount < 10 ? (
+                `Upload ${10 - passedCount} more approved photo${10 - passedCount !== 1 ? 's' : ''} to continue`
               ) : (
-                <><span className="text-xl">🚀</span> Start AI Training ({photoCount} photos)</>
+                <><span className="text-xl">🚀</span> Start AI Training ({passedCount} approved photos)</>
               )}
             </button>
 
