@@ -342,4 +342,57 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section id="faq" className="py-24 px-8 bg-[#FAFAF9]">
-        <div className=
+        <div className="max-w-[880px] mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D]">Common Questions</h2>
+          </div>
+          <div className="space-y-5">
+            {[
+              { q: 'How realistic are the AI-generated headshots?', a: 'We use FLUX LoRA — the most advanced AI portrait model available. The AI is trained specifically on your photos, which means the results look like you, not a generic AI person.' },
+              { q: 'What kind of photos should I upload?', a: 'Upload 10–20 clear solo photos with good lighting from different angles. Avoid group photos, sunglasses, heavy filters, or blurry images. The more variety, the better the result.' },
+              { q: 'How long does it take?', a: 'Training your personal AI model takes about 20–25 minutes. After that, each headshot generates in about 30 seconds.' },
+              { q: 'Are my photos safe?', a: 'Yes. Your photos are stored securely, never shared with third parties, and deleted automatically after your order is complete.' },
+              { q: 'What if I am not happy with the results?', a: 'We guarantee at least 1 profile-worthy headshot in every order. If not, we refund you in full within 7 days. No forms, no hassle — just contact us.' },
+              { q: 'Can I use these headshots commercially?', a: 'Yes. You own the rights to every headshot we generate for you. Use them on LinkedIn, your website, business cards, or anywhere else.' },
+            ].map((faq) => (
+              <div key={faq.q} className="bg-white rounded-2xl p-7 border border-[#E8E6E0] hover:border-[#7D6FB8] transition">
+                <h3 className="font-semibold text-lg text-[#2D2D2D] mb-3">{faq.q}</h3>
+                <p className="text-[#6B6B6B] leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-32 px-8 bg-gradient-to-br from-[#3A2D63] via-[#5B4E9D] to-[#0D9488] text-white text-center relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/10 rounded-full blur-3xl"></div>
+        <div className="max-w-[720px] mx-auto relative z-10">
+          <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] mb-7">Your Best Photo Is One Upload Away</h2>
+          <p className="text-[1.375rem] mb-12 opacity-95">No photographer. No studio. No awkward posing. Just upload your selfies and let the AI do the work.</p>
+          <Link href="/login" className="inline-block bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] px-10 py-4 rounded-full font-bold text-lg transition shadow-xl hover:scale-105">
+            Get Started — From $29 →
+          </Link>
+          <div className="mt-10 inline-flex items-center gap-3 bg-white/15 backdrop-blur-sm px-7 py-4 rounded-full">
+            <ShieldCheck className="w-6 h-6" />
+            <span className="font-semibold">Profile-Worthy Guarantee • Zero Risk</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#2D2D2D] text-white py-16 px-8">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="grid md:grid-cols-4 gap-12 mb-14">
+            <div><h4 className="font-bold mb-5 text-lg">Product</h4><ul className="space-y-3">{['Features', 'Pricing', 'How It Works', 'FAQ'].map(i => <li key={i}><Link href={`#${i.toLowerCase().replace(' ', '-')}`} className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Company</h4><ul className="space-y-3">{['About', 'Blog', 'Contact'].map(i => <li key={i}><Link href="#" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Use Cases</h4><ul className="space-y-3">{['LinkedIn Headshots', 'Resume Photos', 'Dating Profile', 'Business Portraits'].map(i => <li key={i}><Link href="#" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Legal</h4><ul className="space-y-3">{['Terms of Service', 'Privacy Policy', 'Refund Policy', 'Cookie Policy'].map(i => <li key={i}><Link href="#" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+          </div>
+          <div className="pt-8 border-t border-white/10 text-center text-white/60">© 2025 Nova Imago • All rights reserved</div>
+        </div>
+      </footer>
+
+    </div>
+  )
+}
