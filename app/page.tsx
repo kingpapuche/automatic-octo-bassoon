@@ -22,7 +22,6 @@ export default function HomePage() {
               Nova Imago
             </span>
           </Link>
-
           <div className="hidden md:flex items-center gap-10">
             <Link href="#features" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Why Us</Link>
             <Link href="#pricing" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Plans</Link>
@@ -122,7 +121,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* REAL RESULTS SECTION — 3x2 grid */}
+      {/* REAL RESULTS — Rij 1: Leen, Roy, Mims | Rij 2: Lina, Stijn, Renata */}
       <section className="py-24 px-8 bg-white">
         <div className="max-w-[1320px] mx-auto">
           <div className="text-center mb-16">
@@ -131,14 +130,13 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-
             {[
-              { name: 'Roy', before: '/images/roy-before.jpg', after: '/images/roy-after.webp', quote: 'Incredible result — looks completely natural and professional.' },
-              { name: 'Leen', before: '/images/leen-before.jpg', after: '/images/leen-after.webp', quote: "I couldn't believe how realistic it looks. Using it on LinkedIn right away!" },
-              { name: 'Stijn', before: '/images/stijn-before.jpg', after: '/images/stijn-after.jpg', quote: 'Amazing quality — I use it on my LinkedIn profile now!' },
-              { name: 'Renata', before: '/images/renata-before.jpg', after: '/images/renata-after.jpg', quote: 'The results exceeded my expectations. So natural and professional!' },
-              { name: 'Lina', before: '/images/lina-before.jpg', after: '/images/lina-after.webp', quote: 'Absolutely stunning results. Looks just like me but even better!' },
-              { name: 'Mims', before: '/images/mims-before.jpeg', after: '/images/mims-after.webp', quote: 'I was amazed by the quality. Perfect for my professional profile!' },
+              { name: 'Leen',   before: '/images/leen-before.jpg',   after: '/images/leen-after.webp',   quote: "I couldn't believe how realistic it looks. Using it on LinkedIn right away!" },
+              { name: 'Roy',    before: '/images/roy-before.jpg',    after: '/images/roy-after.webp',    quote: 'Incredible result — looks completely natural and professional.' },
+              { name: 'Mims',   before: '/images/mims-before.jpeg',  after: '/images/mims-after.webp',   quote: 'I was amazed by the quality. Perfect for my professional profile!' },
+              { name: 'Lina',   before: '/images/lina-before.jpg',   after: '/images/lina-after.webp',   quote: 'Absolutely stunning results. Looks just like me but even better!' },
+              { name: 'Stijn',  before: '/images/stijn-before.jpg',  after: '/images/stijn-after.jpg',   quote: 'Amazing quality — I use it on my LinkedIn profile now!' },
+              { name: 'Renata', before: '/images/renata-before.jpg', after: '/images/renata-after.jpg',  quote: 'The results exceeded my expectations. So natural and professional!' },
             ].map((person) => (
               <div key={person.name} className="bg-[#FAFAF9] rounded-3xl border border-[#E8E6E0] overflow-hidden">
                 <div className="grid grid-cols-2">
@@ -160,7 +158,6 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
-
           </div>
 
           <div className="text-center mt-12">
