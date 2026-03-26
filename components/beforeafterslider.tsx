@@ -69,7 +69,7 @@ export default function BeforeAfterSlider({
   }
 
   return (
-    <div className="w-full max-w-[380px] mx-auto">
+    <div className="w-full max-w-[320px] mx-auto">
       <div
         ref={containerRef}
         className="relative w-full rounded-2xl overflow-hidden cursor-ew-resize shadow-2xl border-2 border-white/30"
