@@ -37,18 +37,20 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="mt-[90px] py-10 px-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B4A]/10 rounded-full blur-3xl animate-pulse"></div>
+      <section className="mt-[90px] py-10 px-8 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B4A]/10 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
 
-        <div className="max-w-[1320px] mx-auto relative z-10">
+        <div className="max-w-[1320px] mx-auto">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div>
+
+            {/* Tekst kolom */}
+            <div className="relative z-10">
               <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] text-white px-5 py-2.5 rounded-full shadow-lg mb-8">
                 <Sparkles className="w-4 h-4" />
                 <span className="text-sm font-semibold">Powered by FLUX AI — the most realistic model available</span>
               </div>
 
-              <h1 className="font-serif text-[clamp(2rem,5vw,4.5rem)] leading-[1.15] mb-7 text-[#2D2D2D] font-normal tracking-tight">
+              <h1 className="font-serif text-[clamp(2rem,4vw,4.5rem)] leading-[1.15] mb-7 text-[#2D2D2D] font-normal tracking-tight">
                 Turn Your Selfies Into<br />
                 <span className="italic bg-gradient-to-r from-[#7D6FB8] via-[#3A9B8E] to-[#14B8A6] text-transparent bg-clip-text">Professional Headshots</span>
               </h1>
@@ -78,14 +80,18 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <BeforeAfterSlider
-                beforeImage="/images/before.jpeg"
-                afterImage="/images/headshot-42.webp"
-                beforeLabel="Your Selfie"
-                afterLabel="AI Headshot"
-              />
+            {/* Slider kolom — strikt begrensd */}
+            <div className="flex justify-center items-center w-full overflow-hidden">
+              <div className="w-full max-w-[360px]">
+                <BeforeAfterSlider
+                  beforeImage="/images/before.jpeg"
+                  afterImage="/images/headshot-42.webp"
+                  beforeLabel="Your Selfie"
+                  afterLabel="AI Headshot"
+                />
+              </div>
             </div>
+
           </div>
         </div>
       </section>
