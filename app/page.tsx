@@ -80,7 +80,7 @@ export default function HomePage() {
 
             <div className="flex justify-center">
               <BeforeAfterSlider
-                beforeImage="/images/before.jpg"
+                beforeImage="/images/before.jpeg"
                 afterImage="/images/headshot-42.webp"
                 beforeLabel="Your Selfie"
                 afterLabel="AI Headshot"
