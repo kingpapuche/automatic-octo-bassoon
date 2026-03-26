@@ -9,7 +9,7 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#FAFAF9]">
+    <div className="min-h-screen bg-[#FAFAF9] overflow-x-hidden">
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-[#FAFAF9]/95 backdrop-blur-md border-b border-[#E8E6E0] z-50">
