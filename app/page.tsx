@@ -48,7 +48,7 @@ export default function HomePage() {
                 <span className="text-sm font-semibold">Powered by FLUX AI — the most realistic model available</span>
               </div>
 
-              <h1 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.15] mb-7 text-[#2D2D2D] font-normal tracking-tight">
+              <h1 className="font-serif text-[clamp(2rem,5vw,4.5rem)] leading-[1.15] mb-7 text-[#2D2D2D] font-normal tracking-tight">
                 Turn Your Selfies Into<br />
                 <span className="italic bg-gradient-to-r from-[#7D6FB8] via-[#3A9B8E] to-[#14B8A6] text-transparent bg-clip-text">Professional Headshots</span>
               </h1>
