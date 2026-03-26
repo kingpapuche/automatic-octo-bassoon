@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 
 export default function BeforeAfterSlider({
   beforeImage,
@@ -13,52 +13,12 @@ export default function BeforeAfterSlider({
   beforeLabel?: string
   afterLabel?: string
 }) {
-  const [sliderPosition, setSliderPosition] = useState(5)
+  const [sliderPosition, setSliderPosition] = useState(50)
   const [isDragging, setIsDragging] = useState(false)
-  const [isAutoAnimating, setIsAutoAnimating] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [animationPhase, setAnimationPhase] = useState<'pause-left' | 'moving-right' | 'pause-right' | 'moving-left'>('pause-left')
 
-  useEffect(() => {
-    if (!isAutoAnimating) return
-
-    let interval: NodeJS.Timeout
-
-    if (animationPhase === 'pause-left') {
-      interval = setTimeout(() => setAnimationPhase('moving-right'), 2000)
-    } else if (animationPhase === 'pause-right') {
-      interval = setTimeout(() => setAnimationPhase('moving-left'), 2000)
-    } else if (animationPhase === 'moving-right') {
-      interval = setInterval(() => {
-        setSliderPosition((prev) => {
-          if (prev >= 95) { setAnimationPhase('pause-right'); return 95 }
-          return prev + 1
-        })
-      }, 20)
-    } else if (animationPhase === 'moving-left') {
-      interval = setInterval(() => {
-        setSliderPosition((prev) => {
-          if (prev <= 5) { setAnimationPhase('pause-left'); return 5 }
-          return prev - 1
-        })
-      }, 20)
-    }
-
-    return () => clearInterval(interval)
-  }, [isAutoAnimating, animationPhase])
-
-  const handleInteractionStart = () => {
-    setIsAutoAnimating(false)
-    setIsDragging(true)
-  }
-
-  const handleInteractionEnd = () => {
-    setIsDragging(false)
-    setTimeout(() => {
-      setIsAutoAnimating(true)
-      setAnimationPhase('pause-left')
-    }, 3000)
-  }
+  const handleInteractionStart = () => setIsDragging(true)
+  const handleInteractionEnd = () => setIsDragging(false)
 
   const handleMove = (clientX: number) => {
     if (!isDragging || !containerRef.current) return
@@ -96,12 +56,12 @@ export default function BeforeAfterSlider({
           </div>
         </div>
 
-        {/* Before Image — zelfde zoom als after */}
+        {/* Before Image — zelfde zoom en positie, beweegt niet */}
         <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPosition}%` }}>
           <img
             src={beforeImage}
             alt="Before"
-            className="h-full object-cover"
+            className="h-full object-cover object-top"
             style={{
               width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '285px',
               transform: 'scale(1.1) translateY(15px)',
