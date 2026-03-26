@@ -78,7 +78,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex justify-center overflow-hidden">
+            <div className="flex justify-end">
               <BeforeAfterSlider
                 beforeImage="/images/before.jpeg"
                 afterImage="/images/headshot-42.webp"
