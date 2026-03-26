@@ -125,7 +125,7 @@ export default function GalleryPage() {
               ← Dashboard
             </Link>
             <Link
-              href="/create"
+              href="/upload"
               className="bg-[#FF6B4A] text-white px-6 py-2 rounded-lg hover:bg-[#e55a3a] transition text-sm font-semibold"
             >
               Generate More
@@ -147,7 +147,7 @@ export default function GalleryPage() {
           <div className="text-center py-20">
             <p className="text-[#94a3b8] text-lg mb-4">No headshots yet!</p>
             <Link
-              href="/create"
+              href="/upload"
               className="bg-[#FF6B4A] text-white px-6 py-3 rounded-lg hover:bg-[#e55a3a] transition"
             >
               Generate Your First Headshot
