@@ -19,26 +19,35 @@ export default function BeforeAfterSlider({
   const containerRef = useRef<HTMLDivElement>(null)
   const [animationPhase, setAnimationPhase] = useState<'pause-left' | 'moving-right' | 'pause-right' | 'moving-left'>('pause-left')
 
+  // Animatie: 2 sec pauze links, slide naar rechts, 2 sec pauze rechts, slide naar links
   useEffect(() => {
     if (!isAutoAnimating) return
 
     let interval: NodeJS.Timeout
 
     if (animationPhase === 'pause-left') {
+      // Wacht 2 seconden op 5%, dan ga naar rechts
       interval = setTimeout(() => setAnimationPhase('moving-right'), 2000)
     } else if (animationPhase === 'pause-right') {
+      // Wacht 2 seconden op 95%, dan ga naar links
       interval = setTimeout(() => setAnimationPhase('moving-left'), 2000)
     } else if (animationPhase === 'moving-right') {
       interval = setInterval(() => {
         setSliderPosition((prev) => {
-          if (prev >= 95) { setAnimationPhase('pause-right'); return 95 }
+          if (prev >= 95) {
+            setAnimationPhase('pause-right')
+            return 95
+          }
           return prev + 1
         })
       }, 20)
     } else if (animationPhase === 'moving-left') {
       interval = setInterval(() => {
         setSliderPosition((prev) => {
-          if (prev <= 5) { setAnimationPhase('pause-left'); return 5 }
+          if (prev <= 5) {
+            setAnimationPhase('pause-left')
+            return 5
+          }
           return prev - 1
         })
       }, 20)
@@ -69,7 +78,7 @@ export default function BeforeAfterSlider({
   }
 
   return (
-    <div className="w-full max-w-[320px] mx-auto">
+    <div className="w-full max-w-[380px] mx-auto">
       <div
         ref={containerRef}
         className="relative w-full rounded-2xl overflow-hidden cursor-ew-resize shadow-2xl border-2 border-white/30"
@@ -84,13 +93,7 @@ export default function BeforeAfterSlider({
       >
         {/* After Image (achtergrond) */}
         <div className="absolute inset-0">
-          <img
-            src={afterImage}
-            alt="After"
-            className="w-full h-full object-cover"
-            style={{ transform: 'scale(1.1) translateY(15px)' }}
-            draggable={false}
-          />
+          <img src={afterImage} alt="After" className="w-full h-full object-cover" style={{ transform: 'scale(1.1) translateY(15px)' }} draggable={false} />
           <div className="absolute top-3 right-3 bg-[#0D9488] text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
             {afterLabel}
           </div>
