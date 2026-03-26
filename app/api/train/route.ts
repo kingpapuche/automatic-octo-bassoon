@@ -18,11 +18,6 @@ const supabase = createClient(
   }
 )
 
-function generateTriggerWord(userId: string): string {
-  const uniquePart = userId.replace(/-/g, '').slice(0, 8).toUpperCase()
-  return `PERSON_${uniquePart}`
-}
-
 function buildCaptionPrefix(triggerWord: string, user: any): string {
   const parts: string[] = [`a photo of ${triggerWord}`]
   
@@ -41,6 +36,24 @@ function buildCaptionPrefix(triggerWord: string, user: any): string {
   return parts.join(', ')
 }
 
+// Controleer of een buffer een geldige afbeelding is
+// door de magic bytes te controleren (eerste bytes van het bestand)
+function isValidImage(buffer: ArrayBuffer): boolean {
+  const bytes = new Uint8Array(buffer)
+  
+  // JPEG: start met FF D8 FF
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return true
+  
+  // PNG: start met 89 50 4E 47
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return true
+  
+  // WEBP: start met RIFF....WEBP
+  if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+      bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return true
+
+  return false
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { userId, photoUrls, modelName } = await request.json()
@@ -48,7 +61,6 @@ export async function POST(request: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
-
     if (!photoUrls || photoUrls.length < 10) {
       return NextResponse.json(
         { error: 'Need at least 10 photos for training' },
@@ -67,7 +79,6 @@ export async function POST(request: NextRequest) {
     }
 
     const trainingsRemaining = userData.trainings_remaining ?? 0
-
     if (trainingsRemaining <= 0) {
       return NextResponse.json(
         { error: 'No trainings remaining. Please purchase a new package to train a new model.' },
@@ -78,27 +89,45 @@ export async function POST(request: NextRequest) {
     const limitedPhotoUrls = photoUrls.slice(0, 20)
     console.log(`🚀 Starting training for user: ${userId} with ${limitedPhotoUrls.length} photos`)
 
-    // Unieke trigger word per training — op basis van timestamp zodat meerdere modellen uniek zijn
     const uniqueSuffix = Date.now().toString(36).toUpperCase().slice(-4)
     const triggerWord = `PERSON_${userId.replace(/-/g, '').slice(0, 6).toUpperCase()}_${uniqueSuffix}`
     console.log(`🎯 Trigger word: ${triggerWord}`)
 
-    let captionPrefix = `a photo of ${triggerWord}`
-    if (userData) {
-      captionPrefix = buildCaptionPrefix(triggerWord, userData)
-    }
+    const captionPrefix = buildCaptionPrefix(triggerWord, userData)
     console.log(`📝 Caption prefix: ${captionPrefix}`)
 
+    // ── ZIP maken — corrupte foto's worden overgeslagen ──
     const zip = new JSZip()
+    let validPhotoCount = 0
+
     for (let i = 0; i < limitedPhotoUrls.length; i++) {
       try {
         const response = await fetch(limitedPhotoUrls[i])
         const arrayBuffer = await response.arrayBuffer()
-        zip.file(`photo_${i + 1}.jpg`, arrayBuffer)
+
+        // Controleer of het een geldige afbeelding is
+        if (!isValidImage(arrayBuffer)) {
+          console.warn(`⚠️ Skipping corrupt/invalid photo ${i + 1}`)
+          continue
+        }
+
+        zip.file(`photo_${validPhotoCount + 1}.jpg`, arrayBuffer)
+        validPhotoCount++
+        console.log(`✅ Added photo ${validPhotoCount}`)
       } catch (error) {
-        console.error(`Failed to fetch photo ${i}:`, error)
+        console.error(`❌ Failed to fetch photo ${i + 1}:`, error)
       }
     }
+
+    // Minimum check na filteren
+    if (validPhotoCount < 10) {
+      return NextResponse.json(
+        { error: `Only ${validPhotoCount} valid photos found. Need at least 10. Please re-upload your photos.` },
+        { status: 400 }
+      )
+    }
+
+    console.log(`📦 ZIP contains ${validPhotoCount} valid photos`)
 
     const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })
     const zipFilename = `training/${userId}/${Date.now()}.zip`
@@ -127,12 +156,12 @@ export async function POST(request: NextRequest) {
         input: {
           input_images: zipUrl,
           trigger_word: triggerWord,
-          steps: 800,
-          lora_rank: 16,
-          learning_rate: 0.0004,
+          steps: 1000,              // ← bewezen instelling
+          lora_rank: 32,            // ← bewezen instelling
+          learning_rate: 0.0004,    // ← bewezen instelling
           batch_size: 1,
           resolution: '1024',
-          autocaption: true,
+          autocaption: false,       // ← NOOIT true! Zie briefing
           autocaption_prefix: captionPrefix,
         },
         ...webhookConfig,
@@ -141,7 +170,6 @@ export async function POST(request: NextRequest) {
 
     console.log(`🎯 Training started: ${training.id}`)
 
-    // === NIEUW: Sla model op in aparte 'models' tabel ===
     const modelDisplayName = modelName || userData.full_name || `Model ${new Date().toLocaleDateString()}`
     
     const { error: modelInsertError } = await supabase
@@ -156,12 +184,10 @@ export async function POST(request: NextRequest) {
 
     if (modelInsertError) {
       console.error('⚠️ Failed to save to models table:', modelInsertError)
-      // Niet fataal — gaan we door
     } else {
       console.log(`✅ Model saved to models table: ${modelDisplayName}`)
     }
 
-    // === Bestaande users tabel ook updaten (backward compatibility) ===
     const { error: updateError } = await supabase
       .from('users')
       .update({
@@ -181,6 +207,7 @@ export async function POST(request: NextRequest) {
       trainingId: training.id,
       status: training.status,
       triggerWord: triggerWord,
+      validPhotos: validPhotoCount,
       trainingsRemaining: trainingsRemaining - 1,
       message: 'Training started! This takes about 15-20 minutes.',
     })
