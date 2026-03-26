@@ -41,7 +41,7 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B4A]/10 rounded-full blur-3xl animate-pulse"></div>
 
         <div className="max-w-[1320px] mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center overflow-hidden">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
               <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] text-white px-5 py-2.5 rounded-full shadow-lg mb-8">
                 <Sparkles className="w-4 h-4" />
