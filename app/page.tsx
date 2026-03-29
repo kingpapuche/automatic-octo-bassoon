@@ -241,9 +241,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
                 <Camera className="w-6 h-6 text-[#5B4E9D]" />
               </div>
-              <h3 className="text-[1.5rem] font-bold mb-2">Starter</h3>
+              <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Starter</h3>
               <p className="text-[#9B9B9B] text-sm mb-4">40 headshots • 10 styles</p>
-              <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>29</div>
+              <div className="font-serif text-5xl mb-4 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>29</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
                 {['1 AI model training', '40 headshots', 'Choose from 10 styles', 'HD quality', 'Ready in 30 minutes'].map((f) => (
@@ -280,9 +280,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-[#5B4E9D]" />
               </div>
-              <h3 className="text-[1.5rem] font-bold mb-2">Premium</h3>
+              <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Premium</h3>
               <p className="text-[#9B9B9B] text-sm mb-4">120 headshots • All styles</p>
-              <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>49</div>
+              <div className="font-serif text-5xl mb-4 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>49</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
                 {['2 AI model trainings', '120 headshots', 'All 93+ styles included', 'HD quality', 'Ready in 30 minutes'].map((f) => (
