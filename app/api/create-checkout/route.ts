@@ -6,15 +6,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 const PRICE_IDS = {
-  starter: 'price_1SosE81mfNQUAnELpy6yPFXe',
-  pro:     'price_1SosEu1mfNQUAnELbIDepyMp',
-  premium: 'price_1SosFW1mfNQUAnELacoUArM7',
+  starter: 'price_1TGJ250eDPd7Y2qZBWIVAwp2',
+  pro:     'price_1TGJ4D0eDPd7Y2qZnAeyri3K',
+  premium: 'price_1TGJ6Y0eDPd7Y2qZB97lhNIm',
 }
 
 const CREDITS = {
   starter: 40,
-  pro:     100,
-  premium: 150,
+  pro:     80,
+  premium: 120,
 }
 
 export async function POST(request: NextRequest) {
