@@ -184,7 +184,7 @@ export default function UploadPage() {
 
   const handleSubmit = async () => {
     if (!user) { router.push('/login'); return }
-    if (photos.length < 10) { setError('Please upload at least 10 photos'); return }
+    if (photos.length < 8) { setError('Please upload at least 8 photos'); return }
     if (user.credits < 1) { setError('You need credits to train a model.'); return }
 
     setUploading(true)
@@ -245,7 +245,7 @@ export default function UploadPage() {
   )
 
   const photoCount = photos.length
-  const isReady    = photoCount >= 10
+  const isReady    = photoCount >= 8
 
   const pillBase     = 'py-1.5 px-3 rounded-xl text-sm font-medium transition border cursor-pointer'
   const pillActive   = 'bg-violet-600 border-violet-600 text-white'
@@ -445,7 +445,7 @@ export default function UploadPage() {
           <>
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Upload Your Photos</h1>
-              <p className="text-gray-400 text-lg">Upload <strong className="text-white">10–20 photos</strong> for the best results.</p>
+              <p className="text-gray-400 text-lg">Upload <strong className="text-white">8–15 photos</strong> for the best results.</p>
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6 items-center">
@@ -471,7 +471,7 @@ export default function UploadPage() {
               <h3 className="text-white font-semibold mb-4">💡 Tips for the best results</h3>
               <div className="grid grid-cols-2 gap-x-8 gap-y-2">
                 {[
-                  <><span className="text-white font-semibold">10–20 photos</span> for best results</>,
+                  <><span className="text-white font-semibold">8–15 photos</span> for best results</>,
                   <>Solo only — no sunglasses or hats</>,
                   <>Mix <span className="text-white font-semibold">smiling</span> and <span className="text-white font-semibold">neutral</span></>,
                   <>Good <span className="text-white font-semibold">natural lighting</span></>,
@@ -491,8 +491,8 @@ export default function UploadPage() {
                 <h3 className="text-white font-semibold">Upload Photos</h3>
                 {photoCount > 0 && (
                   <div className="flex items-center gap-3">
-                    <span className={`text-sm font-semibold ${photoCount >= 10 ? 'text-emerald-400' : 'text-gray-400'}`}>
-                      {photoCount}/20 photos{photoCount >= 10 && ' ✓'}
+                    <span className={`text-sm font-semibold ${photoCount >= 8 ? 'text-emerald-400' : 'text-gray-400'}`}>
+                      {photoCount}/20 photos{photoCount >= 8 && ' ✓'}
                     </span>
                     <button onClick={() => setPhotos([])} className="text-xs text-gray-500 hover:text-red-400 transition">
                       Clear all
@@ -544,7 +544,7 @@ export default function UploadPage() {
             {photoCount > 0 && photoCount < 10 && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
                 <p className="text-amber-400 text-sm font-medium">
-                  Upload {10 - photoCount} more photo{10 - photoCount !== 1 ? 's' : ''} to continue (minimum 10)
+                  Upload {8 - photoCount} more photo{8 - photoCount !== 1 ? 's' : ''} to continue (minimum 8)
                 </p>
               </div>
             )}
@@ -589,7 +589,7 @@ export default function UploadPage() {
               ) : training ? (
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Starting AI training...</>
               ) : photoCount < 10 ? (
-                `Upload ${10 - photoCount} more photo${10 - photoCount !== 1 ? 's' : ''} to continue`
+                `Upload ${8 - photoCount} more photo${8 - photoCount !== 1 ? 's' : ''} to continue`
               ) : (
                 <><span className="text-xl">🚀</span> Start AI Training ({photoCount} photos)</>
               )}

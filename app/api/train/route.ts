@@ -61,9 +61,9 @@ export async function POST(request: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
-    if (!photoUrls || photoUrls.length < 10) {
+    if (!photoUrls || photoUrls.length < 8) {
       return NextResponse.json(
-        { error: 'Need at least 10 photos for training' },
+        { error: 'Need at least 8 photos for training' },
         { status: 400 }
       )
     }
