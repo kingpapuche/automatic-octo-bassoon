@@ -168,7 +168,6 @@ export default function HomePage() {
               { name: 'Renata', before: '/images/renata-before.jpg', after: '/images/renata-after.jpg',  quote: 'The results exceeded my expectations. So natural and professional!' },
             ].map((person) => (
               <div key={person.name} className="bg-[#FAFAF9] rounded-3xl border border-[#E8E6E0] overflow-hidden">
-                {/* Labels BOVEN de foto */}
                 <div className="grid grid-cols-2">
                   <div className="bg-black/60 text-white text-xs font-semibold px-3 py-2 text-center">Before</div>
                   <div className="bg-[#5B4E9D] text-white text-xs font-semibold px-3 py-2 text-center">AI Headshot</div>
@@ -237,13 +236,17 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
 
+            {/* Starter */}
             <div className="bg-[#FAFAF9] p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
                 <Camera className="w-6 h-6 text-[#5B4E9D]" />
               </div>
               <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Starter</h3>
               <p className="text-[#9B9B9B] text-sm mb-4">40 headshots • 10 styles</p>
-              <div className="font-serif text-5xl mb-4 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>29</div>
+              <div className="mb-1">
+                <span className="text-[#9B9B9B] line-through text-lg">$39</span>
+              </div>
+              <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>29</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
                 {['1 AI model training', '40 headshots', 'Choose from 10 styles', 'HD quality', 'Ready in 30 minutes'].map((f) => (
@@ -256,6 +259,7 @@ export default function HomePage() {
               <Link href="/login" className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
             </div>
 
+            {/* Pro */}
             <div className="bg-gradient-to-br from-[#5B4E9D] to-[#483A7C] p-8 rounded-[28px] border-2 border-[#D4AF37] text-white relative scale-105 shadow-2xl">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-[#2D2D2D] px-4 py-1.5 rounded-full text-sm font-bold shadow-md">Best Value</div>
               <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
@@ -263,7 +267,10 @@ export default function HomePage() {
               </div>
               <h3 className="text-[1.5rem] font-bold mb-2">Pro</h3>
               <p className="text-white/60 text-sm mb-4">80 headshots • 25 styles</p>
-              <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>39</div>
+              <div className="mb-1">
+                <span className="text-white/50 line-through text-lg">$55</span>
+              </div>
+              <div className="font-serif text-5xl mb-1"><span className="text-2xl font-sans">$</span>39</div>
               <p className="text-white/60 mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
                 {['1 AI model training', '80 headshots', 'Choose from 25 styles', 'HD quality', 'Ready in 30 minutes'].map((f) => (
@@ -276,13 +283,17 @@ export default function HomePage() {
               <Link href="/login" className="block w-full bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
             </div>
 
+            {/* Premium */}
             <div className="bg-[#FAFAF9] p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-[#5B4E9D]" />
               </div>
               <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Premium</h3>
               <p className="text-[#9B9B9B] text-sm mb-4">120 headshots • All styles</p>
-              <div className="font-serif text-5xl mb-4 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>49</div>
+              <div className="mb-1">
+                <span className="text-[#9B9B9B] line-through text-lg">$69</span>
+              </div>
+              <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>49</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
                 {['2 AI model trainings', '120 headshots', 'All 93+ styles included', 'HD quality', 'Ready in 30 minutes'].map((f) => (
