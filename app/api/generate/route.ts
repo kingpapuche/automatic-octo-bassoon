@@ -66,10 +66,6 @@ function buildPersonDescription(characteristics: UserCharacteristics): string {
   
   if (characteristics.has_glasses) parts.push(`wearing glasses`)
 
-  // AGE RANGE BEWUST WEGGELATEN
-  // Model is getraind op echte foto's — leeftijd zit ingebakken
-  // Age range in prompt voegt ongewenste veroudering toe
-
   return parts.join(', ')
 }
 
@@ -209,7 +205,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'fullbody-city-street': '[TRIGGER], full body portrait, city street, smart casual outfit, natural daylight, lifestyle photography',
   'fullbody-outdoor': '[TRIGGER], full body portrait, park setting, casual smart outfit, green background blurred, natural light, relaxed full body',
 
-  // ===== ZONNEBRIL =====
+  // ===== SUNGLASSES =====
   'sunglasses-city': '[TRIGGER], half body portrait, stylish sunglasses, dark blazer, city street background, natural daylight, cool confident',
   'sunglasses-outdoor': '[TRIGGER], medium shot, sunglasses, casual jacket, outdoor sunny background, natural daylight, relaxed',
   'sunglasses-black-suit': '[TRIGGER], half body portrait, dark sunglasses, black suit, urban background, natural light, confident',
@@ -220,14 +216,14 @@ const STYLE_PROMPTS: Record<string, string> = {
   'watch-luxury-outdoor': '[TRIGGER], medium shot, sitting relaxed, luxury watch on wrist, smart casual blazer, outdoor nature background, natural light',
   'watch-dark-elegant': '[TRIGGER], half body portrait, hand showing watch, dark suit, dark background, soft ambient light, luxury style',
 
-  // ===== GEKLEURDE PAKKEN =====
+  // ===== BOLD COLORED SUITS =====
   'teal-suit': '[TRIGGER], half body portrait, arms crossed, teal suit, white shirt, light background, soft natural light, bold professional',
   'green-suit': '[TRIGGER], half body portrait, green blazer suit, light background, soft natural light, fresh bold look',
   'pink-blazer': '[TRIGGER], half body portrait, pink blazer, white top, light background, soft natural light, stylish modern',
   'orange-suit': '[TRIGGER], half body portrait, orange blazer, white shirt, vibrant background, natural light, energetic professional',
   'brown-suit-elegant': '[TRIGGER], half body portrait, warm brown suit, open collar, dark background, warm ambient light, elegant',
 
-  // ===== TUXEDO / BLACK TIE =====
+  // ===== TUXEDO =====
   'tuxedo-classic': '[TRIGGER], half body portrait, black tuxedo, white dress shirt, black bow tie, dark elegant background, soft ambient light',
   'tuxedo-modern': '[TRIGGER], headshot portrait, modern slim tuxedo, no tie, open collar, soft dramatic light, elegant evening',
 
@@ -235,7 +231,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'moto-leather': '[TRIGGER], medium shot, leaning against motorcycle, brown leather jacket, white t-shirt, outdoor urban background, natural light',
   'moto-city': '[TRIGGER], half body portrait, standing next to motorbike, black leather jacket, city street, natural daylight, confident',
 
-  // ===== ZITTEND CASUAL =====
+  // ===== SITTING CASUAL =====
   'sitting-ground': '[TRIGGER], medium shot, sitting casually on ground, knees up, casual outfit, soft outdoor light, relaxed approachable',
   'sitting-steps': '[TRIGGER], medium shot, sitting on outdoor steps, smart casual outfit, urban background, natural daylight, candid feel',
   'sitting-chair-casual': '[TRIGGER], medium shot, sitting sideways in chair, arms on backrest, smart casual outfit, modern interior, soft window light',
@@ -245,28 +241,75 @@ const STYLE_PROMPTS: Record<string, string> = {
   'closeup-warm': '[TRIGGER], close up headshot, soft warm window light, light background, genuine warm smile, approachable',
   'closeup-outdoor': '[TRIGGER], close up headshot, outdoor natural light, blurred green background, fresh natural look, candid feel',
 
-  // ===== VROUWENSTIJLEN — JURKEN =====
-  'sheath-dress-navy': '[TRIGGER], headshot portrait, navy blue sheath dress, knee length, clean lines, office background, soft natural light, elegant professional',
-  'sheath-dress-burgundy': '[TRIGGER], headshot portrait, deep burgundy sheath dress, modest neckline, neutral background, soft window light, confident sophisticated',
-  'wrap-dress-emerald': '[TRIGGER], half body portrait, emerald green wrap dress, v-neckline, outdoor nature background, soft natural light, warm confident',
-  'jewel-dress-sapphire': '[TRIGGER], headshot portrait, sapphire blue fitted dress, professional neckline, light neutral background, soft natural light, polished',
-  'sheath-dress-with-blazer': '[TRIGGER], half body portrait, navy sheath dress with matching blazer, office background with plants, natural daylight, executive look',
+  // ===== WOMEN — CORPORATE =====
+  'w-black-blazer-city': '[TRIGGER], headshot portrait, black blazer, white shirt underneath, modern office with city window background, soft natural light, confident professional',
+  'w-navy-blazer-arms': '[TRIGGER], half body portrait, arms crossed, navy blue blazer, light blouse, soft neutral background, natural light, confident feminine',
+  'w-white-shirt-pro': '[TRIGGER], headshot portrait, crisp white blouse, clean neutral background, soft window light, polished professional',
+  'w-light-blue-shirt': '[TRIGGER], headshot portrait, light blue button-up blouse, studio background, soft natural light, approachable professional',
+  'w-black-turtleneck-pro': '[TRIGGER], headshot portrait, black turtleneck, dark background, soft side light, sophisticated minimal',
+  'w-teal-turtleneck': '[TRIGGER], headshot portrait, teal turtleneck sweater, modern office background, soft natural light, polished confident',
+  'w-cream-blazer': '[TRIGGER], half body portrait, arms crossed, cream white blazer, light neutral background, soft natural light, elegant professional',
+  'w-dark-blazer-table': '[TRIGGER], medium shot, sitting at table, dark blazer, restaurant or office background, warm ambient light, confident feminine',
+  'w-white-blazer-arms': '[TRIGGER], half body portrait, arms crossed, white blazer, light neutral background, soft natural light, sharp professional',
+  'w-black-outfit-minimal': '[TRIGGER], headshot portrait, all black outfit, white studio background, soft even light, minimal elegant',
 
-  // ===== VROUWENSTIJLEN — BLAZER COMBINATIES =====
-  'women-blazer-white-blouse': '[TRIGGER], headshot portrait, navy blazer over crisp white blouse, clean neutral background, soft natural light, classic professional',
-  'women-blazer-camisole': '[TRIGGER], half body portrait, black blazer over silk camisole, modern office background, soft window light, sophisticated feminine',
-  'women-emerald-blazer': '[TRIGGER], headshot portrait, emerald green blazer, white top underneath, light background, soft natural light, bold professional feminine',
-  'women-burgundy-blazer': '[TRIGGER], half body portrait, burgundy blazer, neutral blouse, modern interior background, soft natural light, warm confident',
+  // ===== WOMEN — GEKLEURDE SUITS =====
+  'w-red-suit': '[TRIGGER], half body portrait, red power suit blazer, holding laptop, purple background, soft natural light, bold confident feminine',
+  'w-pink-suit': '[TRIGGER], half body portrait, pink blazer suit, modern office background, soft natural light, stylish feminine professional',
+  'w-blue-suit': '[TRIGGER], half body portrait, light blue suit blazer, dark background, soft natural light, fresh professional',
+  'w-green-suit': '[TRIGGER], half body portrait, green blazer suit, matching green background, soft natural light, bold feminine',
+  'w-orange-suit': '[TRIGGER], half body portrait, orange blazer, purple background, soft natural light, vibrant confident feminine',
+  'w-camel-blazer': '[TRIGGER], half body portrait, camel tan blazer, neutral background, soft warm light, elegant feminine professional',
+  'w-green-dark-blazer': '[TRIGGER], headshot portrait, dark forest green blazer, studio background, soft natural light, sophisticated feminine',
+  'w-brown-blazer': '[TRIGGER], half body portrait, warm brown blazer, neutral background, soft warm light, elegant feminine',
 
-  // ===== VROUWENSTIJLEN — SOFT & WARM =====
+  // ===== WOMEN — SMART CASUAL =====
+  'w-blazer-jeans-street': '[TRIGGER], half body portrait, blazer and jeans, city street background, natural daylight, casual chic feminine',
+  'w-black-blazer-outdoor': '[TRIGGER], half body portrait, arms crossed, black blazer, outdoor background, natural light, confident feminine',
+  'w-beige-blazer-casual': '[TRIGGER], half body portrait, beige blazer, casual top underneath, city walk background, natural light, relaxed chic',
+  'w-leather-jacket': '[TRIGGER], half body portrait, black leather jacket, city street background, natural daylight, edgy confident feminine',
+  'w-leather-jacket-city': '[TRIGGER], medium shot, black leather jacket, night city background with bokeh lights, confident urban feminine style',
+  'w-denim-jacket': '[TRIGGER], headshot portrait, denim jacket, white t-shirt underneath, casual outdoor background, natural light, relaxed feminine',
+  'w-navy-turtleneck-street': '[TRIGGER], half body portrait, arms crossed, navy turtleneck, city street background, natural daylight, modern feminine',
+  'w-dark-blazer-restaurant': '[TRIGGER], medium shot, dark blazer, warm restaurant background, ambient warm light, elegant evening feminine',
+
+  // ===== WOMEN — CASUAL =====
+  'w-white-tee-casual': '[TRIGGER], half body portrait, white t-shirt, jeans, studio background, soft natural light, fresh casual feminine',
+  'w-red-tee': '[TRIGGER], half body portrait, red t-shirt, beige pants, neutral background, soft natural light, casual feminine',
+  'w-pink-tee-street': '[TRIGGER], medium shot, pink t-shirt, city street background, natural daylight, casual relaxed feminine',
+  'w-purple-tee': '[TRIGGER], half body portrait, purple t-shirt, pink background, soft natural light, vibrant casual feminine',
+  'w-orange-polo': '[TRIGGER], half body portrait, orange polo shirt, outdoor background, natural light, casual energetic feminine',
+  'w-yellow-shirt': '[TRIGGER], headshot portrait, yellow blouse, casual outfit, soft natural light, bright friendly feminine',
+  'w-cream-tee-sitting': '[TRIGGER], medium shot, sitting casually, cream t-shirt, studio background, soft natural light, relaxed approachable feminine',
+  'w-brown-longsleeve': '[TRIGGER], half body portrait, arms crossed, brown longsleeve top, neutral background, soft warm light, casual confident feminine',
+
+  // ===== WOMEN — OUTDOOR =====
+  'w-outdoor-blazer-nature': '[TRIGGER], half body portrait, beige blazer, outdoor nature background with trees, soft natural daylight, relaxed professional feminine',
+  'w-outdoor-city-walk': '[TRIGGER], medium shot, walking pose, casual smart outfit, city street background, natural daylight, lifestyle feminine',
+  'w-outdoor-cafe': '[TRIGGER], medium shot, smart casual outfit, outdoor café terrace background, warm natural light, relaxed feminine',
+  'w-golden-hour': '[TRIGGER], portrait, warm golden hour lighting, outdoor, soft warm tones, lifestyle photography feminine',
+  'w-park-portrait': '[TRIGGER], medium shot, natural light, green park background blurred, casual smart outfit, fresh outdoor feminine',
+  'w-rooftop-city': '[TRIGGER], half body portrait, smart casual outfit, rooftop with city panorama background, evening light, confident feminine',
+  'w-desert-boho': '[TRIGGER], medium shot, rust brown dress, desert landscape background, warm natural light, boho feminine portrait',
+
+  // ===== WOMEN — JURKEN =====
+  'w-black-dress-casual': '[TRIGGER], headshot portrait, black casual dress, studio background, soft natural light, simple elegant feminine',
+  'w-black-maxi-dress': '[TRIGGER], half body portrait, black maxi dress, elegant background, soft ambient light, sophisticated feminine',
+  'w-black-slip-dress': '[TRIGGER], headshot portrait, black slip dress, minimal background, soft natural light, minimal chic feminine',
+  'sheath-dress-navy': '[TRIGGER], headshot portrait, navy blue sheath dress, clean lines, office background, soft natural light, elegant professional',
+  'sheath-dress-burgundy': '[TRIGGER], headshot portrait, deep burgundy sheath dress, neutral background, soft window light, confident sophisticated',
+  'wrap-dress-emerald': '[TRIGGER], half body portrait, emerald green wrap dress, outdoor nature background, soft natural light, warm confident',
+  'w-brown-skirt-top': '[TRIGGER], half body portrait, brown midi skirt with matching top, neutral background, soft warm light, elegant feminine',
+  'sheath-dress-with-blazer': '[TRIGGER], half body portrait, navy sheath dress with matching blazer, office background, natural daylight, executive feminine',
+
+  // ===== WOMEN — SOFT & WARM =====
   'cardigan-professional': '[TRIGGER], headshot portrait, cream cardigan over blouse, soft indoor background, warm window light, approachable warm professional',
-  'soft-knit-sage': '[TRIGGER], headshot portrait, sage green soft knit sweater, clean background, soft natural light, calm approachable look',
-  'fine-knit-camel': '[TRIGGER], close up headshot, camel fine knit turtleneck, neutral background, warm soft light, elegant understated',
-
-  // ===== VROUWENSTIJLEN — BLOUSES =====
+  'soft-knit-sage': '[TRIGGER], headshot portrait, sage green soft knit sweater, clean background, soft natural light, calm approachable feminine',
+  'fine-knit-camel': '[TRIGGER], close up headshot, camel fine knit turtleneck, neutral background, warm soft light, elegant understated feminine',
+  'w-white-blouse-arms': '[TRIGGER], half body portrait, arms crossed, white blouse, neutral background, soft natural light, clean professional feminine',
   'silk-blouse-jewel': '[TRIGGER], headshot portrait, jewel tone silk blouse, soft draping neckline, light neutral background, soft natural light, polished feminine',
-  'vneck-blouse-professional': '[TRIGGER], headshot portrait, professional v-neck blouse in deep teal, clean background, soft window light, approachable confident',
-  'soft-blouse-outdoor': '[TRIGGER], medium shot, flowing soft blouse in dusty rose, outdoor garden background, golden hour light, warm approachable',
+  'vneck-blouse-professional': '[TRIGGER], headshot portrait, teal v-neck blouse, clean background, soft window light, approachable confident feminine',
+  'soft-blouse-outdoor': '[TRIGGER], medium shot, flowing dusty rose blouse, outdoor garden background, golden hour light, warm approachable feminine',
 }
 
 export async function POST(request: NextRequest) {
