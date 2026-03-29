@@ -5,10 +5,6 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
 
-// ===========================================
-// STYLE DATA — Matcht met generate-route.ts
-// ===========================================
-
 interface StyleOption {
   id: string
   label: string
@@ -20,14 +16,17 @@ interface StyleCategory {
   id: string
   name: string
   icon: string
+  gender: 'male' | 'female' | 'both'
   styles: StyleOption[]
 }
 
 const STYLE_CATEGORIES: StyleCategory[] = [
+  // ===== MANNENSTIJLEN =====
   {
     id: 'formal',
     name: 'Formal / Corporate',
     icon: '👔',
+    gender: 'male',
     styles: [
       { id: 'corporate-classic', label: 'Corporate Classic', description: 'Navy suit, gray studio', icon: '🏢' },
       { id: 'executive-navy', label: 'Executive Navy', description: 'Arms crossed, city skyline', icon: '🌆' },
@@ -48,6 +47,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'smart-casual',
     name: 'Smart Casual',
     icon: '🧥',
+    gender: 'male',
     styles: [
       { id: 'teal-blazer', label: 'Teal Blazer', description: 'Teal blazer, white tee', icon: '💎' },
       { id: 'beige-elegance', label: 'Beige Elegance', description: 'Beige suit, watch', icon: '⌚' },
@@ -67,6 +67,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'casual',
     name: 'Casual Professional',
     icon: '👕',
+    gender: 'male',
     styles: [
       { id: 'white-tee-orange', label: 'White Tee Orange', description: 'White tee, orange bg', icon: '🟠' },
       { id: 'black-tee-urban', label: 'Black Tee Urban', description: 'Black tee, urban street', icon: '🏘️' },
@@ -84,6 +85,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'creative',
     name: 'Creative / Edgy',
     icon: '🎸',
+    gender: 'male',
     styles: [
       { id: 'leather-jacket-city', label: 'Leather Jacket', description: 'Leather jacket, bokeh', icon: '🧥' },
       { id: 'night-life', label: 'Night Life', description: 'Black outfit, nightlife', icon: '🌃' },
@@ -99,6 +101,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'outdoor',
     name: 'Outdoor / Natural',
     icon: '🌿',
+    gender: 'male',
     styles: [
       { id: 'park-portrait', label: 'Park Portrait', description: 'Green park, daylight', icon: '🌲' },
       { id: 'rooftop-view', label: 'Rooftop View', description: 'City panorama, golden hr', icon: '🏙️' },
@@ -114,6 +117,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'poses',
     name: 'Specialty Poses',
     icon: '🧍',
+    gender: 'male',
     styles: [
       { id: 'arms-crossed-power', label: 'Arms Crossed', description: 'Power pose, dark suit', icon: '💪' },
       { id: 'holding-tablet', label: 'Holding Tablet', description: 'Tablet, office', icon: '📱' },
@@ -128,6 +132,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'colored',
     name: 'Colored Backgrounds',
     icon: '🎨',
+    gender: 'male',
     styles: [
       { id: 'blue-studio', label: 'Blue Studio', description: 'Business, blue bg', icon: '🔵' },
       { id: 'green-studio', label: 'Green Studio', description: 'Smart casual, green', icon: '🟢' },
@@ -141,6 +146,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'fullbody',
     name: 'Full Body',
     icon: '🧍',
+    gender: 'male',
     styles: [
       { id: 'fullbody-navy-suit', label: 'Full Body Navy Suit', description: 'Head to toe, navy suit', icon: '👔' },
       { id: 'fullbody-black-outfit', label: 'Full Body Black', description: 'All black, full length', icon: '🖤' },
@@ -154,6 +160,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'sunglasses',
     name: 'Sunglasses',
     icon: '🕶️',
+    gender: 'male',
     styles: [
       { id: 'sunglasses-city', label: 'Sunglasses City', description: 'Dark blazer, city street', icon: '🏙️' },
       { id: 'sunglasses-outdoor', label: 'Sunglasses Outdoor', description: 'Casual jacket, outdoor', icon: '☀️' },
@@ -165,6 +172,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'luxury',
     name: 'Luxury / Watch',
     icon: '⌚',
+    gender: 'male',
     styles: [
       { id: 'watch-showcase', label: 'Watch Showcase', description: 'Luxury watch, beige blazer', icon: '✨' },
       { id: 'watch-luxury-outdoor', label: 'Watch Outdoor', description: 'Watch visible, nature bg', icon: '🌿' },
@@ -175,6 +183,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'bold-colors',
     name: 'Bold Colored Suits',
     icon: '🌈',
+    gender: 'male',
     styles: [
       { id: 'teal-suit', label: 'Teal Suit', description: 'Teal suit, arms crossed', icon: '💎' },
       { id: 'green-suit', label: 'Green Suit', description: 'Green blazer, white bg', icon: '🟢' },
@@ -187,6 +196,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'blacktie',
     name: 'Black Tie / Tuxedo',
     icon: '🎩',
+    gender: 'male',
     styles: [
       { id: 'tuxedo-classic', label: 'Classic Tuxedo', description: 'Black tux, bow tie, gala', icon: '🥂' },
       { id: 'tuxedo-modern', label: 'Modern Tuxedo', description: 'Slim tux, open collar', icon: '✨' },
@@ -196,6 +206,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'lifestyle',
     name: 'Lifestyle / Motor',
     icon: '🏍️',
+    gender: 'male',
     styles: [
       { id: 'moto-leather', label: 'Moto Leather', description: 'Brown leather jacket, moto', icon: '🤎' },
       { id: 'moto-city', label: 'Moto City', description: 'Black leather, city street', icon: '🖤' },
@@ -205,6 +216,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'sitting-casual',
     name: 'Sitting Casual',
     icon: '🪑',
+    gender: 'male',
     styles: [
       { id: 'sitting-ground', label: 'Sitting on Ground', description: 'Casual, knees up, studio', icon: '🧘' },
       { id: 'sitting-steps', label: 'Sitting on Steps', description: 'Outdoor steps, urban', icon: '🏙️' },
@@ -215,6 +227,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     id: 'closeup',
     name: 'Close-Up Headshots',
     icon: '🎯',
+    gender: 'male',
     styles: [
       { id: 'closeup-dramatic', label: 'Dramatic Close-Up', description: 'Cinematic, dark bg', icon: '🎬' },
       { id: 'closeup-warm', label: 'Warm Close-Up', description: 'Warm light, genuine smile', icon: '☀️' },
@@ -224,45 +237,114 @@ const STYLE_CATEGORIES: StyleCategory[] = [
 
   // ===== VROUWENSTIJLEN =====
   {
-    id: 'women-dresses',
-    name: 'Women — Jurken',
-    icon: '👗',
+    id: 'women-corporate',
+    name: 'Women — Corporate',
+    icon: '💼',
+    gender: 'female',
     styles: [
-      { id: 'sheath-dress-navy', label: 'Sheath Dress Navy', description: 'Navy jurk, kantoor', icon: '🔵' },
-      { id: 'sheath-dress-burgundy', label: 'Sheath Dress Burgundy', description: 'Bordeaux jurk, elegant', icon: '🍷' },
-      { id: 'wrap-dress-emerald', label: 'Wrap Dress Emerald', description: 'Groene wikkel jurk, outdoor', icon: '💚' },
-      { id: 'jewel-dress-sapphire', label: 'Sapphire Dress', description: 'Saffier blauwe jurk', icon: '💙' },
-      { id: 'sheath-dress-with-blazer', label: 'Jurk + Blazer', description: 'Navy jurk met blazer', icon: '👔' },
+      { id: 'w-black-blazer-city', label: 'Black Blazer City', description: 'Black blazer, city window', icon: '🏙️' },
+      { id: 'w-navy-blazer-arms', label: 'Navy Blazer', description: 'Navy blazer, arms crossed', icon: '💪' },
+      { id: 'w-white-shirt-pro', label: 'White Shirt Pro', description: 'White blouse, neutral bg', icon: '🤍' },
+      { id: 'w-light-blue-shirt', label: 'Light Blue Shirt', description: 'Light blue blouse, studio', icon: '💙' },
+      { id: 'w-black-turtleneck-pro', label: 'Black Turtleneck', description: 'Black turtleneck, dark bg', icon: '🖤' },
+      { id: 'w-teal-turtleneck', label: 'Teal Turtleneck', description: 'Teal turtleneck, office', icon: '💚' },
+      { id: 'w-cream-blazer', label: 'Cream Blazer', description: 'Cream blazer, arms crossed', icon: '🤍' },
+      { id: 'w-dark-blazer-table', label: 'Dark Blazer Table', description: 'Dark blazer, sitting', icon: '🪑' },
+      { id: 'w-white-blazer-arms', label: 'White Blazer', description: 'White blazer, arms crossed', icon: '🤍' },
+      { id: 'w-black-outfit-minimal', label: 'All Black Minimal', description: 'Black outfit, white studio', icon: '🖤' },
     ],
   },
   {
-    id: 'women-blazers',
-    name: 'Women — Blazer Combinaties',
-    icon: '💼',
+    id: 'women-colored-suits',
+    name: 'Women — Gekleurde Suits',
+    icon: '🌈',
+    gender: 'female',
     styles: [
-      { id: 'women-blazer-white-blouse', label: 'Blazer + Witte Blouse', description: 'Navy blazer, witte blouse', icon: '🤍' },
-      { id: 'women-blazer-camisole', label: 'Blazer + Camisole', description: 'Zwarte blazer, camisole', icon: '✨' },
-      { id: 'women-emerald-blazer', label: 'Emerald Blazer', description: 'Groene blazer, wit top', icon: '💚' },
-      { id: 'women-burgundy-blazer', label: 'Burgundy Blazer', description: 'Bordeaux blazer, kantoor', icon: '🍷' },
+      { id: 'w-red-suit', label: 'Red Power Suit', description: 'Red blazer suit, laptop', icon: '🔴' },
+      { id: 'w-pink-suit', label: 'Pink Suit', description: 'Pink suit, modern office', icon: '🌸' },
+      { id: 'w-blue-suit', label: 'Blue Suit', description: 'Light blue suit, dark bg', icon: '💙' },
+      { id: 'w-green-suit', label: 'Green Suit', description: 'Green suit, green bg', icon: '💚' },
+      { id: 'w-orange-suit', label: 'Orange Suit', description: 'Orange blazer, purple bg', icon: '🟠' },
+      { id: 'w-camel-blazer', label: 'Camel Blazer', description: 'Camel blazer, neutral', icon: '🤎' },
+      { id: 'w-green-dark-blazer', label: 'Forest Green Blazer', description: 'Dark green blazer, studio', icon: '🌲' },
+      { id: 'w-brown-blazer', label: 'Brown Blazer', description: 'Brown blazer, warm bg', icon: '🤎' },
+    ],
+  },
+  {
+    id: 'women-smart-casual',
+    name: 'Women — Smart Casual',
+    icon: '🧥',
+    gender: 'female',
+    styles: [
+      { id: 'w-blazer-jeans-street', label: 'Blazer + Jeans Street', description: 'Blazer, jeans, city street', icon: '🏙️' },
+      { id: 'w-black-blazer-outdoor', label: 'Black Blazer Outdoor', description: 'Black blazer, outdoor', icon: '🌿' },
+      { id: 'w-beige-blazer-casual', label: 'Beige Blazer Casual', description: 'Beige blazer, city walk', icon: '☕' },
+      { id: 'w-leather-jacket', label: 'Leather Jacket', description: 'Black leather jacket, street', icon: '🖤' },
+      { id: 'w-leather-jacket-city', label: 'Leather Jacket City', description: 'Leather jacket, night city', icon: '🌃' },
+      { id: 'w-denim-jacket', label: 'Denim Jacket', description: 'Denim jacket, white tee', icon: '👖' },
+      { id: 'w-navy-turtleneck-street', label: 'Navy Turtleneck Street', description: 'Navy turtleneck, city street', icon: '🔵' },
+      { id: 'w-dark-blazer-restaurant', label: 'Dark Blazer Restaurant', description: 'Elegant, warm restaurant', icon: '🍷' },
+    ],
+  },
+  {
+    id: 'women-casual',
+    name: 'Women — Casual',
+    icon: '👕',
+    gender: 'female',
+    styles: [
+      { id: 'w-white-tee-casual', label: 'White Tee Casual', description: 'White tee, jeans, studio', icon: '🤍' },
+      { id: 'w-red-tee', label: 'Red Tee', description: 'Red t-shirt, beige pants', icon: '🔴' },
+      { id: 'w-pink-tee-street', label: 'Pink Tee Street', description: 'Pink tee, city street', icon: '🌸' },
+      { id: 'w-purple-tee', label: 'Purple Tee', description: 'Purple tee, pink bg', icon: '🟣' },
+      { id: 'w-orange-polo', label: 'Orange Polo', description: 'Orange polo, outdoor', icon: '🟠' },
+      { id: 'w-yellow-shirt', label: 'Yellow Shirt', description: 'Yellow blouse, casual', icon: '🟡' },
+      { id: 'w-cream-tee-sitting', label: 'Cream Tee Sitting', description: 'Cream tee, sitting, studio', icon: '🪑' },
+      { id: 'w-brown-longsleeve', label: 'Brown Longsleeve', description: 'Brown longsleeve, arms crossed', icon: '🤎' },
+    ],
+  },
+  {
+    id: 'women-outdoor',
+    name: 'Women — Outdoor / Natural',
+    icon: '🌿',
+    gender: 'female',
+    styles: [
+      { id: 'w-outdoor-blazer-nature', label: 'Blazer Nature', description: 'Beige blazer, outdoor nature', icon: '🌲' },
+      { id: 'w-outdoor-city-walk', label: 'City Walk', description: 'Casual outfit, city street', icon: '🚶‍♀️' },
+      { id: 'w-outdoor-cafe', label: 'Café Outdoor', description: 'Smart casual, café terras', icon: '☕' },
+      { id: 'w-golden-hour', label: 'Golden Hour', description: 'Warm tones, sunset light', icon: '🌅' },
+      { id: 'w-park-portrait', label: 'Park Portrait', description: 'Natural light, green park', icon: '🌳' },
+      { id: 'w-rooftop-city', label: 'Rooftop City', description: 'City panorama, evening', icon: '🏙️' },
+      { id: 'w-desert-boho', label: 'Desert Boho', description: 'Rust dress, desert bg', icon: '🏜️' },
+    ],
+  },
+  {
+    id: 'women-dresses',
+    name: 'Women — Jurken',
+    icon: '👗',
+    gender: 'female',
+    styles: [
+      { id: 'w-black-dress-casual', label: 'Black Dress Casual', description: 'Zwarte jurk, studio', icon: '🖤' },
+      { id: 'w-black-maxi-dress', label: 'Black Maxi Dress', description: 'Lange zwarte jurk, elegant', icon: '🖤' },
+      { id: 'w-black-slip-dress', label: 'Black Slip Dress', description: 'Zwarte slip jurk, minimal', icon: '✨' },
+      { id: 'sheath-dress-navy', label: 'Navy Sheath Dress', description: 'Navy jurk, kantoor', icon: '🔵' },
+      { id: 'sheath-dress-burgundy', label: 'Burgundy Dress', description: 'Bordeaux jurk, elegant', icon: '🍷' },
+      { id: 'wrap-dress-emerald', label: 'Emerald Wrap Dress', description: 'Groene wikkel jurk', icon: '💚' },
+      { id: 'w-brown-skirt-top', label: 'Brown Skirt + Top', description: 'Bruine rok met top', icon: '🤎' },
+      { id: 'sheath-dress-with-blazer', label: 'Jurk + Blazer', description: 'Navy jurk met blazer', icon: '👔' },
     ],
   },
   {
     id: 'women-soft',
     name: 'Women — Soft & Warm',
     icon: '🧶',
+    gender: 'female',
     styles: [
       { id: 'cardigan-professional', label: 'Cardigan Professional', description: 'Crème cardigan, warm', icon: '🤍' },
       { id: 'soft-knit-sage', label: 'Soft Knit Sage', description: 'Saliegroen trui, rustig', icon: '🌿' },
       { id: 'fine-knit-camel', label: 'Fine Knit Camel', description: 'Kameel coltrui, elegant', icon: '🤎' },
-    ],
-  },
-  {
-    id: 'women-blouses',
-    name: 'Women — Blouses',
-    icon: '👚',
-    styles: [
-      { id: 'silk-blouse-jewel', label: 'Silk Blouse Jewel Tone', description: 'Zijden blouse, juweel kleur', icon: '💎' },
-      { id: 'vneck-blouse-professional', label: 'V-Neck Blouse', description: 'Teal v-hals blouse', icon: '💠' },
+      { id: 'w-white-blouse-arms', label: 'White Blouse', description: 'Wit blouse, armen gekruist', icon: '🤍' },
+      { id: 'silk-blouse-jewel', label: 'Silk Blouse Jewel', description: 'Zijden blouse, juweel kleur', icon: '💎' },
+      { id: 'vneck-blouse-professional', label: 'V-Neck Blouse Teal', description: 'Teal v-hals blouse', icon: '💠' },
       { id: 'soft-blouse-outdoor', label: 'Soft Blouse Outdoor', description: 'Roze blouse, outdoor', icon: '🌸' },
     ],
   },
@@ -273,7 +355,8 @@ export default function CreateStylesPage() {
   const [loading, setLoading] = useState(true)
   const [userCredits, setUserCredits] = useState(0)
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
-  const [expandedCategory, setExpandedCategory] = useState<string>('formal')
+  const [expandedCategory, setExpandedCategory] = useState<string>('')
+  const [gender, setGender] = useState<'male' | 'female'>('male')
 
   useEffect(() => {
     async function fetchUser() {
@@ -282,10 +365,20 @@ export default function CreateStylesPage() {
         if (!session) { router.push('/login'); return }
         const { data: userData } = await supabase
           .from('users')
-          .select('id, credits')
+          .select('id, credits, gender')
           .eq('id', session.user.id)
           .single()
-        if (userData) setUserCredits(userData.credits || 0)
+        if (userData) {
+          setUserCredits(userData.credits || 0)
+          // Stel gender in op basis van gebruikersprofiel
+          if (userData.gender === 'female') {
+            setGender('female')
+            setExpandedCategory('women-corporate')
+          } else {
+            setGender('male')
+            setExpandedCategory('formal')
+          }
+        }
       } catch (error) {
         console.error('Error:', error)
       } finally {
@@ -294,6 +387,9 @@ export default function CreateStylesPage() {
     }
     fetchUser()
   }, [router])
+
+  // Filter categorieën op gender
+  const filteredCategories = STYLE_CATEGORIES.filter(c => c.gender === gender)
 
   const toggleStyle = (styleId: string) => {
     setSelectedStyles(prev =>
@@ -315,6 +411,12 @@ export default function CreateStylesPage() {
     }
   }
 
+  const handleGenderSwitch = (newGender: 'male' | 'female') => {
+    setGender(newGender)
+    setSelectedStyles([]) // Reset selectie bij gender switch
+    setExpandedCategory(newGender === 'female' ? 'women-corporate' : 'formal')
+  }
+
   const handleContinue = () => {
     if (selectedStyles.length === 0) return
     sessionStorage.setItem('bestai_styleIds', JSON.stringify(selectedStyles))
@@ -329,6 +431,8 @@ export default function CreateStylesPage() {
     )
   }
 
+  const totalStyles = filteredCategories.reduce((acc, c) => acc + c.styles.length, 0)
+
   return (
     <div className="min-h-screen bg-[#0a0f1a]">
       <CreateProgressBar currentStep={2} userCredits={userCredits} />
@@ -337,11 +441,37 @@ export default function CreateStylesPage() {
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Choose Your Styles</h1>
           <p className="text-gray-400 text-lg">Select the looks you want. Each style = 1 headshot = 1 credit.</p>
-          <p className="text-gray-600 text-sm mt-2">{STYLE_CATEGORIES.reduce((acc, c) => acc + c.styles.length, 0)} styles available</p>
+          <p className="text-gray-600 text-sm mt-2">{totalStyles} styles available</p>
+        </div>
+
+        {/* Gender filter */}
+        <div className="flex justify-center mb-8">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-1.5 flex gap-2">
+            <button
+              onClick={() => handleGenderSwitch('male')}
+              className={`px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center gap-2 ${
+                gender === 'male'
+                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              👨 Man
+            </button>
+            <button
+              onClick={() => handleGenderSwitch('female')}
+              className={`px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center gap-2 ${
+                gender === 'female'
+                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              👩 Woman
+            </button>
+          </div>
         </div>
 
         <div className="space-y-4">
-          {STYLE_CATEGORIES.map((category) => {
+          {filteredCategories.map((category) => {
             const isExpanded = expandedCategory === category.id
             const selectedCount = category.styles.filter(s => selectedStyles.includes(s.id)).length
             const allSelected = selectedCount === category.styles.length
