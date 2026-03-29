@@ -50,7 +50,7 @@ export default function HomePage() {
                 <span className="italic bg-gradient-to-r from-[#7D6FB8] via-[#3A9B8E] to-[#14B8A6] text-transparent bg-clip-text">Professional Headshots</span>
               </h1>
               <p className="text-[1.25rem] text-[#6B6B6B] mb-10 leading-relaxed">
-                Upload 10–20 photos. Choose your style. Get studio-quality headshots in under 30 minutes — without a photographer, studio, or expensive session.
+                Upload 8–15 photos. Choose your style. Get studio-quality headshots in under 30 minutes — without a photographer, studio, or expensive session.
               </p>
               <div className="flex flex-wrap gap-4 mb-10">
                 <Link href="/login" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-105">
@@ -104,7 +104,7 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: '01', icon: Upload, title: 'Upload Your Photos', desc: 'Upload 10–20 selfies from different angles and lighting conditions. No professional equipment needed.' },
+              { step: '01', icon: Upload, title: 'Upload Your Photos', desc: 'Upload 8–15 selfies from different angles and lighting conditions. No professional equipment needed.' },
               { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 93+ hand-curated styles — corporate, casual, creative, full body, and more.' },
               { step: '03', icon: Download, title: 'Receive Your Headshots', desc: 'Your AI-generated headshots are ready in under 30 minutes. Download and use them anywhere.' },
             ].map((item) => (
@@ -121,7 +121,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* REAL RESULTS — Rij 1: Leen, Roy, Mims | Rij 2: Lina, Stijn, Renata */}
+      {/* REAL RESULTS */}
       <section className="py-24 px-8 bg-white">
         <div className="max-w-[1320px] mx-auto">
           <div className="text-center mb-16">
@@ -205,16 +205,23 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
 
+            {/* Starter */}
             <div className="bg-[#FAFAF9] p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
                 <Camera className="w-6 h-6 text-[#5B4E9D]" />
               </div>
               <h3 className="text-[1.5rem] font-bold mb-2">Starter</h3>
-              <p className="text-[#9B9B9B] text-sm mb-4">40 headshots</p>
+              <p className="text-[#9B9B9B] text-sm mb-4">40 headshots • 10 styles</p>
               <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>29</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['1 AI model trained on you', '40 headshots', '40 styles to choose from', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {[
+                  '1 AI model training',
+                  '40 headshots',
+                  'Choose from 10 styles',
+                  'HD quality',
+                  'Ready in 30 minutes',
+                ].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-[#6B6B6B] text-sm">{f}</span>
@@ -224,17 +231,24 @@ export default function HomePage() {
               <Link href="/login" className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
             </div>
 
+            {/* Pro */}
             <div className="bg-gradient-to-br from-[#5B4E9D] to-[#483A7C] p-8 rounded-[28px] border-2 border-[#D4AF37] text-white relative scale-105 shadow-2xl">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-[#2D2D2D] px-4 py-1.5 rounded-full text-sm font-bold shadow-md">Best Value</div>
               <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
                 <Star className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-[1.5rem] font-bold mb-2">Pro</h3>
-              <p className="text-white/60 text-sm mb-4">80 headshots</p>
+              <p className="text-white/60 text-sm mb-4">80 headshots • 25 styles</p>
               <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>39</div>
               <p className="text-white/60 mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['1 AI model trained on you', '80 headshots', '80 styles to choose from', 'HD quality', 'Priority generation', 'Ready in 30 minutes'].map((f) => (
+                {[
+                  '1 AI model training',
+                  '80 headshots',
+                  'Choose from 25 styles',
+                  'HD quality',
+                  'Ready in 30 minutes',
+                ].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#D4AF37] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-white/90 text-sm">{f}</span>
@@ -244,16 +258,23 @@ export default function HomePage() {
               <Link href="/login" className="block w-full bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
             </div>
 
+            {/* Premium */}
             <div className="bg-[#FAFAF9] p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-[#5B4E9D]" />
               </div>
               <h3 className="text-[1.5rem] font-bold mb-2">Premium</h3>
-              <p className="text-[#9B9B9B] text-sm mb-4">120 headshots</p>
+              <p className="text-[#9B9B9B] text-sm mb-4">120 headshots • All styles</p>
               <div className="font-serif text-5xl mb-4"><span className="text-2xl font-sans">$</span>49</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['2 AI models trained on you', '120 headshots', 'All 93+ styles included', 'HD quality', 'Priority support', 'Ready in 30 minutes'].map((f) => (
+                {[
+                  '2 AI model trainings',
+                  '120 headshots',
+                  'All 93+ styles included',
+                  'HD quality',
+                  'Ready in 30 minutes',
+                ].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-[#6B6B6B] text-sm">{f}</span>
@@ -295,7 +316,7 @@ export default function HomePage() {
           <div className="space-y-5">
             {[
               { q: 'How realistic are the AI-generated headshots?', a: 'We use FLUX LoRA — the most advanced AI portrait model available. The AI is trained specifically on your photos, which means the results look like you, not a generic AI person.' },
-              { q: 'What kind of photos should I upload?', a: 'Upload 10–20 clear solo photos with good lighting from different angles. Avoid group photos, sunglasses, heavy filters, or blurry images. The more variety, the better the result.' },
+              { q: 'What kind of photos should I upload?', a: 'Upload 8–15 clear solo photos with good lighting from different angles. Avoid group photos, sunglasses, heavy filters, or blurry images. The more variety, the better the result.' },
               { q: 'How long does it take?', a: 'Training your personal AI model takes about 20–25 minutes. After that, each headshot generates in about 30 seconds.' },
               { q: 'Are my photos safe?', a: 'Yes. Your photos are stored securely, never shared with third parties, and deleted automatically after your order is complete.' },
               { q: 'What if I am not happy with the results?', a: 'We guarantee at least 1 profile-worthy headshot in every order. If not, we refund you in full within 7 days. No forms, no hassle — just contact us.' },
