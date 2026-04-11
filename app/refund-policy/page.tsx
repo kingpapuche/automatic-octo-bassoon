@@ -1,87 +1,75 @@
 import Link from 'next/link'
+import { Sparkles } from 'lucide-react'
 
 export default function RefundPolicyPage() {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
-      <nav className="fixed top-0 left-0 right-0 bg-[#FAFAF9]/95 backdrop-blur-md border-b border-[#E8E6E0] z-50">
-        <div className="max-w-[1320px] mx-auto px-8 py-5 flex justify-between items-center">
-          <Link href="/" className="font-serif text-2xl font-semibold text-[#2D2D2D]">
-            Nova Imago
+      <nav className="border-b border-[#E8E6E0] bg-white px-8 py-5">
+        <div className="max-w-[900px] mx-auto flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-[#5B4E9D] to-[#7D6FB8] rounded-xl flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-serif text-xl font-semibold text-[#2D2D2D]">Nova Imago</span>
           </Link>
         </div>
       </nav>
 
-      <div className="pt-[100px] pb-24 max-w-[800px] mx-auto px-8">
-        <h1 className="font-serif text-4xl font-bold text-[#2D2D2D] mb-2">Refund Policy</h1>
-        <p className="text-[#9B9B9B] mb-10">Last updated: March 2026</p>
+      <div className="max-w-[900px] mx-auto px-8 py-16">
+        <h1 className="font-serif text-4xl text-[#2D2D2D] mb-4">Refund Policy</h1>
+        <p className="text-[#9B9B9B] mb-12">Last updated: April 2026</p>
 
-        <div className="prose prose-gray max-w-none space-y-8 text-[#4B4B4B] leading-relaxed">
+        <div className="space-y-10 text-[#4B4B4B] leading-relaxed">
 
-          {/* Guarantee Banner */}
-          <div className="bg-white border-2 border-[#0D9488]/30 rounded-3xl p-8 text-center">
-            <div className="text-4xl mb-3">🛡️</div>
-            <h2 className="font-serif text-2xl text-[#2D2D2D] font-semibold mb-3">Profile-Worthy Guarantee</h2>
-            <p className="text-[#6B6B6B]">We guarantee at least 1 profile-worthy headshot in every order. If not, we refund you in full within 7 days. No forms, no hassle.</p>
-          </div>
-
-          <section>
-            <h2 className="text-xl font-bold text-[#2D2D2D] mb-3">Our Guarantee</h2>
-            <p>We stand behind the quality of our AI-generated headshots. Every order comes with our Profile-Worthy Guarantee: if you do not receive at least one headshot that you consider profile-worthy, you are entitled to a full refund.</p>
+          <section className="bg-[#F0EEF8] rounded-2xl p-8 border border-[#5B4E9D]/20">
+            <h2 className="font-serif text-2xl text-[#5B4E9D] mb-4">🛡️ Our Profile-Worthy Guarantee</h2>
+            <p className="text-[#2D2D2D] text-lg">We guarantee at least 1 profile-worthy headshot in every order. If you don&apos;t get a single usable headshot, we refund you in full — no questions asked.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-[#2D2D2D] mb-3">Refund Conditions</h2>
-            <p>To be eligible for a refund, the following conditions must be met:</p>
-            <ul className="list-disc pl-6 mt-3 space-y-2">
-              <li>Your refund request must be submitted within <strong>7 days</strong> of your order being completed</li>
-              <li><strong>No headshots have been downloaded</strong> from your account. Once any headshot has been downloaded, the order is considered used and no refund will be issued</li>
-              <li>You must contact us via email to request your refund</li>
+            <h2 className="font-serif text-2xl text-[#2D2D2D] mb-4">When You Qualify for a Refund</h2>
+            <ul className="list-disc pl-6 space-y-3">
+              <li>You did not receive a single profile-worthy headshot from your order</li>
+              <li>You request the refund within <strong>7 days</strong> of your order completion</li>
+              <li>You followed our photo upload guidelines (clear photos, solo shots, good lighting)</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-[#2D2D2D] mb-3">Non-Refundable Cases</h2>
-            <p>Refunds will not be issued in the following situations:</p>
-            <ul className="list-disc pl-6 mt-3 space-y-2">
-              <li>One or more headshots have been downloaded from your account</li>
-              <li>The refund request is made more than 7 days after order completion</li>
-              <li>Poor results caused by low-quality upload photos (blurry, group photos, heavy filters, sunglasses)</li>
-              <li>Dissatisfaction with style choices made by the customer</li>
+            <h2 className="font-serif text-2xl text-[#2D2D2D] mb-4">When Refunds Are Not Available</h2>
+            <ul className="list-disc pl-6 space-y-3">
+              <li>More than 7 days have passed since your order was completed</li>
+              <li>You received profile-worthy headshots but simply prefer a different style</li>
+              <li>Poor results due to low-quality uploaded photos (blurry, group photos, heavy filters)</li>
+              <li>You have already downloaded and used your headshots</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-[#2D2D2D] mb-3">How to Request a Refund</h2>
-            <p>To request a refund, simply send an email to <a href="mailto:novaimagosupport@gmail.com" className="text-[#5B4E9D]">novaimagosupport@gmail.com</a> with:</p>
+            <h2 className="font-serif text-2xl text-[#2D2D2D] mb-4">How to Request a Refund</h2>
+            <p>Send an email to <a href="mailto:support@novaimago.ai" className="text-[#5B4E9D] underline">support@novaimago.ai</a> with:</p>
             <ul className="list-disc pl-6 mt-3 space-y-2">
-              <li>The email address associated with your account</li>
-              <li>A brief description of why you are unsatisfied</li>
+              <li>Your order email address</li>
+              <li>A brief description of why the headshots didn&apos;t meet your expectations</li>
             </ul>
-            <p className="mt-3">We will process your refund within <strong>3-5 business days</strong>. No forms, no hassle.</p>
+            <p className="mt-4">We process refunds within <strong>3-5 business days</strong>. No forms, no hassle.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-[#2D2D2D] mb-3">Tips for Best Results</h2>
-            <p>To maximize the quality of your headshots, please ensure your uploaded photos:</p>
-            <ul className="list-disc pl-6 mt-3 space-y-2">
-              <li>Are clear and in focus</li>
-              <li>Show only you (no group photos)</li>
-              <li>Have good lighting</li>
-              <li>Do not have heavy filters or sunglasses</li>
-              <li>Include a variety of angles and expressions</li>
-            </ul>
+            <h2 className="font-serif text-2xl text-[#2D2D2D] mb-4">Refund Amount</h2>
+            <p>Approved refunds are returned in full to your original payment method. We do not offer partial refunds.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-[#2D2D2D] mb-3">Contact</h2>
-            <p>For refund requests or questions, contact us at: <a href="mailto:novaimagosupport@gmail.com" className="text-[#5B4E9D]">novaimagosupport@gmail.com</a></p>
+            <h2 className="font-serif text-2xl text-[#2D2D2D] mb-4">Questions?</h2>
+            <p>Contact us at <a href="mailto:support@novaimago.ai" className="text-[#5B4E9D] underline">support@novaimago.ai</a> — we typically respond within 24 hours.</p>
           </section>
 
         </div>
       </div>
 
-      <footer className="bg-[#2D2D2D] text-white py-8 px-8 text-center text-white/60 text-sm">
-        © 2026 Nova Imago • <Link href="/privacy-policy" className="hover:text-white transition">Privacy Policy</Link> • <Link href="/terms" className="hover:text-white transition">Terms of Service</Link> • <Link href="/refund-policy" className="hover:text-white transition">Refund Policy</Link>
+      <footer className="border-t border-[#E8E6E0] px-8 py-8 text-center text-[#9B9B9B] text-sm">
+        <Link href="/" className="hover:text-[#5B4E9D] transition">← Back to Nova Imago</Link>
       </footer>
     </div>
   )
