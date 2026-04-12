@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // RunPod training starten
     const runpodResponse = await fetch(
-      `https://api.runpod.io/v2/${RUNPOD_TRAINING_ENDPOINT}/run`,
+      `https://api.runpod.ai/v2/${RUNPOD_TRAINING_ENDPOINT}/run`,
       {
         method: 'POST',
         headers: {

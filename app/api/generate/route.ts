@@ -284,7 +284,7 @@ export async function POST(request: NextRequest) {
       try {
         // Stuur job naar RunPod generation endpoint
         const runpodResponse = await fetch(
-          `https://api.runpod.io/v2/${RUNPOD_GENERATION_ENDPOINT}/runsync`,
+          `https://api.runpod.ai/v2/${RUNPOD_GENERATION_ENDPOINT}/runsync`,
           {
             method: 'POST',
             headers: {
