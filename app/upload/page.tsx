@@ -160,7 +160,7 @@ export default function UploadPage() {
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError('')
-    if (photos.length + acceptedFiles.length > 20) { setError('Maximum 20 photos allowed'); return }
+    if (photos.length + acceptedFiles.length > 20) { setError('Maximum 15 photos allowed'); return }
     const validFiles = acceptedFiles.filter(f => f.type.startsWith('image/') && f.size < 10 * 1024 * 1024)
     if (validFiles.length !== acceptedFiles.length)
       setError('Some files were rejected. Only images under 10MB are allowed.')
@@ -492,7 +492,7 @@ export default function UploadPage() {
                 {photoCount > 0 && (
                   <div className="flex items-center gap-3">
                     <span className={`text-sm font-semibold ${photoCount >= 8 ? 'text-emerald-400' : 'text-gray-400'}`}>
-                      {photoCount}/20 photos{photoCount >= 8 && ' ✓'}
+                      {photoCount}/15 photos{photoCount >= 8 && ' ✓'}
                     </span>
                     <button onClick={() => setPhotos([])} className="text-xs text-gray-500 hover:text-red-400 transition">
                       Clear all
@@ -591,7 +591,7 @@ export default function UploadPage() {
               ) : photoCount < 8 ? (
                 `Upload ${8 - photoCount} more photo${8 - photoCount !== 1 ? 's' : ''} to continue`
               ) : (
-                <><span className="text-xl">🚀</span> Start AI Training ({photoCount}/15 photos — meer is beter!)</>
+                <><span className="text-xl">🚀</span> Start AI Training ({photoCount}/15 photos — more is better!)</>
               )}
             </button>
 
