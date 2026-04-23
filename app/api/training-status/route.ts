@@ -91,15 +91,13 @@ export async function GET(request: NextRequest) {
       })
 
     } catch (runpodError) {
-      console.error('RunPod status error:', runpodError)
-      // Bij fout: toon "in progress" ipv "succeeded"
-      return NextResponse.json({
-        status: 'processing',
-        trainingId: user.trained_model_id,
-        estimatedMinutesRemaining: 20,
-        message: 'Training in progress...'
-      })
-    }
+  console.error('RunPod status error:', runpodError)
+  return NextResponse.json({
+    status: 'failed',
+    trainingId: user.trained_model_id,
+    message: 'Training failed. Please try again.'
+  })
+}
 
   } catch (error) {
     console.error('Training status error:', error)

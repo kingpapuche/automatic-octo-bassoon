@@ -80,12 +80,16 @@ export async function POST(request: NextRequest) {
           'Authorization': `Bearer ${RUNPOD_API_KEY}`,
         },
         body: JSON.stringify({
-          input: {
-            image_urls: validPhotoUrls,
-            trigger_word: triggerWord,
-            user_id: userId,
-          },
-        }),
+  input: {
+    image_urls: validPhotoUrls,
+    trigger_word: triggerWord,
+    user_id: userId,
+  },
+  policy: {
+    executionTimeout: 7200000,
+    ttl: 86400000,
+  },
+}),
       }
     )
 
