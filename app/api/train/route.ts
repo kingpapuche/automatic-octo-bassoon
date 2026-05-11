@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { fal } from '@fal-ai/client'
+import JSZip from 'jszip'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
-
-const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY!
-const RUNPOD_TRAINING_ENDPOINT = process.env.RUNPOD_TRAINING_ENDPOINT_ID!
 
 function isValidImage(buffer: ArrayBuffer): boolean {
   const bytes = new Uint8Array(buffer)
@@ -45,62 +44,84 @@ export async function POST(request: NextRequest) {
 
     // Valideer foto's
     const limitedPhotoUrls = photoUrls.slice(0, 20)
-    const validPhotoUrls: string[] = []
+    const validPhotos: Array<{ buffer: ArrayBuffer; ext: string }> = []
 
     for (const url of limitedPhotoUrls) {
       try {
         const response = await fetch(url)
         const arrayBuffer = await response.arrayBuffer()
-        if (isValidImage(arrayBuffer)) validPhotoUrls.push(url)
-        else console.warn(`⚠️ Skipping invalid photo: ${url}`)
+        if (isValidImage(arrayBuffer)) {
+          const bytes = new Uint8Array(arrayBuffer)
+          let ext = 'jpg'
+          if (bytes[0] === 0x89 && bytes[1] === 0x50) ext = 'png'
+          else if (bytes[8] === 0x57 && bytes[9] === 0x45) ext = 'webp'
+          validPhotos.push({ buffer: arrayBuffer, ext })
+        } else {
+          console.warn(`⚠️ Skipping invalid photo: ${url}`)
+        }
       } catch {
         console.error(`❌ Failed to fetch photo: ${url}`)
       }
     }
 
-    if (validPhotoUrls.length < 8) {
+    if (validPhotos.length < 8) {
       return NextResponse.json(
-        { error: `Only ${validPhotoUrls.length} valid photos. Need at least 8.` },
+        { error: `Only ${validPhotos.length} valid photos. Need at least 8.` },
         { status: 400 }
       )
     }
+
+    // Bouw ZIP en upload naar Supabase Storage
+    console.log(`📦 Building ZIP with ${validPhotos.length} photos...`)
+    const zip = new JSZip()
+    validPhotos.forEach((photo, index) => {
+      zip.file(`photo_${index + 1}.${photo.ext}`, photo.buffer)
+    })
+
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })
+    const zipFileName = `training-zips/${userId}-${Date.now()}.zip`
+
+    const { error: uploadError } = await supabase.storage
+      .from('headshots')
+      .upload(zipFileName, zipBuffer, {
+        contentType: 'application/zip',
+        upsert: false,
+      })
+
+    if (uploadError) {
+      console.error('❌ ZIP upload failed:', uploadError)
+      return NextResponse.json({ error: 'Failed to upload training data' }, { status: 500 })
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('headshots')
+      .getPublicUrl(zipFileName)
+
+    const zipUrl = publicUrlData.publicUrl
+    console.log(`✅ ZIP uploaded: ${zipUrl}`)
 
     // Trigger word aanmaken
     const uniqueSuffix = Date.now().toString(36).toUpperCase().slice(-4)
     const triggerWord = `PERSON_${userId.replace(/-/g, '').slice(0, 6).toUpperCase()}_${uniqueSuffix}`
     console.log(`🎯 Trigger word: ${triggerWord}`)
 
-    // RunPod training starten
-    const runpodResponse = await fetch(
-      `https://api.runpod.ai/v2/${RUNPOD_TRAINING_ENDPOINT}/run`,
+    // fal.ai training starten
+    const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/training-webhook`
+
+    const { request_id: trainingJobId } = await fal.queue.submit(
+      'fal-ai/flux-krea-trainer',
       {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${RUNPOD_API_KEY}`,
+        input: {
+          images_data_url: zipUrl,
+          trigger_word: triggerWord,
+          steps: 1000,
+          create_masks: true,
         },
-        body: JSON.stringify({
-  input: {
-    image_urls: validPhotoUrls,
-    trigger_word: triggerWord,
-    user_id: userId,
-  },
-  policy: {
-    executionTimeout: 7200000,
-    ttl: 86400000,
-  },
-}),
+        webhookUrl: webhookUrl,
       }
     )
 
-    if (!runpodResponse.ok) {
-      const error = await runpodResponse.text()
-      throw new Error(`RunPod error: ${error}`)
-    }
-
-    const runpodData = await runpodResponse.json()
-    const trainingJobId = runpodData.id
-    console.log(`🚀 RunPod job started: ${trainingJobId}`)
+    console.log(`🚀 fal.ai job started: ${trainingJobId}`)
 
     // Opslaan in database
     const modelDisplayName = modelName || userData.full_name || `Model ${new Date().toLocaleDateString()}`
@@ -120,7 +141,7 @@ export async function POST(request: NextRequest) {
         trigger_word: triggerWord,
         model_trained_at: new Date().toISOString(),
         trainings_remaining: trainingsRemaining - 1,
-        training_provider: 'runpod',
+        training_provider: 'fal',
       })
       .eq('id', userId)
 
@@ -129,7 +150,7 @@ export async function POST(request: NextRequest) {
       trainingId: trainingJobId,
       status: 'IN_QUEUE',
       triggerWord,
-      validPhotos: validPhotoUrls.length,
+      validPhotos: validPhotos.length,
       trainingsRemaining: trainingsRemaining - 1,
       message: 'Training started! This takes about 20-30 minutes.',
     })

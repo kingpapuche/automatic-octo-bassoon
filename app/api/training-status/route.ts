@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { fal } from '@fal-ai/client'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
-
-const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY!
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,43 +44,46 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Check status bij RunPod
+    // Check status bij fal.ai
     try {
-      const response = await fetch(
-        `https://api.runpod.ai/v2/${process.env.RUNPOD_TRAINING_ENDPOINT_ID}/status/${user.trained_model_id}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${RUNPOD_API_KEY}`,
-          }
-        }
-      )
+      const status = await fal.queue.status('fal-ai/flux-krea-trainer', {
+        requestId: user.trained_model_id,
+      })
 
-      if (!response.ok) {
-        throw new Error('RunPod status check failed')
+      // Map fal.ai status naar onze interne status
+      let mappedStatus: string
+      if (status.status === 'IN_QUEUE') {
+        mappedStatus = 'starting'
+      } else if (status.status === 'IN_PROGRESS') {
+        mappedStatus = 'processing'
+      } else if (status.status === 'COMPLETED') {
+        mappedStatus = 'succeeded'
+      } else {
+        // Onbekende status → behandel als failed
+        mappedStatus = 'failed'
       }
 
-      const data = await response.json()
-      const runpodStatus = data.status // IN_QUEUE, IN_PROGRESS, COMPLETED, FAILED, CANCELLED
+      // Bij failed: null de stale velden in users tabel
+      if (mappedStatus === 'failed') {
+        await supabase
+          .from('users')
+          .update({
+            trained_model_id: null,
+            lora_url: null,
+            trigger_word: null,
+            model_trained_at: null,
+          })
+          .eq('id', userId)
+      }
 
       // Bereken geschatte tijd
       let estimatedMinutes = 0
-      if (runpodStatus === 'IN_QUEUE' || runpodStatus === 'IN_PROGRESS') {
+      if (mappedStatus === 'starting' || mappedStatus === 'processing') {
         const startTime = new Date(user.model_trained_at).getTime()
         const now = Date.now()
         const elapsedMinutes = Math.floor((now - startTime) / 60000)
         estimatedMinutes = Math.max(0, 30 - elapsedMinutes)
       }
-
-      // Vertaal RunPod status naar onze status
-      const statusMap: Record<string, string> = {
-        'IN_QUEUE': 'starting',
-        'IN_PROGRESS': 'processing',
-        'COMPLETED': 'succeeded',
-        'FAILED': 'failed',
-        'CANCELLED': 'failed',
-      }
-
-      const mappedStatus = statusMap[runpodStatus] || 'starting'
 
       return NextResponse.json({
         status: mappedStatus,
@@ -90,14 +92,26 @@ export async function GET(request: NextRequest) {
         message: getStatusMessage(mappedStatus, estimatedMinutes)
       })
 
-    } catch (runpodError) {
-  console.error('RunPod status error:', runpodError)
-  return NextResponse.json({
-    status: 'failed',
-    trainingId: user.trained_model_id,
-    message: 'Training failed. Please try again.'
-  })
-}
+    } catch (falError) {
+      console.error('fal.ai status error:', falError)
+
+      // Bij fout: null de stale velden zodat user opnieuw kan starten
+      await supabase
+        .from('users')
+        .update({
+          trained_model_id: null,
+          lora_url: null,
+          trigger_word: null,
+          model_trained_at: null,
+        })
+        .eq('id', userId)
+
+      return NextResponse.json({
+        status: 'failed',
+        trainingId: user.trained_model_id,
+        message: 'Training failed. Please try again.'
+      })
+    }
 
   } catch (error) {
     console.error('Training status error:', error)

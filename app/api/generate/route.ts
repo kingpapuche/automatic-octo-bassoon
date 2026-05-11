@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { fal } from '@fal-ai/client'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
-
-const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY!
-const RUNPOD_GENERATION_ENDPOINT = process.env.RUNPOD_GENERATION_ENDPOINT_ID!
 
 interface UserCharacteristics {
   gender?: string
@@ -53,13 +51,14 @@ function buildPersonDescription(characteristics: UserCharacteristics): string {
   return parts.join(', ')
 }
 
-function buildNegativePrompt(characteristics: UserCharacteristics): string {
-  const negatives: string[] = []
-  if (characteristics.gender === 'male') negatives.push('female', 'woman', 'feminine features', 'makeup')
-  else if (characteristics.gender === 'female') negatives.push('male', 'man', 'masculine features', 'beard', 'mustache')
-  if (characteristics.is_bald) negatives.push('hair on head', 'full head of hair', 'long hair')
-  if (characteristics.has_glasses === false) negatives.push('glasses', 'eyeglasses', 'spectacles')
-  return negatives.join(', ')
+type ImageSize = 'square_hd' | 'square' | 'portrait_4_3' | 'portrait_16_9' | 'landscape_4_3' | 'landscape_16_9'
+
+const aspectRatioMap: Record<string, ImageSize> = {
+  '1:1': 'square_hd',
+  '3:4': 'portrait_4_3',
+  '4:3': 'landscape_4_3',
+  '9:16': 'portrait_16_9',
+  '16:9': 'landscape_16_9',
 }
 
 const STYLE_PROMPTS: Record<string, string> = {
@@ -263,14 +262,11 @@ export async function POST(request: NextRequest) {
     }
 
     const personDescription = buildPersonDescription(characteristics)
-    const negativeAdditions = buildNegativePrompt(characteristics)
 
-    const baseNegative = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, CGI, 3d render, illustration, cartoon, oversaturated, HDR"
-    const fullNegative = negativeAdditions ? `${baseNegative}, ${negativeAdditions}` : baseNegative
-
-    // Haal lora_url op uit Supabase storage
-    const loraUrl = user.lora_url // opgeslagen door RunPod training webhook
+    const loraUrl = user.lora_url
     if (!loraUrl) return NextResponse.json({ error: 'LoRA model URL not found. Training may not be complete.' }, { status: 400 })
+
+    const imageSize: ImageSize = aspectRatioMap[aspectRatio] || 'portrait_4_3'
 
     console.log(`🚀 Starting generation for user: ${userId}, ${styleIds.length} styles`)
 
@@ -282,39 +278,27 @@ export async function POST(request: NextRequest) {
       const fullPrompt = personDescription ? `${triggerWord}, ${personDescription}, ${stylePrompt}` : `${triggerWord}, ${stylePrompt}`
 
       try {
-        // Stuur job naar RunPod generation endpoint
-        const runpodResponse = await fetch(
-          `https://api.runpod.ai/v2/${RUNPOD_GENERATION_ENDPOINT}/runsync`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${RUNPOD_API_KEY}`,
-            },
-            body: JSON.stringify({
-              input: {
-                user_id: userId,
-                lora_url: loraUrl,
-                trigger_word: triggerWord,
-                style_id: styleId,
-                prompt: fullPrompt,
-                negative_prompt: fullNegative,
-                gender: user.gender,
-              },
-            }),
-          }
-        )
+        const result = await fal.subscribe('fal-ai/flux-krea-lora', {
+          input: {
+            prompt: fullPrompt,
+            image_size: imageSize,
+            loras: [{ path: loraUrl, scale: 1.0 }],
+            num_inference_steps: 28,
+            guidance_scale: 3.5,
+            num_images: 1,
+            output_format: 'jpeg',
+          },
+        })
 
-        if (!runpodResponse.ok) {
-          console.error(`❌ RunPod error for style ${styleId}`)
+        if (result.data?.has_nsfw_concepts?.[0] === true) {
+          console.warn(`⚠️ NSFW detected for style ${styleId}, skipping`)
           failedStyles.push(styleId)
           continue
         }
 
-        const result = await runpodResponse.json()
-
-        if (result.output?.image_url) {
-          generatedImages.push(result.output.image_url)
+        const imageUrl = result.data?.images?.[0]?.url
+        if (imageUrl) {
+          generatedImages.push(imageUrl)
           console.log(`✅ Generated: ${styleId}`)
         } else {
           failedStyles.push(styleId)
