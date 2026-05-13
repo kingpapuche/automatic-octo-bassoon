@@ -278,7 +278,7 @@ export async function POST(request: NextRequest) {
       const fullPrompt = personDescription ? `${triggerWord}, ${personDescription}, ${stylePrompt}` : `${triggerWord}, ${stylePrompt}`
 
       try {
-        const result = await fal.subscribe('fal-ai/flux-krea-lora', {
+        const result = await fal.subscribe('fal-ai/flux-lora', {
           input: {
             prompt: fullPrompt,
             image_size: imageSize,

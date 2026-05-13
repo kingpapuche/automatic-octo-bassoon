@@ -105,23 +105,24 @@ export async function POST(request: NextRequest) {
     const triggerWord = `PERSON_${userId.replace(/-/g, '').slice(0, 6).toUpperCase()}_${uniqueSuffix}`
     console.log(`🎯 Trigger word: ${triggerWord}`)
 
-    // fal.ai training starten
+    // fal.ai training starten (portrait-trainer op FLUX.1 dev)
     const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/training-webhook`
 
     const { request_id: trainingJobId } = await fal.queue.submit(
-      'fal-ai/flux-krea-trainer',
+      'fal-ai/flux-lora-portrait-trainer',
       {
         input: {
           images_data_url: zipUrl,
           trigger_word: triggerWord,
-          steps: 1000,
-          create_masks: true,
+          steps: 2500,
+          subject_crop: true,
+          multiresolution_training: true,
         },
         webhookUrl: webhookUrl,
       }
     )
 
-    console.log(`🚀 fal.ai job started: ${trainingJobId}`)
+    console.log(`🚀 fal.ai portrait training started: ${trainingJobId}`)
 
     // Opslaan in database
     const modelDisplayName = modelName || userData.full_name || `Model ${new Date().toLocaleDateString()}`
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
       triggerWord,
       validPhotos: validPhotos.length,
       trainingsRemaining: trainingsRemaining - 1,
-      message: 'Training started! This takes about 20-30 minutes.',
+      message: 'Training started! This takes about 25-35 minutes.',
     })
 
   } catch (error) {

@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     // Check status bij fal.ai
     try {
-      const status = await fal.queue.status('fal-ai/flux-krea-trainer', {
+      const status = await fal.queue.status('fal-ai/flux-lora-portrait-trainer', {
         requestId: user.trained_model_id,
       })
 
@@ -59,7 +59,6 @@ export async function GET(request: NextRequest) {
       } else if (status.status === 'COMPLETED') {
         mappedStatus = 'succeeded'
       } else {
-        // Onbekende status → behandel als failed
         mappedStatus = 'failed'
       }
 
@@ -76,13 +75,13 @@ export async function GET(request: NextRequest) {
           .eq('id', userId)
       }
 
-      // Bereken geschatte tijd
+      // Bereken geschatte tijd (35 min totaal voor portrait-trainer)
       let estimatedMinutes = 0
       if (mappedStatus === 'starting' || mappedStatus === 'processing') {
         const startTime = new Date(user.model_trained_at).getTime()
         const now = Date.now()
         const elapsedMinutes = Math.floor((now - startTime) / 60000)
-        estimatedMinutes = Math.max(0, 30 - elapsedMinutes)
+        estimatedMinutes = Math.max(0, 35 - elapsedMinutes)
       }
 
       return NextResponse.json({
@@ -95,7 +94,6 @@ export async function GET(request: NextRequest) {
     } catch (falError) {
       console.error('fal.ai status error:', falError)
 
-      // Bij fout: null de stale velden zodat user opnieuw kan starten
       await supabase
         .from('users')
         .update({
