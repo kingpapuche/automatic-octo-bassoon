@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { fal } from '@fal-ai/client'
+import Replicate from 'replicate'
 import JSZip from 'jszip'
 
 const supabase = createClient(
@@ -8,6 +8,13 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN!,
+})
+
+const REPLICATE_USERNAME = process.env.REPLICATE_USERNAME!
+const TRAINER_VERSION = '4ffd32160efd92e956d39c5338a9b8fbafca58e03f791f6d8011f3e20e8ea6fa'
 
 function isValidImage(buffer: ArrayBuffer): boolean {
   const bytes = new Uint8Array(buffer)
@@ -20,16 +27,16 @@ function isValidImage(buffer: ArrayBuffer): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, photoUrls, modelName } = await request.json()
+    const { userId, photoUrls } = await request.json()
 
     if (!userId) return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     if (!photoUrls || photoUrls.length < 8) {
-      return NextResponse.json({ error: 'Need at least 8 photos for training' }, { status: 400 })
+      return NextResponse.json({ error: 'Need at least 8 photos' }, { status: 400 })
     }
 
     const { data: userData, error: userCheckError } = await supabase
       .from('users')
-      .select('trainings_remaining, gender, ethnicity, eye_color, hair_color, is_bald, has_glasses, full_name')
+      .select('trainings_remaining, full_name')
       .eq('id', userId)
       .single()
 
@@ -56,23 +63,20 @@ export async function POST(request: NextRequest) {
           if (bytes[0] === 0x89 && bytes[1] === 0x50) ext = 'png'
           else if (bytes[8] === 0x57 && bytes[9] === 0x45) ext = 'webp'
           validPhotos.push({ buffer: arrayBuffer, ext })
-        } else {
-          console.warn(`⚠️ Skipping invalid photo: ${url}`)
         }
       } catch {
-        console.error(`❌ Failed to fetch photo: ${url}`)
+        console.error(`Failed to fetch: ${url}`)
       }
     }
 
     if (validPhotos.length < 8) {
       return NextResponse.json(
-        { error: `Only ${validPhotos.length} valid photos. Need at least 8.` },
+        { error: `Only ${validPhotos.length} valid photos.` },
         { status: 400 }
       )
     }
 
-    // Bouw ZIP en upload naar Supabase Storage
-    console.log(`📦 Building ZIP with ${validPhotos.length} photos...`)
+    // ZIP bouwen + uploaden
     const zip = new JSZip()
     validPhotos.forEach((photo, index) => {
       zip.file(`photo_${index + 1}.${photo.ext}`, photo.buffer)
@@ -83,81 +87,81 @@ export async function POST(request: NextRequest) {
 
     const { error: uploadError } = await supabase.storage
       .from('headshots')
-      .upload(zipFileName, zipBuffer, {
-        contentType: 'application/zip',
-        upsert: false,
-      })
+      .upload(zipFileName, zipBuffer, { contentType: 'application/zip' })
 
     if (uploadError) {
-      console.error('❌ ZIP upload failed:', uploadError)
       return NextResponse.json({ error: 'Failed to upload training data' }, { status: 500 })
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from('headshots')
-      .getPublicUrl(zipFileName)
-
+    const { data: publicUrlData } = supabase.storage.from('headshots').getPublicUrl(zipFileName)
     const zipUrl = publicUrlData.publicUrl
-    console.log(`✅ ZIP uploaded: ${zipUrl}`)
 
-    // Trigger word aanmaken
-    const uniqueSuffix = Date.now().toString(36).toUpperCase().slice(-4)
-    const triggerWord = `PERSON_${userId.replace(/-/g, '').slice(0, 6).toUpperCase()}_${uniqueSuffix}`
-    console.log(`🎯 Trigger word: ${triggerWord}`)
+    // Trigger word + destination
+    const uniqueSuffix = Date.now().toString(36).toLowerCase().slice(-4)
+    const userIdShort = userId.replace(/-/g, '').slice(0, 8).toLowerCase()
+    const triggerWord = `person_${userIdShort}_${uniqueSuffix}`
+    const destinationModelName = `headshot-${userIdShort}-${uniqueSuffix}`
+    const destinationFullPath = `${REPLICATE_USERNAME}/${destinationModelName}`
 
-    // fal.ai training starten (portrait-trainer op FLUX.1 dev)
-    const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/training-webhook`
+    // Maak destination model
+    try {
+      await replicate.models.create(REPLICATE_USERNAME, destinationModelName, {
+        visibility: 'private',
+        hardware: 'gpu-t4',
+        description: `Headshot model for user ${userId}`,
+      })
+    } catch (modelError: unknown) {
+      const errMsg = modelError instanceof Error ? modelError.message : String(modelError)
+      if (!errMsg.includes('already exists')) {
+        return NextResponse.json({ error: 'Failed to create destination model' }, { status: 500 })
+      }
+    }
 
-    const { request_id: trainingJobId } = await fal.queue.submit(
-      'fal-ai/flux-lora-portrait-trainer',
+    // Webhook URL met userId + modelPath als query params
+    const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/training-webhook?userId=${userId}&modelPath=${encodeURIComponent(destinationFullPath)}`
+
+    const training = await replicate.trainings.create(
+      'ostris',
+      'flux-dev-lora-trainer',
+      TRAINER_VERSION,
       {
+        destination: destinationFullPath as `${string}/${string}`,
         input: {
-          images_data_url: zipUrl,
+          input_images: zipUrl,
           trigger_word: triggerWord,
-          steps: 2500,
-          subject_crop: true,
-          multiresolution_training: true,
+          steps: 1000,
+          lora_rank: 16,
+          batch_size: 1,
+          resolution: '512,768,1024',
+          autocaption: true,
+          learning_rate: 0.0004,
         },
-        webhookUrl: webhookUrl,
+        webhook: webhookUrl,
+        webhook_events_filter: ['completed'],
       }
     )
 
-    console.log(`🚀 fal.ai portrait training started: ${trainingJobId}`)
-
-    // Opslaan in database
-    const modelDisplayName = modelName || userData.full_name || `Model ${new Date().toLocaleDateString()}`
-
-    await supabase.from('models').insert({
-      user_id: userId,
-      training_id: trainingJobId,
-      trigger_word: triggerWord,
-      name: modelDisplayName,
-      status: 'training',
-    })
-
+    // Sla op: trained_model_id = training.id (wordt later overschreven door webhook)
     await supabase
       .from('users')
       .update({
-        trained_model_id: trainingJobId,
+        trained_model_id: training.id,
         trigger_word: triggerWord,
         model_trained_at: new Date().toISOString(),
         trainings_remaining: trainingsRemaining - 1,
-        training_provider: 'fal',
       })
       .eq('id', userId)
 
     return NextResponse.json({
       success: true,
-      trainingId: trainingJobId,
-      status: 'IN_QUEUE',
+      trainingId: training.id,
       triggerWord,
       validPhotos: validPhotos.length,
-      trainingsRemaining: trainingsRemaining - 1,
-      message: 'Training started! This takes about 25-35 minutes.',
+      message: 'Training started! This takes about 20-30 minutes.',
     })
 
   } catch (error) {
-    console.error('❌ Training error:', error)
+    console.error('Training error:', error)
     return NextResponse.json(
       { error: 'Training failed', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
