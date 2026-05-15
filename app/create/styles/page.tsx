@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
@@ -16,51 +16,60 @@ interface StyleCategory {
   id: string
   name: string
   icon: string
-  gender: 'male' | 'female' | 'both'
+  gender: 'male' | 'female'
   styles: StyleOption[]
 }
 
+// ===========================================
+// 74 STIJLEN — 100% synced met app/api/generate/route.ts
+// MANNEN: 38 stijlen | VROUWEN: 36 stijlen (w- prefix)
+// ===========================================
 const STYLE_CATEGORIES: StyleCategory[] = [
-  // ===== MANNENSTIJLEN =====
+
+  // ============================================================
+  // MANNEN-STIJLEN — 38 totaal in 7 categorieën
+  // ============================================================
   {
     id: 'formal',
-    name: 'Formal / Corporate',
+    name: 'Formal / Corporate Power',
     icon: '👔',
     gender: 'male',
     styles: [
-      { id: 'corporate-classic', label: 'Corporate Classic', description: 'Navy suit, gray studio', icon: '🏢' },
-      { id: 'executive-navy', label: 'Executive Navy', description: 'Arms crossed, city skyline', icon: '🌆' },
-      { id: 'ceo-black', label: 'CEO Black', description: 'Black suit, white studio', icon: '⬛' },
-      { id: 'boardroom-gray', label: 'Boardroom Gray', description: 'Gray suit, office windows', icon: '🪟' },
-      { id: 'power-suit', label: 'Power Suit', description: 'Navy suit, library', icon: '📚' },
-      { id: 'light-blue-exec', label: 'Light Blue Exec', description: 'Blue blazer, tablet', icon: '📱' },
-      { id: 'pinstripe-pro', label: 'Pinstripe Pro', description: 'Pinstripe suit, gray bg', icon: '📐' },
-      { id: 'three-piece', label: 'Three Piece', description: 'Three piece suit, dramatic', icon: '🎩' },
-      { id: 'wall-street', label: 'Wall Street', description: 'Dark suit, red tie', icon: '📈' },
-      { id: 'corner-office', label: 'Corner Office', description: 'Sitting at desk, city view', icon: '🏙️' },
-      { id: 'conference-ready', label: 'Conference Ready', description: 'Navy blazer, standing', icon: '🎤' },
-      { id: 'investor-meeting', label: 'Investor Meeting', description: 'Charcoal suit, white bg', icon: '🤝' },
-      { id: 'formal-black', label: 'Formal Black', description: 'Black suit, dark studio', icon: '🖤' },
+      { id: 'corporate-classic',   label: 'Corporate Classic',  description: 'Navy suit, modern office',   icon: '🏢' },
+      { id: 'executive-navy',      label: 'Executive Navy',     description: 'Navy suit, city skyline',    icon: '🌆' },
+      { id: 'ceo-black',           label: 'CEO Black',          description: 'Black suit, light gray bg',  icon: '⬛' },
+      { id: 'boardroom-charcoal',  label: 'Boardroom Charcoal', description: 'Charcoal suit, modern office', icon: '🪟' },
+      { id: 'pinstripe-pro',       label: 'Pinstripe Pro',      description: 'Pinstripe suit + tie',       icon: '📐' },
+      { id: 'three-piece',         label: 'Three Piece',        description: 'Three piece suit + vest',    icon: '🎩' },
+      { id: 'formal-black-drama',  label: 'Formal Black',       description: 'Black suit, dramatic light', icon: '🖤' },
+      { id: 'wall-street-power',   label: 'Wall Street Power',  description: 'Dark suit, red tie, street', icon: '📈' },
     ],
   },
   {
     id: 'smart-casual',
-    name: 'Smart Casual',
+    name: 'Smart Casual / Business Modern',
     icon: '🧥',
     gender: 'male',
     styles: [
-      { id: 'teal-blazer', label: 'Teal Blazer', description: 'Teal blazer, white tee', icon: '💎' },
-      { id: 'beige-elegance', label: 'Beige Elegance', description: 'Beige suit, watch', icon: '⌚' },
-      { id: 'gray-blazer-blue', label: 'Gray Blazer', description: 'Gray blazer, blue bg', icon: '🔵' },
-      { id: 'open-collar-navy', label: 'Open Collar', description: 'Navy blazer, open collar', icon: '👕' },
-      { id: 'blazer-white-tee', label: 'Blazer + White Tee', description: 'Black blazer, city lights', icon: '✨' },
-      { id: 'v-neck-sweater', label: 'V-Neck Sweater', description: 'Blue sweater, white bg', icon: '🧶' },
-      { id: 'office-casual-plants', label: 'Office Casual', description: 'Oxford shirt, plants', icon: '🌿' },
-      { id: 'weekend-blazer', label: 'Weekend Blazer', description: 'Tan blazer, café', icon: '☕' },
-      { id: 'creative-director', label: 'Creative Director', description: 'Black blazer + turtleneck', icon: '🎨' },
-      { id: 'startup-ceo', label: 'Startup CEO', description: 'Navy blazer, coworking', icon: '🚀' },
-      { id: 'tech-lead', label: 'Tech Lead', description: 'Gray sport coat', icon: '💻' },
-      { id: 'consultant-look', label: 'Consultant', description: 'Light gray suit, no tie', icon: '📋' },
+      { id: 'navy-blazer-open',    label: 'Navy Blazer Open',   description: 'Navy blazer, open collar',  icon: '👕' },
+      { id: 'gray-blazer-blue',    label: 'Gray Blazer',        description: 'Gray blazer, blue bg',       icon: '🔵' },
+      { id: 'beige-elegance',      label: 'Beige Elegance',     description: 'Beige linen suit',           icon: '🟫' },
+      { id: 'teal-blazer',         label: 'Teal Blazer',        description: 'Teal blazer, white tee',     icon: '💎' },
+      { id: 'light-blue-blazer',   label: 'Light Blue Blazer',  description: 'Light blue blazer, office',  icon: '💙' },
+      { id: 'creative-director',   label: 'Creative Director',  description: 'Black blazer + turtleneck',  icon: '🎨' },
+      { id: 'consultant-look',     label: 'Consultant',         description: 'Light gray suit, no tie',    icon: '📋' },
+    ],
+  },
+  {
+    id: 'tech-founder',
+    name: 'Tech Founder / Sweater',
+    icon: '⚡',
+    gender: 'male',
+    styles: [
+      { id: 'tech-turtleneck',     label: 'Tech Turtleneck',    description: 'Gray turtleneck, minimal',   icon: '🤍' },
+      { id: 'gray-sweater-pro',    label: 'Gray Sweater Pro',   description: 'Crew neck over collar',      icon: '🧶' },
+      { id: 'knit-cozy',           label: 'Knit Cozy',          description: 'Chunky knit, warm light',    icon: '🧣' },
+      { id: 'v-neck-smart',        label: 'V-Neck Smart',       description: 'Blue V-neck over collar',    icon: '🔻' },
     ],
   },
   {
@@ -69,283 +78,145 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     icon: '👕',
     gender: 'male',
     styles: [
-      { id: 'white-tee-orange', label: 'White Tee Orange', description: 'White tee, orange bg', icon: '🟠' },
-      { id: 'black-tee-urban', label: 'Black Tee Urban', description: 'Black tee, urban street', icon: '🏘️' },
-      { id: 'navy-polo-clean', label: 'Navy Polo', description: 'Navy polo, white bg', icon: '🔷' },
-      { id: 'gray-tee-crossed', label: 'Gray Tee Crossed', description: 'Gray tee, arms crossed', icon: '💪' },
-      { id: 'white-tee-nature', label: 'White Tee Nature', description: 'White tee, green nature', icon: '🌳' },
-      { id: 'plaid-casual', label: 'Plaid Casual', description: 'Plaid shirt, studio', icon: '🪵' },
-      { id: 'henley-relaxed', label: 'Henley Relaxed', description: 'Henley, window light', icon: '🪟' },
-      { id: 'denim-shirt', label: 'Denim Shirt', description: 'Chambray, white bg', icon: '👖' },
-      { id: 'knit-sweater', label: 'Knit Sweater', description: 'Chunky knit, cozy', icon: '🧣' },
-      { id: 'linen-summer', label: 'Linen Summer', description: 'White linen, outdoor', icon: '☀️' },
-    ],
-  },
-  {
-    id: 'creative',
-    name: 'Creative / Edgy',
-    icon: '🎸',
-    gender: 'male',
-    styles: [
-      { id: 'leather-jacket-city', label: 'Leather Jacket', description: 'Leather jacket, bokeh', icon: '🧥' },
-      { id: 'night-life', label: 'Night Life', description: 'Black outfit, nightlife', icon: '🌃' },
-      { id: 'turtleneck-modern', label: 'Turtleneck Modern', description: 'Gray turtleneck', icon: '🤍' },
-      { id: 'black-turtleneck-drama', label: 'Black Turtleneck', description: 'Dramatic side light', icon: '🖤' },
-      { id: 'tech-founder', label: 'Tech Founder', description: 'Gray tee, tech office', icon: '⚡' },
-      { id: 'all-black-minimal', label: 'All Black', description: 'All black, dramatic', icon: '🌑' },
-      { id: 'creative-colorful', label: 'Creative Colorful', description: 'Colorful shirt', icon: '🌈' },
-      { id: 'rebel-professional', label: 'Rebel Pro', description: 'Blazer + band tee', icon: '🎵' },
+      { id: 'white-button-down',   label: 'White Button-Down',  description: 'Clean white shirt',          icon: '🤍' },
+      { id: 'light-blue-oxford',   label: 'Light Blue Oxford',  description: 'Light blue oxford, open',    icon: '💙' },
+      { id: 'navy-polo',           label: 'Navy Polo',          description: 'Navy polo, clean bg',        icon: '🔷' },
+      { id: 'denim-shirt-fresh',   label: 'Denim Shirt',        description: 'Chambray, white bg',         icon: '👖' },
+      { id: 'plaid-friendly',      label: 'Plaid Friendly',     description: 'Plaid button-up, neutral',   icon: '🪵' },
+      { id: 'white-tee-clean',     label: 'White Tee Clean',    description: 'Plain white tee, casual',    icon: '⚪' },
+      { id: 'black-tee-clean',     label: 'Black Tee Clean',    description: 'Plain black tee, casual',    icon: '⚫' },
+      { id: 'henley-relaxed',      label: 'Henley Relaxed',     description: 'Henley, warm window light',  icon: '🪟' },
     ],
   },
   {
     id: 'outdoor',
-    name: 'Outdoor / Natural',
+    name: 'Outdoor / Lifestyle',
     icon: '🌿',
     gender: 'male',
     styles: [
-      { id: 'park-portrait', label: 'Park Portrait', description: 'Green park, daylight', icon: '🌲' },
-      { id: 'rooftop-view', label: 'Rooftop View', description: 'City panorama, golden hr', icon: '🏙️' },
-      { id: 'golden-hour', label: 'Golden Hour', description: 'White shirt, warm tones', icon: '🌅' },
-      { id: 'nature-fresh', label: 'Nature Fresh', description: 'Trees, natural light', icon: '🍃' },
-      { id: 'city-walk', label: 'City Walk', description: 'Walking, city street', icon: '🚶' },
-      { id: 'coffee-shop', label: 'Coffee Shop', description: 'Sitting, café', icon: '☕' },
-      { id: 'beach-professional', label: 'Beach Pro', description: 'Linen shirt, coastal', icon: '🏖️' },
-      { id: 'architectural', label: 'Architectural', description: 'Modern architecture', icon: '🏛️' },
+      { id: 'golden-hour',         label: 'Golden Hour',        description: 'Warm tones, sunset light',   icon: '🌅' },
+      { id: 'park-natural',        label: 'Park Natural',       description: 'Green park, daylight',       icon: '🌳' },
+      { id: 'rooftop-city',        label: 'Rooftop City',       description: 'City skyline, rooftop',      icon: '🏙️' },
+      { id: 'city-walk',           label: 'City Walk',          description: 'Walking, urban street',      icon: '🚶' },
     ],
   },
   {
-    id: 'poses',
-    name: 'Specialty Poses',
-    icon: '🧍',
+    id: 'creative',
+    name: 'Creative / Bold',
+    icon: '🎸',
     gender: 'male',
     styles: [
-      { id: 'arms-crossed-power', label: 'Arms Crossed', description: 'Power pose, dark suit', icon: '💪' },
-      { id: 'holding-tablet', label: 'Holding Tablet', description: 'Tablet, office', icon: '📱' },
-      { id: 'sitting-confident', label: 'Sitting Confident', description: 'Chair, legs crossed', icon: '🪑' },
-      { id: 'leaning-casual', label: 'Leaning Casual', description: 'Against wall', icon: '🚪' },
-      { id: 'hands-in-pockets', label: 'Hands in Pockets', description: 'Blazer + jeans', icon: '🤙' },
-      { id: 'thoughtful-pose', label: 'Thoughtful', description: 'Hand near chin', icon: '🤔' },
-      { id: 'looking-up', label: 'Looking Up', description: 'From below', icon: '⬆️' },
+      { id: 'leather-jacket-urban', label: 'Leather Jacket',   description: 'Black leather, urban',       icon: '🧥' },
+      { id: 'all-black-minimal',   label: 'All Black Minimal', description: 'All black, dramatic',        icon: '🌑' },
+      { id: 'bold-colored-blazer', label: 'Bold Colored Blazer', description: 'Red/emerald blazer',       icon: '🌈' },
     ],
   },
   {
-    id: 'colored',
-    name: 'Colored Backgrounds',
-    icon: '🎨',
+    id: 'restaurant-mens',
+    name: 'Restaurant / Date Night',
+    icon: '🍷',
     gender: 'male',
     styles: [
-      { id: 'blue-studio', label: 'Blue Studio', description: 'Business, blue bg', icon: '🔵' },
-      { id: 'green-studio', label: 'Green Studio', description: 'Smart casual, green', icon: '🟢' },
-      { id: 'purple-creative', label: 'Purple Creative', description: 'Dark outfit, purple', icon: '🟣' },
-      { id: 'yellow-energetic', label: 'Yellow Energetic', description: 'Casual, yellow', icon: '🟡' },
-      { id: 'red-bold', label: 'Red Bold', description: 'Professional, red', icon: '🔴' },
-      { id: 'gradient-modern', label: 'Gradient Modern', description: 'Blue to purple', icon: '🌀' },
-    ],
-  },
-  {
-    id: 'fullbody',
-    name: 'Full Body',
-    icon: '🧍',
-    gender: 'male',
-    styles: [
-      { id: 'fullbody-navy-suit', label: 'Full Body Navy Suit', description: 'Head to toe, navy suit', icon: '👔' },
-      { id: 'fullbody-black-outfit', label: 'Full Body Black', description: 'All black, full length', icon: '🖤' },
-      { id: 'fullbody-casual-white', label: 'Full Body Casual', description: 'White tee, jeans, studio', icon: '👕' },
-      { id: 'fullbody-blazer-jeans', label: 'Blazer + Jeans', description: 'Blazer, jeans, modern interior', icon: '🧥' },
-      { id: 'fullbody-city-street', label: 'City Street', description: 'Urban, smart casual, full body', icon: '🏙️' },
-      { id: 'fullbody-outdoor', label: 'Outdoor Full Body', description: 'Park, casual, full length', icon: '🌿' },
-    ],
-  },
-  {
-    id: 'sunglasses',
-    name: 'Sunglasses',
-    icon: '🕶️',
-    gender: 'male',
-    styles: [
-      { id: 'sunglasses-city', label: 'Sunglasses City', description: 'Dark blazer, city street', icon: '🏙️' },
-      { id: 'sunglasses-outdoor', label: 'Sunglasses Outdoor', description: 'Casual jacket, outdoor', icon: '☀️' },
-      { id: 'sunglasses-black-suit', label: 'Sunglasses Black Suit', description: 'Black suit, mysterious', icon: '🖤' },
-      { id: 'sunglasses-casual', label: 'Sunglasses Casual', description: 'White tee, outdoor', icon: '😎' },
-    ],
-  },
-  {
-    id: 'luxury',
-    name: 'Luxury / Watch',
-    icon: '⌚',
-    gender: 'male',
-    styles: [
-      { id: 'watch-showcase', label: 'Watch Showcase', description: 'Luxury watch, beige blazer', icon: '✨' },
-      { id: 'watch-luxury-outdoor', label: 'Watch Outdoor', description: 'Watch visible, nature bg', icon: '🌿' },
-      { id: 'watch-dark-elegant', label: 'Watch Dark Elegant', description: 'Watch, dark suit, dramatic', icon: '🖤' },
-    ],
-  },
-  {
-    id: 'bold-colors',
-    name: 'Bold Colored Suits',
-    icon: '🌈',
-    gender: 'male',
-    styles: [
-      { id: 'teal-suit', label: 'Teal Suit', description: 'Teal suit, arms crossed', icon: '💎' },
-      { id: 'green-suit', label: 'Green Suit', description: 'Green blazer, white bg', icon: '🟢' },
-      { id: 'pink-blazer', label: 'Pink Blazer', description: 'Pink blazer, modern', icon: '🌸' },
-      { id: 'orange-suit', label: 'Orange Suit', description: 'Orange blazer, vibrant', icon: '🟠' },
-      { id: 'brown-suit-elegant', label: 'Brown Suit', description: 'Warm brown, dark bg', icon: '🤎' },
-    ],
-  },
-  {
-    id: 'blacktie',
-    name: 'Black Tie / Tuxedo',
-    icon: '🎩',
-    gender: 'male',
-    styles: [
-      { id: 'tuxedo-classic', label: 'Classic Tuxedo', description: 'Black tux, bow tie, gala', icon: '🥂' },
-      { id: 'tuxedo-modern', label: 'Modern Tuxedo', description: 'Slim tux, open collar', icon: '✨' },
-    ],
-  },
-  {
-    id: 'lifestyle',
-    name: 'Lifestyle / Motor',
-    icon: '🏍️',
-    gender: 'male',
-    styles: [
-      { id: 'moto-leather', label: 'Moto Leather', description: 'Brown leather jacket, moto', icon: '🤎' },
-      { id: 'moto-city', label: 'Moto City', description: 'Black leather, city street', icon: '🖤' },
-    ],
-  },
-  {
-    id: 'sitting-casual',
-    name: 'Sitting Casual',
-    icon: '🪑',
-    gender: 'male',
-    styles: [
-      { id: 'sitting-ground', label: 'Sitting on Ground', description: 'Casual, knees up, studio', icon: '🧘' },
-      { id: 'sitting-steps', label: 'Sitting on Steps', description: 'Outdoor steps, urban', icon: '🏙️' },
-      { id: 'sitting-chair-casual', label: 'Chair Sideways', description: 'Sideways in chair, relaxed', icon: '🪑' },
-    ],
-  },
-  {
-    id: 'closeup',
-    name: 'Close-Up Headshots',
-    icon: '🎯',
-    gender: 'male',
-    styles: [
-      { id: 'closeup-dramatic', label: 'Dramatic Close-Up', description: 'Cinematic, dark bg', icon: '🎬' },
-      { id: 'closeup-warm', label: 'Warm Close-Up', description: 'Warm light, genuine smile', icon: '☀️' },
-      { id: 'closeup-outdoor', label: 'Outdoor Close-Up', description: 'Natural light, green bg', icon: '🌿' },
+      { id: 'restaurant-elegant',   label: 'Restaurant Elegant', description: 'Upscale restaurant, candlelit', icon: '🕯️' },
+      { id: 'wine-bar-relaxed',     label: 'Wine Bar Relaxed',   description: 'At wine bar, warm light',    icon: '🍷' },
+      { id: 'coffee-shop-date',     label: 'Coffee Shop Date',   description: 'Coffee shop, ambient',       icon: '☕' },
+      { id: 'rooftop-bar-evening',  label: 'Rooftop Bar Evening', description: 'City lights, evening',      icon: '🌃' },
     ],
   },
 
-  // ===== VROUWENSTIJLEN =====
+  // ============================================================
+  // VROUWEN-STIJLEN — 36 totaal in 7 categorieën (w- prefix)
+  // ============================================================
   {
-    id: 'women-corporate',
-    name: 'Women — Corporate',
+    id: 'w-formal',
+    name: 'Formal / Corporate Power',
     icon: '💼',
     gender: 'female',
     styles: [
-      { id: 'w-black-blazer-city', label: 'Black Blazer City', description: 'Black blazer, city window', icon: '🏙️' },
-      { id: 'w-navy-blazer-arms', label: 'Navy Blazer', description: 'Navy blazer, arms crossed', icon: '💪' },
-      { id: 'w-white-shirt-pro', label: 'White Shirt Pro', description: 'White blouse, neutral bg', icon: '🤍' },
-      { id: 'w-light-blue-shirt', label: 'Light Blue Shirt', description: 'Light blue blouse, studio', icon: '💙' },
-      { id: 'w-black-turtleneck-pro', label: 'Black Turtleneck', description: 'Black turtleneck, dark bg', icon: '🖤' },
-      { id: 'w-teal-turtleneck', label: 'Teal Turtleneck', description: 'Teal turtleneck, office', icon: '💚' },
-      { id: 'w-cream-blazer', label: 'Cream Blazer', description: 'Cream blazer, arms crossed', icon: '🤍' },
-      { id: 'w-dark-blazer-table', label: 'Dark Blazer Table', description: 'Dark blazer, sitting', icon: '🪑' },
-      { id: 'w-white-blazer-arms', label: 'White Blazer', description: 'White blazer, arms crossed', icon: '🤍' },
-      { id: 'w-black-outfit-minimal', label: 'All Black Minimal', description: 'Black outfit, white studio', icon: '🖤' },
+      { id: 'w-power-blazer-navy',   label: 'Navy Power Blazer', description: 'Navy blazer, white blouse', icon: '🔷' },
+      { id: 'w-executive-charcoal',  label: 'Executive Charcoal', description: 'Charcoal suit, modern',    icon: '🪟' },
+      { id: 'w-ceo-black',           label: 'CEO Black',         description: 'Black blazer, powerful',     icon: '⬛' },
+      { id: 'w-pinstripe-pro',       label: 'Pinstripe Pro',     description: 'Pinstripe blazer, silk',     icon: '📐' },
+      { id: 'w-sheath-classic',      label: 'Sheath Dress',      description: 'Black sheath, refined',      icon: '🖤' },
+      { id: 'w-pussybow-elegant',    label: 'Pussybow Elegant',  description: 'Silk blouse, tweed',         icon: '🎀' },
     ],
   },
   {
-    id: 'women-colored-suits',
-    name: 'Women — Gekleurde Suits',
-    icon: '🌈',
-    gender: 'female',
-    styles: [
-      { id: 'w-red-suit', label: 'Red Power Suit', description: 'Red blazer suit, laptop', icon: '🔴' },
-      { id: 'w-pink-suit', label: 'Pink Suit', description: 'Pink suit, modern office', icon: '🌸' },
-      { id: 'w-blue-suit', label: 'Blue Suit', description: 'Light blue suit, dark bg', icon: '💙' },
-      { id: 'w-green-suit', label: 'Green Suit', description: 'Green suit, green bg', icon: '💚' },
-      { id: 'w-orange-suit', label: 'Orange Suit', description: 'Orange blazer, purple bg', icon: '🟠' },
-      { id: 'w-camel-blazer', label: 'Camel Blazer', description: 'Camel blazer, neutral', icon: '🤎' },
-      { id: 'w-green-dark-blazer', label: 'Forest Green Blazer', description: 'Dark green blazer, studio', icon: '🌲' },
-      { id: 'w-brown-blazer', label: 'Brown Blazer', description: 'Brown blazer, warm bg', icon: '🤎' },
-    ],
-  },
-  {
-    id: 'women-smart-casual',
-    name: 'Women — Smart Casual',
+    id: 'w-smart-casual',
+    name: 'Smart Casual / Business Modern',
     icon: '🧥',
     gender: 'female',
     styles: [
-      { id: 'w-blazer-jeans-street', label: 'Blazer + Jeans Street', description: 'Blazer, jeans, city street', icon: '🏙️' },
-      { id: 'w-black-blazer-outdoor', label: 'Black Blazer Outdoor', description: 'Black blazer, outdoor', icon: '🌿' },
-      { id: 'w-beige-blazer-casual', label: 'Beige Blazer Casual', description: 'Beige blazer, city walk', icon: '☕' },
-      { id: 'w-leather-jacket', label: 'Leather Jacket', description: 'Black leather jacket, street', icon: '🖤' },
-      { id: 'w-leather-jacket-city', label: 'Leather Jacket City', description: 'Leather jacket, night city', icon: '🌃' },
-      { id: 'w-denim-jacket', label: 'Denim Jacket', description: 'Denim jacket, white tee', icon: '👖' },
-      { id: 'w-navy-turtleneck-street', label: 'Navy Turtleneck Street', description: 'Navy turtleneck, city street', icon: '🔵' },
-      { id: 'w-dark-blazer-restaurant', label: 'Dark Blazer Restaurant', description: 'Elegant, warm restaurant', icon: '🍷' },
+      { id: 'w-cream-blazer-arms',   label: 'Cream Blazer',      description: 'Cream blazer + tee',         icon: '🟡' },
+      { id: 'w-turtleneck-blazer',   label: 'Turtleneck + Blazer', description: 'Black turtleneck + gray',  icon: '🖤' },
+      { id: 'w-silk-blouse-modern',  label: 'Silk Blouse',       description: 'Navy silk, modern office',   icon: '💙' },
+      { id: 'w-cardigan-soft',       label: 'Cardigan Soft',     description: 'Beige cardigan, warm',       icon: '🧶' },
+      { id: 'w-knit-twinset',        label: 'Knit Twinset',      description: 'Matching knit, neutral',     icon: '🌾' },
+      { id: 'w-startup-casual',      label: 'Startup Casual',    description: 'Light blue shirt, modern',   icon: '🚀' },
     ],
   },
   {
-    id: 'women-casual',
-    name: 'Women — Casual',
+    id: 'w-creative',
+    name: 'Creative / Bold',
+    icon: '🌈',
+    gender: 'female',
+    styles: [
+      { id: 'w-red-power-suit',      label: 'Red Power Suit',    description: 'Red blazer, statement',      icon: '🔴' },
+      { id: 'w-emerald-blazer',      label: 'Emerald Blazer',    description: 'Green blazer, bold',         icon: '💚' },
+      { id: 'w-mustard-creative',    label: 'Mustard Creative',  description: 'Mustard silk, artistic',     icon: '🟡' },
+      { id: 'w-statement-coral',     label: 'Statement Coral',   description: 'Coral blazer, vibrant',      icon: '🪸' },
+      { id: 'w-jewel-purple',        label: 'Jewel Purple',      description: 'Deep purple, expressive',    icon: '🟣' },
+    ],
+  },
+  {
+    id: 'w-casual',
+    name: 'Casual / Approachable',
     icon: '👕',
     gender: 'female',
     styles: [
-      { id: 'w-white-tee-casual', label: 'White Tee Casual', description: 'White tee, jeans, studio', icon: '🤍' },
-      { id: 'w-red-tee', label: 'Red Tee', description: 'Red t-shirt, beige pants', icon: '🔴' },
-      { id: 'w-pink-tee-street', label: 'Pink Tee Street', description: 'Pink tee, city street', icon: '🌸' },
-      { id: 'w-purple-tee', label: 'Purple Tee', description: 'Purple tee, pink bg', icon: '🟣' },
-      { id: 'w-orange-polo', label: 'Orange Polo', description: 'Orange polo, outdoor', icon: '🟠' },
-      { id: 'w-yellow-shirt', label: 'Yellow Shirt', description: 'Yellow blouse, casual', icon: '🟡' },
-      { id: 'w-cream-tee-sitting', label: 'Cream Tee Sitting', description: 'Cream tee, sitting, studio', icon: '🪑' },
-      { id: 'w-brown-longsleeve', label: 'Brown Longsleeve', description: 'Brown longsleeve, arms crossed', icon: '🤎' },
+      { id: 'w-white-tee-natural',   label: 'White Tee Nature',  description: 'White tee, green outdoor',   icon: '🌿' },
+      { id: 'w-cream-sweater-window', label: 'Cream Sweater',    description: 'Soft knit, window light',    icon: '🤍' },
+      { id: 'w-denim-shirt-fresh',   label: 'Denim Shirt',       description: 'Chambray, fresh white bg',   icon: '👖' },
+      { id: 'w-coffee-shop-warm',    label: 'Coffee Shop Warm',  description: 'Casual sweater, café',       icon: '☕' },
+      { id: 'w-park-outdoor',        label: 'Park Outdoor',      description: 'Light blouse, park bg',      icon: '🌳' },
     ],
   },
   {
-    id: 'women-outdoor',
-    name: 'Women — Outdoor / Natural',
+    id: 'w-outdoor',
+    name: 'Outdoor / Lifestyle',
     icon: '🌿',
     gender: 'female',
     styles: [
-      { id: 'w-outdoor-blazer-nature', label: 'Blazer Nature', description: 'Beige blazer, outdoor nature', icon: '🌲' },
-      { id: 'w-outdoor-city-walk', label: 'City Walk', description: 'Casual outfit, city street', icon: '🚶‍♀️' },
-      { id: 'w-outdoor-cafe', label: 'Café Outdoor', description: 'Smart casual, café terras', icon: '☕' },
-      { id: 'w-golden-hour', label: 'Golden Hour', description: 'Warm tones, sunset light', icon: '🌅' },
-      { id: 'w-park-portrait', label: 'Park Portrait', description: 'Natural light, green park', icon: '🌳' },
-      { id: 'w-rooftop-city', label: 'Rooftop City', description: 'City panorama, evening', icon: '🏙️' },
-      { id: 'w-desert-boho', label: 'Desert Boho', description: 'Rust dress, desert bg', icon: '🏜️' },
+      { id: 'w-rooftop-golden',      label: 'Rooftop Golden',    description: 'City panorama, golden hour', icon: '🌅' },
+      { id: 'w-architectural',       label: 'Architectural',     description: 'Modern architecture bg',     icon: '🏛️' },
+      { id: 'w-city-walk',           label: 'City Walk',         description: 'Walking, urban street',      icon: '🚶‍♀️' },
+      { id: 'w-beach-professional',  label: 'Beach Professional', description: 'Linen blouse, coastal',     icon: '🏖️' },
     ],
   },
   {
-    id: 'women-dresses',
-    name: 'Women — Jurken',
-    icon: '👗',
+    id: 'w-restaurant',
+    name: 'Restaurant / Date Night',
+    icon: '🍷',
     gender: 'female',
     styles: [
-      { id: 'w-black-dress-casual', label: 'Black Dress Casual', description: 'Zwarte jurk, studio', icon: '🖤' },
-      { id: 'w-black-maxi-dress', label: 'Black Maxi Dress', description: 'Lange zwarte jurk, elegant', icon: '🖤' },
-      { id: 'w-black-slip-dress', label: 'Black Slip Dress', description: 'Zwarte slip jurk, minimal', icon: '✨' },
-      { id: 'sheath-dress-navy', label: 'Navy Sheath Dress', description: 'Navy jurk, kantoor', icon: '🔵' },
-      { id: 'sheath-dress-burgundy', label: 'Burgundy Dress', description: 'Bordeaux jurk, elegant', icon: '🍷' },
-      { id: 'wrap-dress-emerald', label: 'Emerald Wrap Dress', description: 'Groene wikkel jurk', icon: '💚' },
-      { id: 'w-brown-skirt-top', label: 'Brown Skirt + Top', description: 'Bruine rok met top', icon: '🤎' },
-      { id: 'sheath-dress-with-blazer', label: 'Jurk + Blazer', description: 'Navy jurk met blazer', icon: '👔' },
+      { id: 'w-restaurant-elegant',  label: 'Restaurant Elegant', description: 'Silk blouse, candlelit',    icon: '🕯️' },
+      { id: 'w-wine-bar-casual',     label: 'Wine Bar Casual',   description: 'At wine bar, warm light',    icon: '🍷' },
+      { id: 'w-cocktail-glamour',    label: 'Cocktail Glamour',  description: 'Cocktail dress, evening',    icon: '✨' },
+      { id: 'w-cafe-date',           label: 'Café Date',         description: 'Charming cafe interior',     icon: '☕' },
+      { id: 'w-rooftop-bar',         label: 'Rooftop Bar',       description: 'Rooftop bar, city lights',   icon: '🌃' },
+      { id: 'w-restaurant-evening',  label: 'Restaurant Evening', description: 'Intimate, candlelight',     icon: '🌙' },
+      { id: 'w-bistro-warm',         label: 'Bistro Warm',       description: 'Smart casual, bistro',       icon: '🥂' },
     ],
   },
   {
-    id: 'women-soft',
-    name: 'Women — Soft & Warm',
-    icon: '🧶',
+    id: 'w-evening',
+    name: 'Evening / Statement',
+    icon: '✨',
     gender: 'female',
     styles: [
-      { id: 'cardigan-professional', label: 'Cardigan Professional', description: 'Crème cardigan, warm', icon: '🤍' },
-      { id: 'soft-knit-sage', label: 'Soft Knit Sage', description: 'Saliegroen trui, rustig', icon: '🌿' },
-      { id: 'fine-knit-camel', label: 'Fine Knit Camel', description: 'Kameel coltrui, elegant', icon: '🤎' },
-      { id: 'w-white-blouse-arms', label: 'White Blouse', description: 'Wit blouse, armen gekruist', icon: '🤍' },
-      { id: 'silk-blouse-jewel', label: 'Silk Blouse Jewel', description: 'Zijden blouse, juweel kleur', icon: '💎' },
-      { id: 'vneck-blouse-professional', label: 'V-Neck Blouse Teal', description: 'Teal v-hals blouse', icon: '💠' },
-      { id: 'soft-blouse-outdoor', label: 'Soft Blouse Outdoor', description: 'Roze blouse, outdoor', icon: '🌸' },
+      { id: 'w-leather-jacket-edge', label: 'Leather Jacket',    description: 'Black leather, edgy',        icon: '🧥' },
+      { id: 'w-evening-rooftop',     label: 'Evening Rooftop',   description: 'Black evening top, lights',  icon: '🌃' },
+      { id: 'w-night-city-glamour',  label: 'Night City Glamour', description: 'City nightlife, glamorous', icon: '💫' },
     ],
   },
 ]
@@ -357,6 +228,9 @@ export default function CreateStylesPage() {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
   const [expandedCategory, setExpandedCategory] = useState<string>('')
   const [gender, setGender] = useState<'male' | 'female'>('male')
+
+  // Refs voor auto-scroll naar geopende categorie
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
     async function fetchUser() {
@@ -370,10 +244,9 @@ export default function CreateStylesPage() {
           .single()
         if (userData) {
           setUserCredits(userData.credits || 0)
-          // Stel gender in op basis van gebruikersprofiel
           if (userData.gender === 'female') {
             setGender('female')
-            setExpandedCategory('women-corporate')
+            setExpandedCategory('w-formal')
           } else {
             setGender('male')
             setExpandedCategory('formal')
@@ -390,6 +263,32 @@ export default function CreateStylesPage() {
 
   // Filter categorieën op gender
   const filteredCategories = STYLE_CATEGORIES.filter(c => c.gender === gender)
+
+  // ===========================================
+  // CATEGORIE TOGGLE MET AUTO-SCROLL
+  // Bij openen: scroll de header netjes in beeld onder de fixed nav
+  // ===========================================
+  const toggleCategory = (categoryId: string) => {
+    if (expandedCategory === categoryId) {
+      // Sluit
+      setExpandedCategory('')
+      return
+    }
+
+    // Open + auto-scroll
+    setExpandedCategory(categoryId)
+
+    // Wacht een tikje tot de DOM is geüpdate, scroll dan smooth
+    setTimeout(() => {
+      const el = categoryRefs.current[categoryId]
+      if (el) {
+        const headerOffset = 160 // hoogte CreateProgressBar (fixed top)
+        const elementPosition = el.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+      }
+    }, 50)
+  }
 
   const toggleStyle = (styleId: string) => {
     setSelectedStyles(prev =>
@@ -413,8 +312,8 @@ export default function CreateStylesPage() {
 
   const handleGenderSwitch = (newGender: 'male' | 'female') => {
     setGender(newGender)
-    setSelectedStyles([]) // Reset selectie bij gender switch
-    setExpandedCategory(newGender === 'female' ? 'women-corporate' : 'formal')
+    setSelectedStyles([])
+    setExpandedCategory(newGender === 'female' ? 'w-formal' : 'formal')
   }
 
   const handleContinue = () => {
@@ -477,9 +376,13 @@ export default function CreateStylesPage() {
             const allSelected = selectedCount === category.styles.length
 
             return (
-              <div key={category.id} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+              <div
+                key={category.id}
+                ref={el => { categoryRefs.current[category.id] = el }}
+                className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden scroll-mt-[160px]"
+              >
                 <button
-                  onClick={() => setExpandedCategory(isExpanded ? '' : category.id)}
+                  onClick={() => toggleCategory(category.id)}
                   className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition"
                 >
                   <div className="flex items-center gap-3">
