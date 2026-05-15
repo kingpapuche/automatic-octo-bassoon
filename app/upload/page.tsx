@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useDropzone } from 'react-dropzone'
 import { supabase } from '@/lib/supabase'
+import imageCompression from 'browser-image-compression'
 
 const ETHNICITY_OPTIONS = [
   { value: 'caucasian',  label: 'Caucasian' },
@@ -62,6 +63,16 @@ interface UserCharacteristics {
   use_cases:   string[]
 }
 
+// Vercel limit = 4.5MB. Comprimeer naar max 3.5MB voor buffer.
+const COMPRESSION_THRESHOLD_MB = 3.5
+const COMPRESSION_OPTIONS = {
+  maxSizeMB: 3.5,
+  maxWidthOrHeight: 2048,
+  useWebWorker: true,
+  fileType: 'image/jpeg' as const,
+  initialQuality: 0.85,
+}
+
 export default function UploadPage() {
   const router = useRouter()
   const [user, setUser] = useState<{ id: string; email: string; credits: number } | null>(null)
@@ -73,6 +84,7 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [step, setStep]           = useState(1)
   const [allowPhotoUsage, setAllowPhotoUsage] = useState(true)
+  const [compressing, setCompressing] = useState(false)
 
   const [characteristics, setCharacteristics] = useState<UserCharacteristics>({
     full_name: '', gender: '', ethnicity: '', eye_color: '',
@@ -158,26 +170,79 @@ export default function UploadPage() {
     }
   }
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  // PHOTO DROP MET AUTOMATISCHE COMPRESSIE
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setError('')
-    if (photos.length + acceptedFiles.length > 20) { setError('Maximum 15 photos allowed'); return }
-    const validFiles = acceptedFiles.filter(f => f.type.startsWith('image/') && f.size < 10 * 1024 * 1024)
-    if (validFiles.length !== acceptedFiles.length)
-      setError('Some files were rejected. Only images under 10MB are allowed.')
-    const existing = new Set(photos.map(p => `${p.name}-${p.size}`))
-    const newFiles: File[] = []
-    validFiles.forEach(file => {
-      const key = `${file.name}-${file.size}`
-      if (!existing.has(key)) { newFiles.push(file); existing.add(key) }
-    })
-    if (newFiles.length > 0) setPhotos(prev => [...prev, ...newFiles])
+    if (photos.length + acceptedFiles.length > 20) {
+      setError('Maximum 15 photos allowed')
+      return
+    }
+
+    setCompressing(true)
+
+    try {
+      const processedFiles: File[] = []
+      let compressedCount = 0
+
+      for (const file of acceptedFiles) {
+        if (!file.type.startsWith('image/')) continue
+
+        if (file.size > 15 * 1024 * 1024) {
+          setError(`${file.name} is too large (>15MB). Please use a smaller photo.`)
+          continue
+        }
+
+        const fileSizeMB = file.size / (1024 * 1024)
+        if (fileSizeMB > COMPRESSION_THRESHOLD_MB) {
+          try {
+            setStatus(`Compressing ${file.name}...`)
+            const compressed = await imageCompression(file, COMPRESSION_OPTIONS)
+            // Behoud originele naam
+            const renamedFile = new File([compressed], file.name, { type: 'image/jpeg' })
+            processedFiles.push(renamedFile)
+            compressedCount++
+            console.log(`✅ Compressed ${file.name}: ${fileSizeMB.toFixed(2)}MB → ${(compressed.size / 1024 / 1024).toFixed(2)}MB`)
+          } catch (compErr) {
+            console.error(`Compression failed for ${file.name}:`, compErr)
+            setError(`Could not process ${file.name}. Try a different photo.`)
+            continue
+          }
+        } else {
+          processedFiles.push(file)
+        }
+      }
+
+      const existing = new Set(photos.map(p => `${p.name}-${p.size}`))
+      const newFiles: File[] = []
+      processedFiles.forEach(file => {
+        const key = `${file.name}-${file.size}`
+        if (!existing.has(key)) {
+          newFiles.push(file)
+          existing.add(key)
+        }
+      })
+
+      if (newFiles.length > 0) {
+        setPhotos(prev => [...prev, ...newFiles])
+      }
+
+      if (compressedCount > 0) {
+        setStatus(`✓ ${compressedCount} photo${compressedCount !== 1 ? 's' : ''} optimized for upload`)
+        setTimeout(() => setStatus(''), 3000)
+      } else {
+        setStatus('')
+      }
+    } finally {
+      setCompressing(false)
+    }
   }, [photos])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept:   { 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] },
-    maxSize:  10 * 1024 * 1024,
+    maxSize:  15 * 1024 * 1024,
     multiple: true,
+    disabled: compressing,
   })
 
   const removePhoto = (index: number) => setPhotos(prev => prev.filter((_, i) => i !== index))
@@ -275,7 +340,6 @@ export default function UploadPage() {
 
       <div className="pt-[100px] pb-[60px] max-w-[700px] mx-auto px-6">
 
-        {/* Stappen indicator */}
         <div className="flex items-center justify-center gap-3 mb-8">
           {[1, 2].map(s => (
             <div key={s} className="flex items-center gap-3">
@@ -294,7 +358,7 @@ export default function UploadPage() {
           ))}
         </div>
 
-        {/* ── STAP 1 ── */}
+        {/* STEP 1 - SAME AS BEFORE */}
         {step === 1 && (
           <>
             <div className="text-center mb-8">
@@ -440,7 +504,7 @@ export default function UploadPage() {
           </>
         )}
 
-        {/* ── STAP 2 ── */}
+        {/* STEP 2 - UPDATED WITH COMPRESSION */}
         {step === 2 && (
           <>
             <div className="text-center mb-8">
@@ -476,7 +540,7 @@ export default function UploadPage() {
                   <>Mix <span className="text-white font-semibold">smiling</span> and <span className="text-white font-semibold">neutral</span></>,
                   <>Good <span className="text-white font-semibold">natural lighting</span></>,
                   <>Different <span className="text-white font-semibold">angles</span> and settings</>,
-                  <>No heavy filters or edits</>,
+                  <>Photos auto-optimized — any size works</>,
                 ].map((tip, i) => (
                   <div key={i} className="flex items-start gap-2 text-gray-400 text-sm">
                     <span className="text-violet-400 shrink-0 mt-0.5">•</span>
@@ -504,19 +568,25 @@ export default function UploadPage() {
               <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
-                  isDragActive ? 'border-violet-500 bg-violet-500/10' : 'border-white/10 hover:border-violet-500/50 hover:bg-white/[0.03]'
+                  compressing
+                    ? 'border-violet-500/50 bg-violet-500/5 cursor-wait'
+                    : isDragActive
+                    ? 'border-violet-500 bg-violet-500/10'
+                    : 'border-white/10 hover:border-violet-500/50 hover:bg-white/[0.03]'
                 }`}>
                 <input {...getInputProps()} />
                 <div className="w-14 h-14 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">📸</span>
+                  <span className="text-2xl">{compressing ? '⏳' : '📸'}</span>
                 </div>
-                {isDragActive ? (
+                {compressing ? (
+                  <p className="text-violet-400 font-semibold text-lg">Optimizing photos...</p>
+                ) : isDragActive ? (
                   <p className="text-violet-400 font-semibold text-lg">Drop your photos here...</p>
                 ) : (
                   <>
                     <p className="text-white font-semibold text-lg mb-1">Drag & drop photos here</p>
                     <p className="text-gray-500 text-sm mb-2">or click to browse</p>
-                    <p className="text-gray-600 text-xs">JPG, PNG, WEBP • Max 10MB each</p>
+                    <p className="text-gray-600 text-xs">JPG, PNG, WEBP • Auto-optimized for upload</p>
                   </>
                 )}
               </div>
@@ -541,11 +611,17 @@ export default function UploadPage() {
               )}
             </div>
 
-            {photoCount > 0 && photoCount < 10 && (
+            {photoCount > 0 && photoCount < 8 && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
                 <p className="text-amber-400 text-sm font-medium">
                   Upload {8 - photoCount} more photo{8 - photoCount !== 1 ? 's' : ''} to continue (minimum 8)
                 </p>
+              </div>
+            )}
+
+            {status && !uploading && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 mb-6">
+                <p className="text-emerald-400 text-sm font-medium">{status}</p>
               </div>
             )}
 
@@ -578,9 +654,9 @@ export default function UploadPage() {
 
             <button
               onClick={handleSubmit}
-              disabled={uploading || training || !isReady}
+              disabled={uploading || training || !isReady || compressing}
               className={`w-full py-4 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
-                isReady && !uploading && !training
+                isReady && !uploading && !training && !compressing
                   ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xl shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5'
                   : 'bg-white/10 text-gray-500 cursor-not-allowed'
               }`}>
@@ -588,15 +664,17 @@ export default function UploadPage() {
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>{status}</>
               ) : training ? (
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Starting AI training...</>
+              ) : compressing ? (
+                'Optimizing photos...'
               ) : photoCount < 8 ? (
                 `Upload ${8 - photoCount} more photo${8 - photoCount !== 1 ? 's' : ''} to continue`
               ) : (
-                <><span className="text-xl">🚀</span> Start AI Training ({photoCount}/15 photos — more is better!)</>
+                <><span className="text-xl">🚀</span> Start AI Training ({photoCount}/15 photos)</>
               )}
             </button>
 
             <p className="text-center mt-4 text-gray-600 text-sm">
-              Training takes about 15–20 minutes. You'll be notified when it's ready.
+              Training takes about 25–35 minutes. You'll be notified when it's ready.
             </p>
           </>
         )}

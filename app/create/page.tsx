@@ -45,7 +45,7 @@ const HAIR_COLOR_OPTIONS = [
 
 export default function CreateOrderDetailsPage() {
   const router = useRouter()
-  
+
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string>('')
   const [userCredits, setUserCredits] = useState(0)
@@ -73,6 +73,22 @@ export default function CreateOrderDetailsPage() {
           .single()
 
         if (userData) {
+          // ===========================================
+          // SMART SKIP — als karakteristieken al ingevuld
+          // tijdens /upload (stap 1), direct door naar styles
+          // ===========================================
+          const allFilled =
+            userData.gender &&
+            userData.ethnicity &&
+            userData.eye_color &&
+            (userData.is_bald || userData.hair_color)
+
+          if (allFilled) {
+            router.replace('/create/styles')
+            return
+          }
+
+          // Fallback: toon UI als sommige velden nog ontbreken
           setUserId(userData.id)
           setUserCredits(userData.credits || 0)
           if (userData.gender) setGender(userData.gender)
