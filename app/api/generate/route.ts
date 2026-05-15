@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import Replicate from 'replicate'
 import { getStyleById } from '@/lib/styles/STYLE_LIBRARY'
 
-// Vercel timeout verhogen (Pro plan ondersteunt tot 300s)
-export const maxDuration = 300
+// Vercel timeout verhogen tot 60s (max op Hobby plan)
+export const maxDuration = 60
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
