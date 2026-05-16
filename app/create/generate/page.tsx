@@ -123,11 +123,18 @@ export default function CreateGeneratePage() {
       }
 
       sessionStorage.removeItem('bestai_styleIds')
-      router.push(`/gallery?generated=${data.imagesGenerated}`)
+
+      // BACKGROUND PROCESSING: redirect naar progress page
+      // Op die page polleert frontend voor live updates van images
+      if (data.generationId) {
+        router.push(`/generations/${data.generationId}`)
+      } else {
+        // Fallback voor oude API responses
+        router.push('/gallery')
+      }
     } catch (error) {
       console.error('Generation error:', error)
       alert('Generation failed. Please try again.')
-    } finally {
       setGenerating(false)
     }
   }
@@ -191,7 +198,7 @@ export default function CreateGeneratePage() {
             <p className="text-gray-400 text-center mb-6">Before generating headshots, you need to train an AI model with your photos.</p>
             <div className="flex gap-3">
               <button onClick={() => setShowModelPopup(false)} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition">Cancel</button>
-              <button onClick={() => router.push('/upload')} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white transition shadow-lg">Upload Photos →</button>
+              <button onClick={() => router.push('/upload')} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-500 text-white transition shadow-lg">Upload Photos →</button>
             </div>
           </div>
         </div>
@@ -201,13 +208,11 @@ export default function CreateGeneratePage() {
 
       <div className="pt-[140px] pb-[100px] max-w-[700px] mx-auto px-6">
 
-        {/* HEADER */}
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Review & Generate</h1>
           <p className="text-gray-400 text-lg">Everything looks good? Let&apos;s create your headshots.</p>
         </div>
 
-        {/* SELECTED STYLES */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-semibold text-lg">Your Selected Styles</h3>
@@ -230,7 +235,6 @@ export default function CreateGeneratePage() {
           </div>
         </div>
 
-        {/* ASPECT RATIO SELECTOR */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
           <h3 className="text-white font-semibold text-lg mb-4">Photo Format</h3>
           <div className="flex gap-4 justify-center">
@@ -246,7 +250,6 @@ export default function CreateGeneratePage() {
                       : 'bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20'
                   }`}
                 >
-                  {/* Device shape with ratio text inside */}
                   <div className="flex items-center justify-center" style={{ height: 100 }}>
                     <div
                       className={`rounded-xl border-2 flex items-center justify-center transition-all ${
@@ -275,7 +278,6 @@ export default function CreateGeneratePage() {
           </div>
         </div>
 
-        {/* SETTINGS INFO */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
           <h3 className="text-white font-semibold text-lg mb-4">Generation Settings</h3>
           <div className="space-y-3">
@@ -285,7 +287,7 @@ export default function CreateGeneratePage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-gray-400">Quality</span>
-              <span className="text-white font-semibold">High (28 steps)</span>
+              <span className="text-white font-semibold">High (35 steps)</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-gray-400">Format</span>
@@ -294,7 +296,6 @@ export default function CreateGeneratePage() {
           </div>
         </div>
 
-        {/* COST SUMMARY */}
         <div className="bg-gradient-to-br from-violet-900/30 to-fuchsia-900/20 border border-violet-500/20 rounded-2xl p-6 mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-300">Styles</span>
@@ -319,7 +320,6 @@ export default function CreateGeneratePage() {
           </div>
         </div>
 
-        {/* NAVIGATION BUTTONS */}
         <div className="flex gap-4">
           <button
             onClick={() => router.push('/create/styles')}
@@ -342,7 +342,7 @@ export default function CreateGeneratePage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Generating your headshots...
+                Starting generation...
               </>
             ) : (
               <><span className="text-xl">✨</span> Generate {creditsNeeded} Headshots</>
