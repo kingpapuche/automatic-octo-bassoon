@@ -26,9 +26,7 @@ interface StyleCategory {
 // ===========================================
 const STYLE_CATEGORIES: StyleCategory[] = [
 
-  // ============================================================
-  // MANNEN-STIJLEN — 38 totaal in 7 categorieën
-  // ============================================================
+  // MANNEN-STIJLEN — 7 categorieën
   {
     id: 'formal',
     name: 'Formal / Corporate Power',
@@ -124,9 +122,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     ],
   },
 
-  // ============================================================
-  // VROUWEN-STIJLEN — 36 totaal in 7 categorieën (w- prefix)
-  // ============================================================
+  // VROUWEN-STIJLEN — 7 categorieën (w- prefix)
   {
     id: 'w-formal',
     name: 'Formal / Corporate Power',
@@ -229,7 +225,6 @@ export default function CreateStylesPage() {
   const [expandedCategory, setExpandedCategory] = useState<string>('')
   const [gender, setGender] = useState<'male' | 'female'>('male')
 
-  // Refs voor auto-scroll naar geopende categorie
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
@@ -244,6 +239,7 @@ export default function CreateStylesPage() {
           .single()
         if (userData) {
           setUserCredits(userData.credits || 0)
+          // Gender komt automatisch uit users tabel (ingevuld bij /upload stap 1)
           if (userData.gender === 'female') {
             setGender('female')
             setExpandedCategory('w-formal')
@@ -261,28 +257,18 @@ export default function CreateStylesPage() {
     fetchUser()
   }, [router])
 
-  // Filter categorieën op gender
   const filteredCategories = STYLE_CATEGORIES.filter(c => c.gender === gender)
 
-  // ===========================================
-  // CATEGORIE TOGGLE MET AUTO-SCROLL
-  // Bij openen: scroll de header netjes in beeld onder de fixed nav
-  // ===========================================
   const toggleCategory = (categoryId: string) => {
     if (expandedCategory === categoryId) {
-      // Sluit
       setExpandedCategory('')
       return
     }
-
-    // Open + auto-scroll
     setExpandedCategory(categoryId)
-
-    // Wacht een tikje tot de DOM is geüpdate, scroll dan smooth
     setTimeout(() => {
       const el = categoryRefs.current[categoryId]
       if (el) {
-        const headerOffset = 160 // hoogte CreateProgressBar (fixed top)
+        const headerOffset = 160
         const elementPosition = el.getBoundingClientRect().top
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset
         window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
@@ -308,12 +294,6 @@ export default function CreateStylesPage() {
     } else {
       setSelectedStyles(prev => [...new Set([...prev, ...ids])])
     }
-  }
-
-  const handleGenderSwitch = (newGender: 'male' | 'female') => {
-    setGender(newGender)
-    setSelectedStyles([])
-    setExpandedCategory(newGender === 'female' ? 'w-formal' : 'formal')
   }
 
   const handleContinue = () => {
@@ -343,31 +323,7 @@ export default function CreateStylesPage() {
           <p className="text-gray-600 text-sm mt-2">{totalStyles} styles available</p>
         </div>
 
-        {/* Gender filter */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-1.5 flex gap-2">
-            <button
-              onClick={() => handleGenderSwitch('male')}
-              className={`px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center gap-2 ${
-                gender === 'male'
-                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              👨 Man
-            </button>
-            <button
-              onClick={() => handleGenderSwitch('female')}
-              className={`px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center gap-2 ${
-                gender === 'female'
-                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              👩 Woman
-            </button>
-          </div>
-        </div>
+        {/* Gender switcher VERWIJDERD - gender wordt automatisch bepaald via userData.gender */}
 
         <div className="space-y-4">
           {filteredCategories.map((category) => {
