@@ -115,7 +115,7 @@ export default function HomePage() {
       <section className="py-16 px-8 bg-gradient-to-r from-[#5B4E9D] to-[#483A7C] text-white">
         <div className="max-w-[1320px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
           <div><h3 className="font-serif text-5xl mb-2">30 min</h3><p className="opacity-90">Average delivery time</p></div>
-          <div><h3 className="font-serif text-5xl mb-2">37+</h3><p className="opacity-90">Unique styles available</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">70+</h3><p className="opacity-90">Unique styles available</p></div>
           <div><h3 className="font-serif text-5xl mb-2">$29</h3><p className="opacity-90">Starting price</p></div>
           <div><h3 className="font-serif text-5xl mb-2">🛡️</h3><p className="opacity-90">Profile-Worthy Guarantee</p></div>
         </div>
@@ -131,7 +131,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { step: '01', icon: Upload, title: 'Upload Your Photos', desc: 'Upload 8–15 selfies from different angles and lighting conditions. No professional equipment needed.' },
-              { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 37+ hand-curated styles — corporate, casual, creative, outdoor, restaurant, and more. Each style generates 4 unique variations.' },
+              { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 70+ hand-curated styles — corporate, casual, creative, outdoor, restaurant, and more. Each style generates 4 unique variations.' },
               { step: '03', icon: Download, title: 'Receive Your Headshots', desc: 'Your AI-generated headshots are ready in under 30 minutes. Download and use them anywhere.' },
             ].map((item) => (
               <div key={item.step} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300 relative">
@@ -206,7 +206,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { icon: Zap, title: 'Results in 30 Minutes', desc: 'Upload your selfies and receive professional headshots in under 30 minutes. No waiting days for a photographer.' },
-              { icon: Palette, title: '37+ Curated Styles', desc: 'Corporate executive, smart casual, creative, outdoor, restaurant, and date night — hand-tuned for consistent quality. Each style produces 4 unique variations.' },
+              { icon: Palette, title: '70+ Curated Styles', desc: 'Corporate executive, smart casual, creative, outdoor, restaurant, and date night — hand-tuned for consistent quality. Each style produces 4 unique variations.' },
               { icon: Gem, title: 'Powered by FLUX AI', desc: 'We use the most advanced AI model available, specifically fine-tuned on your photos for maximum realism.' },
               { icon: Lock, title: 'Your Photos Stay Private', desc: 'Your photos are encrypted, never shared or sold, and automatically deleted after your order is complete.' },
               { icon: BadgeDollarSign, title: 'Save $200–$500', desc: 'A professional photographer charges $300–700 for one session. Get unlimited variations starting at just $29.' },
@@ -247,7 +247,7 @@ export default function HomePage() {
               <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>29</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['1 AI model training', '40 HD headshots', 'Choose 10 styles × 4 variations', 'All 37+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['1 AI model training', '40 HD headshots', 'Choose 10 styles × 4 variations', 'All 70+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-[#6B6B6B] text-sm">{f}</span>
@@ -271,7 +271,7 @@ export default function HomePage() {
               <div className="font-serif text-5xl mb-1"><span className="text-2xl font-sans">$</span>39</div>
               <p className="text-white/60 mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['1 AI model training', '80 HD headshots', 'Choose 20 styles × 4 variations', 'All 37+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['1 AI model training', '80 HD headshots', 'Choose 20 styles × 4 variations', 'All 70+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#D4AF37] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-white/90 text-sm">{f}</span>
@@ -294,7 +294,7 @@ export default function HomePage() {
               <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>49</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['2 AI model trainings', '120 HD headshots', 'Choose 30 styles × 4 variations', 'All 37+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['2 AI model trainings', '120 HD headshots', 'Choose 30 styles × 4 variations', 'All 70+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-[#6B6B6B] text-sm">{f}</span>
