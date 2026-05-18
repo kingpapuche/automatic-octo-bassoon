@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
 
+const VARIATIONS_PER_STYLE = 4
+
 interface StyleOption {
   id: string
   label: string
@@ -20,13 +22,9 @@ interface StyleCategory {
   styles: StyleOption[]
 }
 
-// ===========================================
-// 74 STIJLEN — 100% synced met app/api/generate/route.ts
-// MANNEN: 38 stijlen | VROUWEN: 36 stijlen (w- prefix)
-// ===========================================
 const STYLE_CATEGORIES: StyleCategory[] = [
 
-  // MANNEN-STIJLEN — 7 categorieën
+  // MANNEN-STIJLEN
   {
     id: 'formal',
     name: 'Formal / Corporate Power',
@@ -122,7 +120,7 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     ],
   },
 
-  // VROUWEN-STIJLEN — 7 categorieën (w- prefix)
+  // VROUWEN-STIJLEN
   {
     id: 'w-formal',
     name: 'Formal / Corporate Power',
@@ -227,6 +225,11 @@ export default function CreateStylesPage() {
 
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
+  // OPTIE C: max stijlen = beschikbare credits / 4
+  const maxStyles = Math.floor(userCredits / VARIATIONS_PER_STYLE)
+  const totalHeadshots = selectedStyles.length * VARIATIONS_PER_STYLE
+  const isOverLimit = selectedStyles.length > maxStyles
+
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -239,7 +242,6 @@ export default function CreateStylesPage() {
           .single()
         if (userData) {
           setUserCredits(userData.credits || 0)
-          // Gender komt automatisch uit users tabel (ingevuld bij /upload stap 1)
           if (userData.gender === 'female') {
             setGender('female')
             setExpandedCategory('w-formal')
@@ -277,11 +279,17 @@ export default function CreateStylesPage() {
   }
 
   const toggleStyle = (styleId: string) => {
-    setSelectedStyles(prev =>
-      prev.includes(styleId)
-        ? prev.filter(id => id !== styleId)
-        : [...prev, styleId]
-    )
+    setSelectedStyles(prev => {
+      if (prev.includes(styleId)) {
+        // Deselecteren is altijd OK
+        return prev.filter(id => id !== styleId)
+      }
+      // Selecteren: alleen toestaan als nog binnen limit
+      if (prev.length >= maxStyles) {
+        return prev // blokkeer, geef geen update
+      }
+      return [...prev, styleId]
+    })
   }
 
   const selectAllInCategory = (categoryId: string) => {
@@ -292,12 +300,16 @@ export default function CreateStylesPage() {
     if (allSelected) {
       setSelectedStyles(prev => prev.filter(id => !ids.includes(id)))
     } else {
-      setSelectedStyles(prev => [...new Set([...prev, ...ids])])
+      // Voeg toe maar respecteer maxStyles limit
+      setSelectedStyles(prev => {
+        const merged = [...new Set([...prev, ...ids])]
+        return merged.slice(0, maxStyles)
+      })
     }
   }
 
   const handleContinue = () => {
-    if (selectedStyles.length === 0) return
+    if (selectedStyles.length === 0 || isOverLimit) return
     sessionStorage.setItem('bestai_styleIds', JSON.stringify(selectedStyles))
     router.push('/create/generate')
   }
@@ -319,11 +331,25 @@ export default function CreateStylesPage() {
       <div className="pt-[140px] pb-[160px] max-w-[900px] mx-auto px-6">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Choose Your Styles</h1>
-          <p className="text-gray-400 text-lg">Select the looks you want. Each style = 1 headshot = 1 credit.</p>
-          <p className="text-gray-600 text-sm mt-2">{totalStyles} styles available</p>
+          <p className="text-gray-400 text-lg">
+            Each style generates <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique variations</span>.
+          </p>
+          <p className="text-gray-600 text-sm mt-2">
+            {totalStyles} styles available • Pick up to <span className="text-violet-400 font-semibold">{maxStyles} styles</span> = {maxStyles * VARIATIONS_PER_STYLE} headshots
+          </p>
         </div>
 
-        {/* Gender switcher VERWIJDERD - gender wordt automatisch bepaald via userData.gender */}
+        {maxStyles === 0 && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 mb-6 text-center">
+            <p className="text-amber-300 font-semibold mb-2">⚠️ You need credits to generate headshots</p>
+            <button
+              onClick={() => router.push('/buy-credits')}
+              className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-2 rounded-lg transition"
+            >
+              Buy Credits →
+            </button>
+          </div>
+        )}
 
         <div className="space-y-4">
           {filteredCategories.map((category) => {
@@ -374,13 +400,18 @@ export default function CreateStylesPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                       {category.styles.map((style) => {
                         const isSelected = selectedStyles.includes(style.id)
+                        const isLimitReached = !isSelected && selectedStyles.length >= maxStyles
+
                         return (
                           <button
                             key={style.id}
                             onClick={() => toggleStyle(style.id)}
+                            disabled={isLimitReached}
                             className={`relative flex flex-col items-center text-center py-4 px-3 rounded-xl transition-all duration-200 ${
                               isSelected
                                 ? 'bg-violet-600/20 border-2 border-violet-500 shadow-lg shadow-violet-500/10'
+                                : isLimitReached
+                                ? 'bg-white/[0.02] border border-white/5 opacity-40 cursor-not-allowed'
                                 : 'bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20'
                             }`}
                           >
@@ -408,12 +439,17 @@ export default function CreateStylesPage() {
 
       {/* STICKY BOTTOM BAR */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#0a0f1a]/95 backdrop-blur-xl border-t border-white/10 z-50">
-        <div className="max-w-[900px] mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <span className="text-white font-bold text-lg">{selectedStyles.length}</span>
-            <span className="text-gray-400 ml-2">styles selected</span>
-            <span className="text-gray-600 mx-2">•</span>
-            <span className="text-violet-400 font-semibold">{selectedStyles.length} credits</span>
+        <div className="max-w-[900px] mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
+            <div>
+              <span className="text-white font-bold text-lg">{selectedStyles.length}</span>
+              <span className="text-gray-400 ml-2">/ {maxStyles} styles</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-violet-400 font-semibold">{totalHeadshots} headshots</span>
+              <span className="text-gray-600 mx-2">•</span>
+              <span className="text-gray-400">{totalHeadshots} credits</span>
+            </div>
           </div>
           <div className="flex gap-3">
             <button
@@ -424,9 +460,9 @@ export default function CreateStylesPage() {
             </button>
             <button
               onClick={handleContinue}
-              disabled={selectedStyles.length === 0}
+              disabled={selectedStyles.length === 0 || isOverLimit}
               className={`py-3 px-8 rounded-xl font-bold transition-all duration-300 ${
-                selectedStyles.length > 0
+                selectedStyles.length > 0 && !isOverLimit
                   ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xl shadow-violet-500/25'
                   : 'bg-white/10 text-gray-500 cursor-not-allowed'
               }`}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-export const maxDuration = 30
+export const maxDuration = 60
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,16 +9,12 @@ const supabase = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
+const VARIATIONS_PER_STYLE = 4
+
 // ===========================================
-// GENERATION WEBHOOK
-// Replicate roept dit aan per voltooide prediction.
-// URL: /api/generation-webhook?generationId=X&styleId=Y&userId=Z
-//
-// Flow:
-// 1. Download de gegenereerde image van Replicate
-// 2. Upload naar Supabase Storage
-// 3. Voeg URL toe aan generation.result_urls array
-// 4. Check of generation compleet is, update status indien zo
+// GENERATION WEBHOOK — Option C
+// 1 prediction = 4 outputs (1 stijl = 4 variaties)
+// Upload alle 4 en voeg toe aan result_urls
 // ===========================================
 
 interface ReplicateWebhookPayload {
@@ -42,7 +38,6 @@ export async function POST(request: NextRequest) {
     const payload = (await request.json()) as ReplicateWebhookPayload
     console.log(`Webhook: ${payload.id} status=${payload.status} style=${styleId}`)
 
-    // Haal current generation op
     const { data: generation, error: genError } = await supabase
       .from('generations')
       .select('*')
@@ -56,60 +51,68 @@ export async function POST(request: NextRequest) {
 
     // === SUCCEEDED ===
     if (payload.status === 'succeeded' && payload.output) {
-      const imageUrl = Array.isArray(payload.output) ? payload.output[0] : payload.output
+      // Output = array van 4 URLs (one per variation)
+      const imageUrls = Array.isArray(payload.output) ? payload.output : [payload.output]
+      console.log(`Got ${imageUrls.length} variations for ${styleId}`)
 
-      try {
-        // Download image van Replicate
-        const response = await fetch(imageUrl)
-        const arrayBuffer = await response.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
+      const uploadedUrls: string[] = []
 
-        // Upload naar Supabase Storage
-        const filename = `generated/${userId}/${Date.now()}-${styleId}.webp`
-        const { error: uploadError } = await supabase.storage
-          .from('headshots')
-          .upload(filename, buffer, {
-            contentType: 'image/webp',
-            cacheControl: '31536000',
-            upsert: true,
-          })
+      // Upload alle variaties naar Supabase Storage parallel
+      const uploadPromises = imageUrls.map(async (imageUrl, idx) => {
+        try {
+          const response = await fetch(imageUrl)
+          const arrayBuffer = await response.arrayBuffer()
+          const buffer = Buffer.from(arrayBuffer)
 
-        let publicUrl = imageUrl
-        if (!uploadError) {
-          const { data: publicUrlData } = supabase.storage.from('headshots').getPublicUrl(filename)
-          publicUrl = publicUrlData.publicUrl
-          console.log(`✅ Saved ${styleId} to storage`)
-        } else {
-          console.error('Upload error:', uploadError)
+          const filename = `generated/${userId}/${Date.now()}-${styleId}-v${idx + 1}.webp`
+          const { error: uploadError } = await supabase.storage
+            .from('headshots')
+            .upload(filename, buffer, {
+              contentType: 'image/webp',
+              cacheControl: '31536000',
+              upsert: true,
+            })
+
+          if (!uploadError) {
+            const { data: publicUrlData } = supabase.storage.from('headshots').getPublicUrl(filename)
+            return publicUrlData.publicUrl
+          } else {
+            console.error(`Upload error v${idx + 1}:`, uploadError)
+            return imageUrl // fallback naar Replicate URL
+          }
+        } catch (err) {
+          console.error(`Download error v${idx + 1}:`, err)
+          return imageUrl
         }
+      })
 
-        // Voeg URL toe aan result_urls array
-        const newUrls = [...(generation.result_urls || []), publicUrl]
-        const totalStyles = generation.styles_used?.length || 0
-        const isComplete = newUrls.length >= totalStyles
+      const results = await Promise.all(uploadPromises)
+      uploadedUrls.push(...results)
 
-        await supabase
-          .from('generations')
-          .update({
-            result_urls: newUrls,
-            credits_used: newUrls.length,
-            status: isComplete ? 'completed' : 'processing',
-          })
-          .eq('id', generationId)
+      // Voeg alle 4 URLs toe aan result_urls
+      const newUrls = [...(generation.result_urls || []), ...uploadedUrls]
+      const totalExpected = (generation.styles_used?.length || 0) * VARIATIONS_PER_STYLE
+      const isComplete = newUrls.length >= totalExpected
 
-        console.log(`📊 Generation ${generationId}: ${newUrls.length}/${totalStyles} complete`)
+      await supabase
+        .from('generations')
+        .update({
+          result_urls: newUrls,
+          credits_used: newUrls.length,
+          status: isComplete ? 'completed' : 'processing',
+        })
+        .eq('id', generationId)
 
-        // Log credit transactie alleen als alles klaar is
-        if (isComplete) {
-          await supabase.from('credits_transactions').insert({
-            user_id: userId,
-            amount: -newUrls.length,
-            type: 'generation',
-            description: `Generated ${newUrls.length} headshots`,
-          })
-        }
-      } catch (downloadError) {
-        console.error('Download/upload error:', downloadError)
+      console.log(`📊 ${generationId}: ${newUrls.length}/${totalExpected} complete`)
+
+      // Log credit transactie alleen als alles klaar is
+      if (isComplete) {
+        await supabase.from('credits_transactions').insert({
+          user_id: userId,
+          amount: -newUrls.length,
+          type: 'generation',
+          description: `Generated ${newUrls.length} headshots (${generation.styles_used?.length} styles × ${VARIATIONS_PER_STYLE})`,
+        })
       }
 
       return NextResponse.json({ received: true })
@@ -119,28 +122,22 @@ export async function POST(request: NextRequest) {
     if (payload.status === 'failed' || payload.status === 'canceled') {
       console.error(`Prediction ${payload.status}: ${styleId}`, payload.error)
 
-      // Geef credit terug aan user
+      // Geef de 4 credits voor deze stijl terug
       const { data: userData } = await supabase
         .from('users').select('credits').eq('id', userId).single()
 
       if (userData) {
         await supabase
           .from('users')
-          .update({ credits: (userData.credits || 0) + 1 })
+          .update({ credits: (userData.credits || 0) + VARIATIONS_PER_STYLE })
           .eq('id', userId)
       }
 
-      // Markeer dit als 'partial completion' — update completed count maar geen URL toevoegen
-      const expectedTotal = generation.styles_used?.length || 0
+      const totalExpected = (generation.styles_used?.length || 0) * VARIATIONS_PER_STYLE
       const currentCompleted = (generation.result_urls?.length || 0)
 
-      // Check of dit de laatste prediction was (alleen op processing/completed status updaten)
-      // We doen niets actiefs — alle URL's die er zijn blijven, generation blijft processing
-      // tot alles binnen is. Frontend ziet zelf wat success vs failure was.
-
-      // Als alleen failures over zijn → mark completed
-      if (currentCompleted >= expectedTotal - 1) {
-        // Dit is de laatste, en wel een failure → forceer complete state
+      // Forceer complete state als dit de laatste prediction was
+      if (currentCompleted >= totalExpected - VARIATIONS_PER_STYLE) {
         await supabase
           .from('generations')
           .update({ status: 'completed' })
@@ -150,7 +147,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    // Andere statussen (starting, processing) - geen actie
     return NextResponse.json({ received: true })
 
   } catch (error) {

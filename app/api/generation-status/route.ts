@@ -7,10 +7,7 @@ const supabase = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ===========================================
-// GENERATION STATUS — Frontend polleert dit
-// Returns: status, completed count, total, image URLs
-// ===========================================
+const VARIATIONS_PER_STYLE = 4
 
 export async function GET(
   request: NextRequest,
@@ -30,13 +27,16 @@ export async function GET(
     }
 
     const completed = generation.result_urls?.length || 0
-    const total = generation.styles_used?.length || 0
+    const totalStyles = generation.styles_used?.length || 0
+    const total = totalStyles * VARIATIONS_PER_STYLE
 
     return NextResponse.json({
       id: generation.id,
       status: generation.status,
       completed,
       total,
+      totalStyles,
+      variationsPerStyle: VARIATIONS_PER_STYLE,
       imageUrls: generation.result_urls || [],
       styles: generation.styles_used || [],
       isComplete: generation.status === 'completed',

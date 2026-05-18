@@ -13,6 +13,12 @@ const supabase = createClient(
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
 const REPLICATE_USERNAME = process.env.REPLICATE_USERNAME || 'kingpapuche'
 
+// ===========================================
+// OPTION C: 4 variations per style
+// 1 style = 4 photos = 4 credits used
+// ===========================================
+const VARIATIONS_PER_STYLE = 4
+
 interface UserCharacteristics {
   gender?: string; ethnicity?: string; eye_color?: string
   hair_color?: string; is_bald?: boolean; has_glasses?: boolean; age_range?: string
@@ -145,15 +151,6 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-night-city-glamour':  '[TRIGGER], portrait of woman, stylish dark outfit, city nightlife background with bokeh lights, sophisticated glamorous evening',
 }
 
-// ===========================================
-// BACKGROUND PROCESSING — GENERATE ROUTE
-// 1. Maakt generation record met empty result_urls
-// 2. Start ALLE Replicate predictions (parallel, async fire-and-forget)
-// 3. Returnt direct met generation_id (geen wachten op completion!)
-// 4. Webhook (/api/generation-webhook) ontvangt completed predictions per stuk
-// 5. Frontend polleert /api/generation-status/{id} voor updates
-// ===========================================
-
 export async function POST(request: NextRequest) {
   try {
     const { userId, styleIds, aspectRatio } = await request.json()
@@ -161,15 +158,22 @@ export async function POST(request: NextRequest) {
     if (!userId) return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     if (!styleIds || styleIds.length === 0) return NextResponse.json({ error: 'No styles selected' }, { status: 400 })
 
-    console.log(`🚀 Start background generation: ${userId} | ${styleIds.length} styles`)
+    const totalHeadshots = styleIds.length * VARIATIONS_PER_STYLE
+    console.log(`🚀 Start: ${userId} | ${styleIds.length} styles × ${VARIATIONS_PER_STYLE} = ${totalHeadshots} headshots`)
 
     const { data: user, error: userError } = await supabase
       .from('users').select('*').eq('id', userId).single()
 
     if (userError || !user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    if (user.credits < styleIds.length) {
-      return NextResponse.json({ error: `Not enough credits. Need ${styleIds.length}, have ${user.credits}` }, { status: 400 })
+
+    // Credits check: 4 credits per stijl (1 per gegenereerde headshot)
+    const creditsNeeded = totalHeadshots
+    if (user.credits < creditsNeeded) {
+      return NextResponse.json({
+        error: `Not enough credits. Need ${creditsNeeded} (${styleIds.length} styles × ${VARIATIONS_PER_STYLE}), have ${user.credits}`
+      }, { status: 400 })
     }
+
     if (!user.trained_model_id) return NextResponse.json({ error: 'No trained model found' }, { status: 400 })
 
     const modelReference = await resolveModelReference(userId, user.trained_model_id)
@@ -189,7 +193,8 @@ export async function POST(request: NextRequest) {
     const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette, studio strobe lighting, artificial lighting"
     const fullNegativePrompt = negativeAdditions ? `${baseNegativePrompt}, ${negativeAdditions}` : baseNegativePrompt
 
-    // Maak generation record - status processing, lege result_urls
+    // Maak generation record met empty result_urls
+    // total_expected = styles × 4 variations
     const { data: generation, error: genError } = await supabase
       .from('generations')
       .insert({
@@ -203,22 +208,20 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (genError || !generation) {
-      console.error('Failed to create generation record:', genError)
       return NextResponse.json({ error: 'Failed to create generation' }, { status: 500 })
     }
 
     const generationId = generation.id
 
-    // Reserveer credits direct (worden bij failure terug gegeven via webhook)
-    await supabase.from('users').update({ credits: user.credits - styleIds.length }).eq('id', userId)
+    // Reserveer credits direct
+    await supabase.from('users').update({ credits: user.credits - creditsNeeded }).eq('id', userId)
 
     const triggerWithDescription = personDescription ? `${triggerWord}, ${personDescription}` : triggerWord
     const realism = 'natural skin texture, photorealistic, candid feel, film grain, shot on 50mm lens, subtle skin imperfections'
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${request.headers.get('host')}`
 
-    // Start ALLE predictions parallel met webhook callback
-    // Geen await op completion — predictions runnen in achtergrond
+    // Start predictions parallel - 4 outputs per stijl
     const predictionPromises = styleIds.map(async (styleId: string) => {
       try {
         const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional headshot portrait, natural lighting, clean background, sharp focus'
@@ -233,7 +236,7 @@ export async function POST(request: NextRequest) {
             negative_prompt: fullNegativePrompt,
             model: 'dev',
             lora_scale: 1,
-            num_outputs: 1,
+            num_outputs: VARIATIONS_PER_STYLE, // 4 variaties per stijl
             aspect_ratio: aspectRatio || '3:4',
             output_format: 'webp',
             guidance_scale: 3.0,
@@ -245,10 +248,10 @@ export async function POST(request: NextRequest) {
           webhook_events_filter: ['completed'],
         })
 
-        console.log(`✅ Prediction started: ${styleId} → ${prediction.id}`)
+        console.log(`✅ Started ${styleId} (4 variations) → ${prediction.id}`)
         return { styleId, predictionId: prediction.id, success: true }
       } catch (err) {
-        console.error(`❌ Failed to start ${styleId}:`, err)
+        console.error(`❌ Failed ${styleId}:`, err)
         return { styleId, success: false }
       }
     })
@@ -256,13 +259,12 @@ export async function POST(request: NextRequest) {
     const startedPredictions = await Promise.all(predictionPromises)
     const successfulStarts = startedPredictions.filter(p => p.success).length
 
-    console.log(`🎉 Started ${successfulStarts}/${styleIds.length} predictions in background`)
-
     return NextResponse.json({
       success: true,
       generationId,
       pendingPredictions: successfulStarts,
       totalStyles: styleIds.length,
+      totalHeadshots: totalHeadshots,
       message: 'Generation started in background',
     })
 

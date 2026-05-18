@@ -5,31 +5,12 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
 
+const VARIATIONS_PER_STYLE = 4
+
 const ASPECT_RATIO_OPTIONS = [
-  {
-    id: '3:4',
-    label: 'Portrait',
-    dimensions: '3:4',
-    description: 'LinkedIn, CV & dating apps',
-    boxW: 60,
-    boxH: 80,
-  },
-  {
-    id: '1:1',
-    label: 'Square',
-    dimensions: '1:1',
-    description: 'Instagram, X & WhatsApp',
-    boxW: 80,
-    boxH: 80,
-  },
-  {
-    id: '4:3',
-    label: 'Landscape',
-    dimensions: '4:3',
-    description: 'Website & iPad',
-    boxW: 80,
-    boxH: 60,
-  },
+  { id: '3:4', label: 'Portrait', dimensions: '3:4', description: 'LinkedIn, CV & dating apps', boxW: 60, boxH: 80 },
+  { id: '1:1', label: 'Square', dimensions: '1:1', description: 'Instagram, X & WhatsApp', boxW: 80, boxH: 80 },
+  { id: '4:3', label: 'Landscape', dimensions: '4:3', description: 'Website & iPad', boxW: 80, boxH: 60 },
 ]
 
 export default function CreateGeneratePage() {
@@ -49,21 +30,16 @@ export default function CreateGeneratePage() {
 
   useEffect(() => {
     const stored = sessionStorage.getItem('bestai_styleIds')
-    if (!stored) {
-      router.push('/create/styles')
-      return
-    }
+    if (!stored) { router.push('/create/styles'); return }
 
     try {
       const parsed = JSON.parse(stored)
       if (!Array.isArray(parsed) || parsed.length === 0) {
-        router.push('/create/styles')
-        return
+        router.push('/create/styles'); return
       }
       setStyleIds(parsed)
     } catch {
-      router.push('/create/styles')
-      return
+      router.push('/create/styles'); return
     }
 
     async function fetchUser() {
@@ -91,7 +67,8 @@ export default function CreateGeneratePage() {
     fetchUser()
   }, [router])
 
-  const creditsNeeded = styleIds.length
+  const totalHeadshots = styleIds.length * VARIATIONS_PER_STYLE
+  const creditsNeeded = totalHeadshots
   const hasEnoughCredits = userCredits >= creditsNeeded
 
   const handleGenerateClick = () => {
@@ -108,11 +85,7 @@ export default function CreateGeneratePage() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          styleIds,
-          aspectRatio,
-        }),
+        body: JSON.stringify({ userId, styleIds, aspectRatio }),
       })
 
       const data = await response.json()
@@ -124,12 +97,9 @@ export default function CreateGeneratePage() {
 
       sessionStorage.removeItem('bestai_styleIds')
 
-      // BACKGROUND PROCESSING: redirect naar progress page
-      // Op die page polleert frontend voor live updates van images
       if (data.generationId) {
         router.push(`/generations/${data.generationId}`)
       } else {
-        // Fallback voor oude API responses
         router.push('/gallery')
       }
     } catch (error) {
@@ -140,7 +110,7 @@ export default function CreateGeneratePage() {
   }
 
   const formatStyleName = (id: string) => {
-    return id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    return id.replace(/^w-/, '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
   }
 
   if (loading) {
@@ -163,20 +133,20 @@ export default function CreateGeneratePage() {
             </div>
             <h2 className="text-2xl font-bold text-white text-center mb-2">You Need More Credits</h2>
             <p className="text-gray-400 text-center mb-6">
-              You selected <span className="text-white font-semibold">{creditsNeeded} styles</span> but only have <span className="text-amber-400 font-semibold">{userCredits} credits</span>.
+              You selected <span className="text-white font-semibold">{styleIds.length} styles × {VARIATIONS_PER_STYLE} = {totalHeadshots} headshots</span> but only have <span className="text-amber-400 font-semibold">{userCredits} credits</span>.
             </p>
             <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/10">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-gray-400 text-sm">Starter Pack</span>
-                <span className="text-white font-semibold">40 credits — $29</span>
+                <span className="text-white font-semibold">40 headshots — $29</span>
               </div>
               <div className="flex justify-between items-center mb-3">
                 <span className="text-gray-400 text-sm">Pro Pack <span className="text-amber-400 text-xs">POPULAR</span></span>
-                <span className="text-white font-semibold">80 credits — $39</span>
+                <span className="text-white font-semibold">80 headshots — $39</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm">Premium Pack</span>
-                <span className="text-white font-semibold">120 credits — $49</span>
+                <span className="text-white font-semibold">120 headshots — $49</span>
               </div>
             </div>
             <div className="flex gap-3">
@@ -187,7 +157,6 @@ export default function CreateGeneratePage() {
         </div>
       )}
 
-      {/* MODEL POPUP */}
       {showModelPopup && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-[#1a1f2e] rounded-3xl p-8 max-w-md w-full border border-white/10 shadow-2xl">
@@ -233,6 +202,9 @@ export default function CreateGeneratePage() {
               </span>
             ))}
           </div>
+          <p className="text-gray-500 text-sm mt-4">
+            Each style generates <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique variations</span> with different poses and expressions.
+          </p>
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
@@ -286,6 +258,10 @@ export default function CreateGeneratePage() {
               <span className="text-white font-semibold">{aspectRatio} ({ASPECT_RATIO_OPTIONS.find(o => o.id === aspectRatio)?.label})</span>
             </div>
             <div className="flex items-center justify-between">
+              <span className="text-gray-400">Variations per style</span>
+              <span className="text-white font-semibold">{VARIATIONS_PER_STYLE}</span>
+            </div>
+            <div className="flex items-center justify-between">
               <span className="text-gray-400">Quality</span>
               <span className="text-white font-semibold">High (35 steps)</span>
             </div>
@@ -298,17 +274,21 @@ export default function CreateGeneratePage() {
 
         <div className="bg-gradient-to-br from-violet-900/30 to-fuchsia-900/20 border border-violet-500/20 rounded-2xl p-6 mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-gray-300">Styles</span>
-            <span className="text-white font-semibold">{creditsNeeded}×</span>
+            <span className="text-gray-300">Styles selected</span>
+            <span className="text-white font-semibold">{styleIds.length}×</span>
+          </div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-gray-300">Variations per style</span>
+            <span className="text-white font-semibold">{VARIATIONS_PER_STYLE}</span>
           </div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-gray-300">Cost per headshot</span>
-            <span className="text-white font-semibold">1 credit</span>
+            <span className="text-gray-300">Total headshots</span>
+            <span className="text-white font-semibold">{totalHeadshots} photos</span>
           </div>
           <div className="border-t border-white/10 pt-4">
             <div className="flex items-center justify-between">
-              <span className="text-white font-bold text-lg">Total</span>
-              <span className="text-violet-400 font-bold text-2xl">{creditsNeeded} credits</span>
+              <span className="text-white font-bold text-lg">Credits needed</span>
+              <span className="text-violet-400 font-bold text-2xl">{creditsNeeded}</span>
             </div>
             <div className="flex items-center justify-between mt-1">
               <span className="text-gray-500 text-sm">Your balance</span>
@@ -345,7 +325,7 @@ export default function CreateGeneratePage() {
                 Starting generation...
               </>
             ) : (
-              <><span className="text-xl">✨</span> Generate {creditsNeeded} Headshots</>
+              <><span className="text-xl">✨</span> Generate {totalHeadshots} Headshots</>
             )}
           </button>
         </div>

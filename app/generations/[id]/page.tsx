@@ -9,6 +9,8 @@ interface GenerationStatus {
   status: 'processing' | 'completed' | 'failed'
   completed: number
   total: number
+  totalStyles: number
+  variationsPerStyle: number
   imageUrls: string[]
   styles: string[]
   isComplete: boolean
@@ -81,8 +83,8 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
           </h1>
           <p className="text-gray-400 text-lg">
             {status.isComplete
-              ? `${status.completed} headshots generated`
-              : `${status.completed} of ${status.total} complete`}
+              ? `${status.completed} headshots generated (${status.totalStyles} styles × ${status.variationsPerStyle} variations)`
+              : `${status.completed} of ${status.total} complete · ${status.totalStyles} styles × ${status.variationsPerStyle} variations`}
           </p>
         </div>
 
@@ -93,7 +95,9 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
               <div className="w-12 h-12 border-4 border-violet-400 border-t-transparent rounded-full animate-spin"></div>
               <div className="flex-1">
                 <h3 className="text-white font-bold text-xl mb-1">Working on it...</h3>
-                <p className="text-gray-400">Each headshot takes 20-30 seconds. You can leave this page — we'll keep generating in the background.</p>
+                <p className="text-gray-400">
+                  Each style generates {status.variationsPerStyle} unique variations. Takes 30-60 seconds per style. You can leave this page — we'll keep generating in the background.
+                </p>
               </div>
             </div>
 
@@ -107,7 +111,6 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
           </div>
         )}
 
-        {/* Action buttons als compleet */}
         {status.isComplete && (
           <div className="flex justify-center gap-3 mb-8">
             <Link
@@ -125,7 +128,7 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
           </div>
         )}
 
-        {/* Image grid */}
+        {/* Image grid - 4 columns op desktop */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {/* Geleverde images */}
           {status.imageUrls.map((url, idx) => (
@@ -159,10 +162,9 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
           ))}
         </div>
 
-        {/* Info */}
         {!status.isComplete && (
           <p className="text-center text-gray-500 text-sm mt-8">
-            This page updates every few seconds. Feel free to close and come back later — your headshots will be waiting in your gallery.
+            Images appear in groups of {status.variationsPerStyle} (one batch per style). Feel free to close this page — your headshots will wait in your gallery.
           </p>
         )}
       </div>
