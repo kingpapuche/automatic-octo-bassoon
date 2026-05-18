@@ -28,7 +28,6 @@ export default function HomePage() {
             </span>
           </Link>
 
-          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-10">
             <Link href="#features" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Why Us</Link>
             <Link href="#pricing" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Plans</Link>
@@ -40,7 +39,6 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Mobile hamburger */}
           <button
             className="md:hidden p-2 rounded-lg hover:bg-[#F0EEF8] transition"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -49,7 +47,6 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-[#FAFAF9] border-t border-[#E8E6E0] px-8 py-6 flex flex-col gap-5">
             <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Why Us</Link>
@@ -118,7 +115,7 @@ export default function HomePage() {
       <section className="py-16 px-8 bg-gradient-to-r from-[#5B4E9D] to-[#483A7C] text-white">
         <div className="max-w-[1320px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
           <div><h3 className="font-serif text-5xl mb-2">30 min</h3><p className="opacity-90">Average delivery time</p></div>
-          <div><h3 className="font-serif text-5xl mb-2">93+</h3><p className="opacity-90">Unique styles available</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">37+</h3><p className="opacity-90">Unique styles available</p></div>
           <div><h3 className="font-serif text-5xl mb-2">$29</h3><p className="opacity-90">Starting price</p></div>
           <div><h3 className="font-serif text-5xl mb-2">🛡️</h3><p className="opacity-90">Profile-Worthy Guarantee</p></div>
         </div>
@@ -134,7 +131,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { step: '01', icon: Upload, title: 'Upload Your Photos', desc: 'Upload 8–15 selfies from different angles and lighting conditions. No professional equipment needed.' },
-              { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 93+ hand-curated styles — corporate, casual, creative, full body, and more.' },
+              { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 37+ hand-curated styles — corporate, casual, creative, outdoor, restaurant, and more. Each style generates 4 unique variations.' },
               { step: '03', icon: Download, title: 'Receive Your Headshots', desc: 'Your AI-generated headshots are ready in under 30 minutes. Download and use them anywhere.' },
             ].map((item) => (
               <div key={item.step} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300 relative">
@@ -209,7 +206,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { icon: Zap, title: 'Results in 30 Minutes', desc: 'Upload your selfies and receive professional headshots in under 30 minutes. No waiting days for a photographer.' },
-              { icon: Palette, title: '93+ Curated Styles', desc: 'Corporate executive, smart casual, creative, full body, sunglasses, black tie — hand-tuned for consistent quality.' },
+              { icon: Palette, title: '37+ Curated Styles', desc: 'Corporate executive, smart casual, creative, outdoor, restaurant, and date night — hand-tuned for consistent quality. Each style produces 4 unique variations.' },
               { icon: Gem, title: 'Powered by FLUX AI', desc: 'We use the most advanced AI model available, specifically fine-tuned on your photos for maximum realism.' },
               { icon: Lock, title: 'Your Photos Stay Private', desc: 'Your photos are encrypted, never shared or sold, and automatically deleted after your order is complete.' },
               { icon: BadgeDollarSign, title: 'Save $200–$500', desc: 'A professional photographer charges $300–700 for one session. Get unlimited variations starting at just $29.' },
@@ -233,6 +230,7 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5">Simple, Honest Pricing</h2>
             <p className="text-xl text-[#6B6B6B]">One-time payment. No subscriptions. No hidden fees.</p>
+            <p className="text-base text-[#9B9B9B] mt-2">Every style generates 4 unique variations.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
 
@@ -249,7 +247,7 @@ export default function HomePage() {
               <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>29</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['1 AI model training', '40 headshots', 'Choose from 10 styles', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['1 AI model training', '40 HD headshots', 'Choose 10 styles × 4 variations', 'All 37+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-[#6B6B6B] text-sm">{f}</span>
@@ -266,14 +264,14 @@ export default function HomePage() {
                 <Star className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-[1.5rem] font-bold mb-2">Pro</h3>
-              <p className="text-white/60 text-sm mb-4">80 headshots • 25 styles</p>
+              <p className="text-white/60 text-sm mb-4">80 headshots • 20 styles</p>
               <div className="mb-1">
                 <span className="text-white/50 line-through text-lg">$55</span>
               </div>
               <div className="font-serif text-5xl mb-1"><span className="text-2xl font-sans">$</span>39</div>
               <p className="text-white/60 mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['1 AI model training', '80 headshots', 'Choose from 25 styles', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['1 AI model training', '80 HD headshots', 'Choose 20 styles × 4 variations', 'All 37+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#D4AF37] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-white/90 text-sm">{f}</span>
@@ -289,14 +287,14 @@ export default function HomePage() {
                 <Sparkles className="w-6 h-6 text-[#5B4E9D]" />
               </div>
               <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Premium</h3>
-              <p className="text-[#9B9B9B] text-sm mb-4">120 headshots • All styles</p>
+              <p className="text-[#9B9B9B] text-sm mb-4">120 headshots • 30 styles</p>
               <div className="mb-1">
                 <span className="text-[#9B9B9B] line-through text-lg">$69</span>
               </div>
               <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>49</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['2 AI model trainings', '120 headshots', 'All 93+ styles included', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['2 AI model trainings', '120 HD headshots', 'Choose 30 styles × 4 variations', 'All 37+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-[#6B6B6B] text-sm">{f}</span>
@@ -339,7 +337,7 @@ export default function HomePage() {
             {[
               { q: 'How realistic are the AI-generated headshots?', a: 'We use FLUX LoRA — the most advanced AI portrait model available. The AI is trained specifically on your photos, which means the results look like you, not a generic AI person.' },
               { q: 'What kind of photos should I upload?', a: 'Upload 8–15 clear solo photos with good lighting from different angles. Avoid group photos, sunglasses, heavy filters, or blurry images. The more variety, the better the result.' },
-              { q: 'How long does it take?', a: 'Training your personal AI model takes about 20–25 minutes. After that, each headshot generates in about 30 seconds.' },
+              { q: 'How long does it take?', a: 'Training your personal AI model takes about 20–25 minutes. After that, each style generates 4 variations in about 30 seconds.' },
               { q: 'Are my photos safe?', a: 'Yes. Your photos are stored securely, never shared with third parties, and deleted automatically after your order is complete.' },
               { q: 'What if I am not happy with the results?', a: 'We guarantee at least 1 profile-worthy headshot in every order. If not, we refund you in full within 7 days. No forms, no hassle — just contact us.' },
               { q: 'Can I use these headshots commercially?', a: 'Yes. You own the rights to every headshot we generate for you. Use them on LinkedIn, your website, business cards, or anywhere else.' },
