@@ -23,7 +23,7 @@ export default function GalleryPage() {
     async function loadData() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        
+
         if (!session?.user) {
           router.push('/login')
           return
@@ -66,7 +66,6 @@ export default function GalleryPage() {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(downloadUrl)
 
-      // === DOWNLOAD TRACKING ===
       if (user?.id) {
         await supabase.from('downloads').insert({
           user_id: user.id,
@@ -125,7 +124,7 @@ export default function GalleryPage() {
               ← Dashboard
             </Link>
             <Link
-              href="/upload"
+              href="/create/styles"
               className="bg-[#FF6B4A] text-white px-6 py-2 rounded-lg hover:bg-[#e55a3a] transition text-sm font-semibold"
             >
               Generate More
