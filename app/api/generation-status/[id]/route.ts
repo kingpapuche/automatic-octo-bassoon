@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
+const VARIATIONS_PER_STYLE = 4
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,21 +21,21 @@ export async function GET(
       return NextResponse.json({ error: 'Generation not found' }, { status: 404 })
     }
 
-    const stylesUsed: string[] = generation.styles_used || []
-    const resultUrls: string[] = generation.result_urls || []
-    const variationsPerStyle = 4
-    const totalExpected = stylesUsed.length * variationsPerStyle
-    const completed = resultUrls.length
-    const progressPercent = totalExpected > 0 ? Math.round((completed / totalExpected) * 100) : 0
+    const styles: string[] = generation.styles_used || []
+    const imageUrls: string[] = generation.result_urls || []
+    const totalStyles = styles.length
+    const total = totalStyles * VARIATIONS_PER_STYLE
+    const completed = imageUrls.length
 
     return NextResponse.json({
       id: generation.id,
       status: generation.status,
-      stylesUsed,
-      resultUrls,
-      totalExpected,
+      styles,
+      imageUrls,
+      totalStyles,
+      variationsPerStyle: VARIATIONS_PER_STYLE,
+      total,
       completed,
-      progressPercent,
       isComplete: generation.status === 'completed',
       createdAt: generation.created_at,
     })
