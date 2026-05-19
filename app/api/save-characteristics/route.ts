@@ -13,15 +13,14 @@ export async function POST(request: NextRequest) {
       hair_color,
       is_bald,
       has_glasses,
+      has_beard,
       use_cases,
       age_range,
       allow_photo_usage,
     } = body
-
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
-
     const { error } = await supabaseAdmin
       .from('users')
       .update({
@@ -32,20 +31,18 @@ export async function POST(request: NextRequest) {
         hair_color: is_bald ? null : hair_color,
         is_bald,
         has_glasses,
+        has_beard,
         use_cases,
         age_range,
         allow_photo_usage,
       })
       .eq('id', userId)
-
     if (error) {
       console.error('Failed to save characteristics:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
-
     console.log(`✅ Characteristics saved for user: ${userId}`)
     return NextResponse.json({ success: true })
-
   } catch (error) {
     console.error('Save characteristics error:', error)
     return NextResponse.json(

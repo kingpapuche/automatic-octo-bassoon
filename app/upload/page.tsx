@@ -60,10 +60,10 @@ interface UserCharacteristics {
   hair_color:  string
   is_bald:     boolean
   has_glasses: boolean
+  has_beard:   boolean
   use_cases:   string[]
 }
 
-// Vercel limit = 4.5MB. Comprimeer naar max 3.5MB voor buffer.
 const COMPRESSION_THRESHOLD_MB = 3.5
 const COMPRESSION_OPTIONS = {
   maxSizeMB: 3.5,
@@ -88,7 +88,7 @@ export default function UploadPage() {
 
   const [characteristics, setCharacteristics] = useState<UserCharacteristics>({
     full_name: '', gender: '', ethnicity: '', eye_color: '',
-    hair_color: '', is_bald: false, has_glasses: false,
+    hair_color: '', is_bald: false, has_glasses: false, has_beard: false,
     use_cases: [],
   })
 
@@ -109,6 +109,7 @@ export default function UploadPage() {
             hair_color:  userData.hair_color  || '',
             is_bald:     userData.is_bald     || false,
             has_glasses: userData.has_glasses || false,
+            has_beard:   userData.has_beard   || false,
             use_cases:   userData.use_cases   || [],
           })
         }
@@ -157,6 +158,7 @@ export default function UploadPage() {
           hair_color:        characteristics.hair_color,
           is_bald:           characteristics.is_bald,
           has_glasses:       characteristics.has_glasses,
+          has_beard:         characteristics.has_beard,
           use_cases:         characteristics.use_cases,
           allow_photo_usage: allowPhotoUsage,
         }),
@@ -170,40 +172,31 @@ export default function UploadPage() {
     }
   }
 
-  // PHOTO DROP MET AUTOMATISCHE COMPRESSIE
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setError('')
     if (photos.length + acceptedFiles.length > 20) {
       setError('Maximum 15 photos allowed')
       return
     }
-
     setCompressing(true)
-
     try {
       const processedFiles: File[] = []
       let compressedCount = 0
-
       for (const file of acceptedFiles) {
         if (!file.type.startsWith('image/')) continue
-
         if (file.size > 15 * 1024 * 1024) {
           setError(`${file.name} is too large (>15MB). Please use a smaller photo.`)
           continue
         }
-
         const fileSizeMB = file.size / (1024 * 1024)
         if (fileSizeMB > COMPRESSION_THRESHOLD_MB) {
           try {
             setStatus(`Compressing ${file.name}...`)
             const compressed = await imageCompression(file, COMPRESSION_OPTIONS)
-            // Behoud originele naam
             const renamedFile = new File([compressed], file.name, { type: 'image/jpeg' })
             processedFiles.push(renamedFile)
             compressedCount++
-            console.log(`✅ Compressed ${file.name}: ${fileSizeMB.toFixed(2)}MB → ${(compressed.size / 1024 / 1024).toFixed(2)}MB`)
           } catch (compErr) {
-            console.error(`Compression failed for ${file.name}:`, compErr)
             setError(`Could not process ${file.name}. Try a different photo.`)
             continue
           }
@@ -211,7 +204,6 @@ export default function UploadPage() {
           processedFiles.push(file)
         }
       }
-
       const existing = new Set(photos.map(p => `${p.name}-${p.size}`))
       const newFiles: File[] = []
       processedFiles.forEach(file => {
@@ -221,11 +213,9 @@ export default function UploadPage() {
           existing.add(key)
         }
       })
-
       if (newFiles.length > 0) {
         setPhotos(prev => [...prev, ...newFiles])
       }
-
       if (compressedCount > 0) {
         setStatus(`✓ ${compressedCount} photo${compressedCount !== 1 ? 's' : ''} optimized for upload`)
         setTimeout(() => setStatus(''), 3000)
@@ -251,38 +241,30 @@ export default function UploadPage() {
     if (!user) { router.push('/login'); return }
     if (photos.length < 8) { setError('Please upload at least 8 photos'); return }
     if (user.credits < 1) { setError('You need credits to train a model.'); return }
-
     setUploading(true)
     setError('')
     setStatus('Uploading photos...')
     setUploadProgress(0)
-
     try {
       const photoUrls: string[] = []
       const timestamp = Date.now()
-
       for (let i = 0; i < photos.length; i++) {
         const photo    = photos[i]
         const filename = `uploads/${user.id}/${timestamp}-${i}.jpg`
-
         const formData = new FormData()
         formData.append('file',     photo)
         formData.append('userId',   user.id)
         formData.append('filename', filename)
-
         const response = await fetch('/api/upload-photo', { method: 'POST', body: formData })
         const data     = await response.json()
         if (!response.ok || data.error) throw new Error(`Failed to upload photo ${i + 1}: ${data.error}`)
-
         photoUrls.push(data.url)
         setUploadProgress(Math.round(((i + 1) / photos.length) * 100))
         setStatus(`Uploading photos... ${i + 1}/${photos.length}`)
       }
-
       setStatus('Photos uploaded! Starting AI training...')
       setUploading(false)
       setTraining(true)
-
       const trainResponse = await fetch('/api/train', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -290,10 +272,8 @@ export default function UploadPage() {
       })
       const trainData = await trainResponse.json()
       if (!trainResponse.ok || trainData.error) throw new Error(trainData.error || 'Failed to start training')
-
       setStatus('Training started! 🎉')
       setTimeout(() => router.push('/dashboard?training=started'), 2000)
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setUploading(false)
@@ -358,7 +338,6 @@ export default function UploadPage() {
           ))}
         </div>
 
-        {/* STEP 1 - SAME AS BEFORE */}
         {step === 1 && (
           <>
             <div className="text-center mb-8">
@@ -418,7 +397,7 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              <div className="flex gap-6">
+              <div className="flex flex-wrap gap-6">
                 <label className="flex items-center gap-3 cursor-pointer" onClick={() => updateChar('is_bald', !characteristics.is_bald)}>
                   <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
                     characteristics.is_bald ? 'bg-violet-600 border-violet-600' : 'bg-white/5 border-white/20 hover:border-violet-500/50'
@@ -434,6 +413,14 @@ export default function UploadPage() {
                     {characteristics.has_glasses && <span className="text-white text-xs font-bold">✓</span>}
                   </div>
                   <span className="text-white text-sm">Glasses</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer" onClick={() => updateChar('has_beard', !characteristics.has_beard)}>
+                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                    characteristics.has_beard ? 'bg-violet-600 border-violet-600' : 'bg-white/5 border-white/20 hover:border-violet-500/50'
+                  }`}>
+                    {characteristics.has_beard && <span className="text-white text-xs font-bold">✓</span>}
+                  </div>
+                  <span className="text-white text-sm">Beard / facial hair</span>
                 </label>
               </div>
 
@@ -504,7 +491,6 @@ export default function UploadPage() {
           </>
         )}
 
-        {/* STEP 2 - UPDATED WITH COMPRESSION */}
         {step === 2 && (
           <>
             <div className="text-center mb-8">
@@ -524,8 +510,9 @@ export default function UploadPage() {
                 `${characteristics.eye_color} eyes`,
                 characteristics.is_bald ? 'Bald' : `${characteristics.hair_color} hair`,
                 characteristics.has_glasses ? 'Glasses' : null,
+                characteristics.has_beard ? 'Beard' : null,
               ].filter(Boolean).map(tag => (
-                <span key={tag} className="bg-violet-500/20 text-violet-300 border border-violet-500/30 px-2.5 py-0.5 rounded-full text-xs capitalize">
+                <span key={String(tag)} className="bg-violet-500/20 text-violet-300 border border-violet-500/30 px-2.5 py-0.5 rounded-full text-xs capitalize">
                   {tag}
                 </span>
               ))}

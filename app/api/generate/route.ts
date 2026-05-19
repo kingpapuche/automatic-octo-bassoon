@@ -21,7 +21,7 @@ const VARIATIONS_PER_STYLE = 4
 
 interface UserCharacteristics {
   gender?: string; ethnicity?: string; eye_color?: string
-  hair_color?: string; is_bald?: boolean; has_glasses?: boolean; age_range?: string
+  hair_color?: string; is_bald?: boolean; has_glasses?: boolean; has_beard?: boolean; age_range?: string
 }
 
 const skinToneMap: Record<string, string> = {
@@ -32,17 +32,17 @@ const skinToneMap: Record<string, string> = {
 }
 
 function buildPersonDescription(c: UserCharacteristics): string {
+  // Houd description minimaal: alleen features die LoRA mogelijk niet vasthoudt.
+  // - gender (verplicht voor LoRA per Ostris docs)
+  // - is_bald (voorkomt dat AI haar toevoegt)
+  // - has_glasses (voorkomt dat AI bril vergeet)
+  // - has_beard (voorkomt dat AI baard toevoegt/vergeet)
+  // Ethnicity/skin/eyes/age laten we WEG — die heeft de LoRA al van je gezicht geleerd.
   const parts: string[] = []
-  if (c.ethnicity && c.gender) {
-    const article = ['a','e','i','o','u'].includes(c.ethnicity[0].toLowerCase()) ? 'an' : 'a'
-    parts.push(`${article} ${c.ethnicity} ${c.gender}`)
-  } else if (c.gender) parts.push(`a ${c.gender}`)
-  if (c.ethnicity) { const s = skinToneMap[c.ethnicity.toLowerCase()]; if (s) parts.push(s) }
-  if (c.eye_color) parts.push(`with ${c.eye_color} eyes`)
-  if (c.is_bald) parts.push(`bald head`)
-  else if (c.hair_color) parts.push(`${c.hair_color} hair`)
-  if (c.has_glasses) parts.push(`wearing glasses`)
-  if (c.age_range) parts.push(`${c.age_range} years old`)
+  if (c.gender) parts.push(`a ${c.gender}`)
+  if (c.is_bald) parts.push('bald')
+  if (c.has_glasses) parts.push('wearing glasses')
+  if (c.has_beard) parts.push('with beard')
   return parts.join(', ')
 }
 
@@ -52,6 +52,7 @@ function buildNegativePromptAdditions(c: UserCharacteristics): string {
   else if (c.gender === 'female') negatives.push('male','man','masculine features','beard','mustache','stubble','facial hair','adam apple')
   if (c.is_bald) negatives.push('hair on head','full head of hair','long hair','short hair','hairstyle')
   if (c.has_glasses === false) negatives.push('glasses','eyeglasses','spectacles','sunglasses')
+  if (c.has_beard === false) negatives.push('beard','mustache','stubble','facial hair','goatee')
   return negatives.join(', ')
 }
 
@@ -246,7 +247,7 @@ export async function POST(request: NextRequest) {
             num_outputs: VARIATIONS_PER_STYLE, // 4 variaties per stijl
             aspect_ratio: aspectRatio || '3:4',
             output_format: 'webp',
-            guidance_scale: 3.0,
+            guidance_scale: 2.3,
             output_quality: 90,
             num_inference_steps: 35,
             disable_safety_checker: false,
