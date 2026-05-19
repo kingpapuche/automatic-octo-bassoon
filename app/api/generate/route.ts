@@ -208,7 +208,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (genError || !generation) {
-      return NextResponse.json({ error: 'Failed to create generation' }, { status: 500 })
+      console.error('❌ Supabase insert error:', JSON.stringify(genError, null, 2))
+      console.error('Attempted insert:', { user_id: userId, styles_used: styleIds, result_urls: [], credits_used: 0, status: 'processing' })
+      return NextResponse.json({
+        error: 'Failed to create generation',
+        details: genError?.message || 'Unknown Supabase error',
+        code: genError?.code,
+        hint: genError?.hint,
+      }, { status: 500 })
     }
 
     const generationId = generation.id
