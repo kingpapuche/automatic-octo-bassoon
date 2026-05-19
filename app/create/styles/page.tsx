@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
 
 const VARIATIONS_PER_STYLE = 4
+const ONBOARDING_KEY = 'novaimago_styles_onboarded'
 
 interface StyleOption {
   id: string
@@ -223,9 +224,17 @@ export default function CreateStylesPage() {
   const [expandedCategory, setExpandedCategory] = useState<string>('')
   const [gender, setGender] = useState<'male' | 'female'>('male')
 
-  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  // ONBOARDING + TOAST states
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'add' | 'remove' }>({
+    visible: false,
+    message: '',
+    type: 'add',
+  })
 
-  // OPTIE C: max stijlen = beschikbare credits / 4
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
   const maxStyles = Math.floor(userCredits / VARIATIONS_PER_STYLE)
   const totalHeadshots = selectedStyles.length * VARIATIONS_PER_STYLE
   const isOverLimit = selectedStyles.length > maxStyles
@@ -254,10 +263,30 @@ export default function CreateStylesPage() {
         console.error('Error:', error)
       } finally {
         setLoading(false)
+
+        // ONBOARDING: check localStorage en toon popup eerste bezoek
+        const hasOnboarded = localStorage.getItem(ONBOARDING_KEY)
+        if (!hasOnboarded) {
+          setShowOnboarding(true)
+        }
       }
     }
     fetchUser()
   }, [router])
+
+  const dismissOnboarding = () => {
+    localStorage.setItem(ONBOARDING_KEY, 'true')
+    setShowOnboarding(false)
+  }
+
+  // TOAST helper - toon korte feedback bij selectie
+  const showToast = (message: string, type: 'add' | 'remove') => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
+    setToast({ visible: true, message, type })
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(prev => ({ ...prev, visible: false }))
+    }, 2200)
+  }
 
   const filteredCategories = STYLE_CATEGORIES.filter(c => c.gender === gender)
 
@@ -278,16 +307,16 @@ export default function CreateStylesPage() {
     }, 50)
   }
 
-  const toggleStyle = (styleId: string) => {
+  const toggleStyle = (styleId: string, styleLabel: string) => {
     setSelectedStyles(prev => {
       if (prev.includes(styleId)) {
-        // Deselecteren is altijd OK
+        showToast(`Removed ${styleLabel} — −${VARIATIONS_PER_STYLE} photos`, 'remove')
         return prev.filter(id => id !== styleId)
       }
-      // Selecteren: alleen toestaan als nog binnen limit
       if (prev.length >= maxStyles) {
-        return prev // blokkeer, geef geen update
+        return prev
       }
+      showToast(`Added ${styleLabel} — +${VARIATIONS_PER_STYLE} photos`, 'add')
       return [...prev, styleId]
     })
   }
@@ -299,12 +328,16 @@ export default function CreateStylesPage() {
     const allSelected = ids.every(id => selectedStyles.includes(id))
     if (allSelected) {
       setSelectedStyles(prev => prev.filter(id => !ids.includes(id)))
+      showToast(`Removed ${ids.length} styles — −${ids.length * VARIATIONS_PER_STYLE} photos`, 'remove')
     } else {
-      // Voeg toe maar respecteer maxStyles limit
       setSelectedStyles(prev => {
         const merged = [...new Set([...prev, ...ids])]
         return merged.slice(0, maxStyles)
       })
+      const added = Math.min(ids.length, maxStyles - selectedStyles.length)
+      if (added > 0) {
+        showToast(`Added ${added} styles — +${added * VARIATIONS_PER_STYLE} photos`, 'add')
+      }
     }
   }
 
@@ -322,21 +355,120 @@ export default function CreateStylesPage() {
     )
   }
 
-  const totalStyles = filteredCategories.reduce((acc, c) => acc + c.styles.length, 0)
-
   return (
     <div className="min-h-screen bg-[#0a0f1a]">
+
+      {/* ONBOARDING MODAL - eerste bezoek */}
+      {showOnboarding && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0a0f1a] rounded-3xl p-8 max-w-md w-full border border-violet-500/30 shadow-2xl">
+
+            <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/30">
+              <span className="text-3xl">✨</span>
+            </div>
+
+            <h2 className="text-2xl font-bold text-white text-center mb-3">How It Works</h2>
+
+            <p className="text-gray-300 text-center mb-6 leading-relaxed">
+              Pick the looks you want. Each style gives you <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique photos</span> with different poses, angles & lighting.
+            </p>
+
+            <div className="bg-violet-600/10 border border-violet-500/30 rounded-2xl p-5 mb-6">
+              <div className="flex items-center justify-center gap-3 mb-3 flex-wrap">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-white">1</div>
+                  <div className="text-xs text-violet-300 uppercase tracking-wider">Style</div>
+                </div>
+                <span className="text-violet-400 text-2xl font-bold">=</span>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-fuchsia-300">{VARIATIONS_PER_STYLE}</div>
+                  <div className="text-xs text-fuchsia-300 uppercase tracking-wider">Photos</div>
+                </div>
+              </div>
+              <p className="text-center text-gray-400 text-sm">
+                You have <span className="text-white font-semibold">{userCredits} credits</span> = up to <span className="text-violet-300 font-semibold">{maxStyles} styles</span> = <span className="text-fuchsia-300 font-semibold">{maxStyles * VARIATIONS_PER_STYLE} total headshots</span>
+              </p>
+            </div>
+
+            <button
+              onClick={dismissOnboarding}
+              className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition shadow-lg shadow-violet-500/25"
+            >
+              Got it, let's go →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* TOAST NOTIFICATION - bij elke selectie */}
+      <div
+        className={`fixed top-24 right-6 z-[90] transition-all duration-300 ${
+          toast.visible
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 -translate-y-2 pointer-events-none'
+        }`}
+      >
+        <div className={`flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-xl ${
+          toast.type === 'add'
+            ? 'bg-violet-600/90 border-violet-400/50 shadow-violet-500/30'
+            : 'bg-gray-700/90 border-gray-500/50'
+        }`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+            toast.type === 'add' ? 'bg-emerald-500' : 'bg-gray-500'
+          }`}>
+            {toast.type === 'add' ? '✓' : '−'}
+          </div>
+          <p className="text-white font-semibold text-sm whitespace-nowrap">{toast.message}</p>
+        </div>
+      </div>
+
       <CreateProgressBar currentStep={2} userCredits={userCredits} />
 
-      <div className="pt-[140px] pb-[160px] max-w-[900px] mx-auto px-6">
-        <div className="text-center mb-10">
+      <div className="pt-[140px] pb-[180px] max-w-[900px] mx-auto px-6">
+
+        <div className="text-center mb-6">
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Choose Your Styles</h1>
-          <p className="text-gray-400 text-lg">
-            Each style generates <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique variations</span>.
+          <p className="text-gray-300 text-lg">
+            Pick the looks you want for your headshots
           </p>
-          <p className="text-gray-600 text-sm mt-2">
-            {totalStyles} styles available • Pick up to <span className="text-violet-400 font-semibold">{maxStyles} styles</span> = {maxStyles * VARIATIONS_PER_STYLE} headshots
+        </div>
+
+        {/* INFO BANNER */}
+        <div className="bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 border-2 border-violet-500/40 rounded-2xl p-5 mb-8">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center font-bold text-white text-xl">
+                1
+              </div>
+              <span className="text-white font-bold text-lg">style</span>
+            </div>
+            <span className="text-violet-300 text-3xl font-bold">=</span>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-fuchsia-600 rounded-xl flex items-center justify-center font-bold text-white text-xl">
+                {VARIATIONS_PER_STYLE}
+              </div>
+              <span className="text-white font-bold text-lg">unique photos</span>
+            </div>
+          </div>
+          <p className="text-center text-violet-200 text-sm mt-3">
+            Each style you pick generates {VARIATIONS_PER_STYLE} different variations with unique poses, angles & lighting
           </p>
+        </div>
+
+        {/* QUOTA CARD */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-8 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p className="text-gray-400 text-sm mb-1">Your plan</p>
+            <p className="text-white font-semibold">
+              <span className="text-2xl">{userCredits}</span> credits = up to <span className="text-violet-400">{maxStyles} styles</span>
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-gray-400 text-sm mb-1">You'll receive</p>
+            <p className="text-white font-semibold">
+              <span className="text-2xl text-violet-400">{maxStyles * VARIATIONS_PER_STYLE}</span> total headshots
+            </p>
+          </div>
         </div>
 
         {maxStyles === 0 && (
@@ -405,26 +537,43 @@ export default function CreateStylesPage() {
                         return (
                           <button
                             key={style.id}
-                            onClick={() => toggleStyle(style.id)}
+                            onClick={() => toggleStyle(style.id, style.label)}
                             disabled={isLimitReached}
                             className={`relative flex flex-col items-center text-center py-4 px-3 rounded-xl transition-all duration-200 ${
                               isSelected
-                                ? 'bg-violet-600/20 border-2 border-violet-500 shadow-lg shadow-violet-500/10'
+                                ? 'bg-violet-600/20 border-2 border-violet-500 shadow-lg shadow-violet-500/20'
                                 : isLimitReached
                                 ? 'bg-white/[0.02] border border-white/5 opacity-40 cursor-not-allowed'
                                 : 'bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20'
                             }`}
                           >
+                            <div className={`absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-md ${
+                              isSelected
+                                ? 'bg-fuchsia-600 text-white'
+                                : 'bg-white/10 text-gray-400'
+                            }`}>
+                              ×{VARIATIONS_PER_STYLE}
+                            </div>
+
                             {isSelected && (
                               <div className="absolute top-2 right-2 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs">✓</span>
                               </div>
                             )}
-                            <span className="text-2xl mb-2">{style.icon}</span>
+
+                            <span className="text-2xl mb-2 mt-2">{style.icon}</span>
                             <span className={`text-sm font-semibold mb-1 ${isSelected ? 'text-white' : 'text-gray-300'}`}>
                               {style.label}
                             </span>
-                            <span className="text-gray-500 text-xs leading-tight">{style.description}</span>
+                            <span className="text-gray-500 text-xs leading-tight mb-2">{style.description}</span>
+
+                            <div className={`text-[10px] font-semibold uppercase tracking-wider mt-auto px-2 py-1 rounded ${
+                              isSelected
+                                ? 'bg-violet-500/30 text-violet-200'
+                                : 'bg-white/5 text-gray-500'
+                            }`}>
+                              {VARIATIONS_PER_STYLE} photos
+                            </div>
                           </button>
                         )
                       })}
@@ -438,37 +587,50 @@ export default function CreateStylesPage() {
       </div>
 
       {/* STICKY BOTTOM BAR */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0f1a]/95 backdrop-blur-xl border-t border-white/10 z-50">
-        <div className="max-w-[900px] mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
-            <div>
-              <span className="text-white font-bold text-lg">{selectedStyles.length}</span>
-              <span className="text-gray-400 ml-2">/ {maxStyles} styles</span>
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0f1a]/95 backdrop-blur-xl border-t-2 border-white/10 z-50 shadow-2xl">
+        <div className="max-w-[900px] mx-auto px-6 py-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+
+            <div className="flex items-center gap-3">
+              <div className="bg-violet-600/20 border border-violet-500/40 rounded-xl px-4 py-2">
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">Styles</p>
+                <p className="text-white font-bold text-2xl leading-none">{selectedStyles.length}<span className="text-gray-500 text-base">/{maxStyles}</span></p>
+              </div>
+
+              <span className="text-violet-400 text-2xl font-bold">×</span>
+
+              <div className="bg-fuchsia-600/20 border border-fuchsia-500/40 rounded-xl px-4 py-2">
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">Per style</p>
+                <p className="text-white font-bold text-2xl leading-none">{VARIATIONS_PER_STYLE}</p>
+              </div>
+
+              <span className="text-violet-400 text-2xl font-bold">=</span>
+
+              <div className="bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl px-5 py-2 shadow-lg shadow-violet-500/25">
+                <p className="text-violet-100 text-[10px] uppercase tracking-wider mb-0.5">Total headshots</p>
+                <p className="text-white font-bold text-2xl leading-none">{totalHeadshots}</p>
+              </div>
             </div>
-            <div className="text-sm">
-              <span className="text-violet-400 font-semibold">{totalHeadshots} headshots</span>
-              <span className="text-gray-600 mx-2">•</span>
-              <span className="text-gray-400">{totalHeadshots} credits</span>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => router.push('/create')}
+                className="py-3 px-6 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/15 transition"
+              >
+                ← Back
+              </button>
+              <button
+                onClick={handleContinue}
+                disabled={selectedStyles.length === 0 || isOverLimit}
+                className={`py-3 px-8 rounded-xl font-bold transition-all duration-300 ${
+                  selectedStyles.length > 0 && !isOverLimit
+                    ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xl shadow-violet-500/25'
+                    : 'bg-white/10 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Continue →
+              </button>
             </div>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => router.push('/create')}
-              className="py-3 px-6 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/15 transition"
-            >
-              ← Back
-            </button>
-            <button
-              onClick={handleContinue}
-              disabled={selectedStyles.length === 0 || isOverLimit}
-              className={`py-3 px-8 rounded-xl font-bold transition-all duration-300 ${
-                selectedStyles.length > 0 && !isOverLimit
-                  ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xl shadow-violet-500/25'
-                  : 'bg-white/10 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              Continue →
-            </button>
           </div>
         </div>
       </div>
