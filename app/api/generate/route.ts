@@ -76,15 +76,15 @@ async function resolveModelReference(userId: string, trainedModelId: string): Pr
 }
 
 const STYLE_PROMPTS: Record<string, string> = {
-  'corporate-classic':   '[TRIGGER], professional headshot, navy blue suit, white dress shirt, modern office background with windows, natural light, sharp focus, confident look',
+  'corporate-classic':   '[TRIGGER], professional portrait, navy blue suit, white dress shirt, modern office background with windows, natural light, sharp focus, confident look',
   'executive-navy':      '[TRIGGER], half body portrait, arms crossed, navy blue suit with tie, office background with city view, soft natural light, confident pose',
-  'ceo-black':           '[TRIGGER], headshot portrait, black suit, white shirt, light gray background, soft natural light, strong presence',
+  'ceo-black':           '[TRIGGER], portrait, black suit, white shirt, light gray background, soft natural light, strong presence',
   'boardroom-charcoal':  '[TRIGGER], half body portrait, arms crossed, charcoal gray suit, modern office background with windows, natural lighting, confident pose',
-  'pinstripe-pro':       '[TRIGGER], professional headshot, pinstripe suit with tie, neutral background, soft natural light, sharp professional look',
+  'pinstripe-pro':       '[TRIGGER], professional portrait, pinstripe suit with tie, neutral background, soft natural light, sharp professional look',
   'three-piece':         '[TRIGGER], half body portrait, arms crossed, three piece suit with vest, office background, window light, distinguished look',
-  'formal-black-drama':  '[TRIGGER], headshot portrait, black formal suit, white shirt, neutral darker background, soft side window light, elegant moody',
+  'formal-black-drama':  '[TRIGGER], portrait, black formal suit, white shirt, neutral darker background, soft side window light, elegant moody',
   'wall-street-power':   '[TRIGGER], professional portrait, dark suit, red tie, city street background, confident expression, natural light',
-  'navy-blazer-open':    '[TRIGGER], close up headshot, navy blazer, open collar white shirt, gray background, soft natural light, friendly expression',
+  'navy-blazer-open':    '[TRIGGER], close up portrait, navy blazer, open collar white shirt, gray background, soft natural light, friendly expression',
   'gray-blazer-blue':    '[TRIGGER], half body portrait, arms crossed, gray blazer, light blue background, soft window light, approachable professional',
   'beige-elegance':      '[TRIGGER], half body portrait, beige linen suit, dark background, warm ambient light, sophisticated',
   'teal-blazer':         '[TRIGGER], half body portrait, arms crossed, teal blazer, white t-shirt, light background, soft natural light, modern professional',
@@ -92,23 +92,23 @@ const STYLE_PROMPTS: Record<string, string> = {
   'creative-director':   '[TRIGGER], half body portrait, black blazer, black turtleneck, minimalist background, soft natural light, creative',
   'consultant-look':     '[TRIGGER], half body portrait, light gray suit, no tie, arms relaxed, modern office, soft natural light, confident',
   'tech-turtleneck':     '[TRIGGER], close up portrait, gray turtleneck sweater, neutral background, soft natural light, minimalist modern, intelligent gaze',
-  'gray-sweater-pro':    '[TRIGGER], headshot portrait, gray crew neck sweater over collared shirt, clean background, soft window light, smart casual',
+  'gray-sweater-pro':    '[TRIGGER], portrait, gray crew neck sweater over collared shirt, clean background, soft window light, smart casual',
   'knit-cozy':           '[TRIGGER], half body portrait, chunky knit sweater, warm ambient light, cozy neutral background, approachable',
-  'v-neck-smart':        '[TRIGGER], headshot portrait, blue v-neck sweater over collared shirt, light background, soft natural light, smart casual',
-  'white-button-down':   '[TRIGGER], headshot portrait, clean white button-down shirt, soft neutral background, natural window light, approachable professional',
+  'v-neck-smart':        '[TRIGGER], portrait, blue v-neck sweater over collared shirt, light background, soft natural light, smart casual',
+  'white-button-down':   '[TRIGGER], portrait, clean white button-down shirt, soft neutral background, natural window light, approachable professional',
   'light-blue-oxford':   '[TRIGGER], half body portrait, light blue oxford button-down shirt, open collar, soft neutral background, natural window light, classic smart casual',
-  'navy-polo':           '[TRIGGER], headshot portrait, navy blue polo shirt, clean light background, soft natural light, friendly expression',
-  'denim-shirt-fresh':   '[TRIGGER], headshot portrait, chambray denim shirt, white background, soft natural light, casual friendly look',
-  'plaid-friendly':      '[TRIGGER], headshot portrait, plaid button-up shirt, neutral background, soft natural light, relaxed approachable',
+  'navy-polo':           '[TRIGGER], portrait, navy blue polo shirt, clean light background, soft natural light, friendly expression',
+  'denim-shirt-fresh':   '[TRIGGER], portrait, chambray denim shirt, white background, soft natural light, casual friendly look',
+  'plaid-friendly':      '[TRIGGER], portrait, plaid button-up shirt, neutral background, soft natural light, relaxed approachable',
   'white-tee-clean':     '[TRIGGER], close up portrait, well-fitting plain white t-shirt, soft neutral light gray background, natural window light, candid feel, relaxed expression',
   'black-tee-clean':     '[TRIGGER], close up portrait, well-fitting plain black t-shirt, soft neutral medium gray background, natural light, candid feel, confident relaxed',
-  'henley-relaxed':      '[TRIGGER], headshot portrait, fitted henley shirt with button opening, textured fabric, warm natural window light, comfortable relaxed natural feel',
+  'henley-relaxed':      '[TRIGGER], portrait, fitted henley shirt with button opening, textured fabric, warm natural window light, comfortable relaxed natural feel',
   'golden-hour':         '[TRIGGER], portrait, casual smart shirt, golden hour outdoor lighting, warm natural tones, lifestyle photography',
   'park-natural':        '[TRIGGER], medium shot, outdoor park setting, casual smart outfit or plain t-shirt, dappled sunlight, blurred green background, relaxed natural pose',
   'rooftop-city':        '[TRIGGER], medium shot, rooftop setting, city skyline background, smart casual outfit, natural daylight',
   'city-walk':           '[TRIGGER], medium shot, walking pose, casual jacket, city street background, urban lifestyle, natural movement',
   'leather-jacket-urban': '[TRIGGER], medium shot, black leather jacket, white t-shirt, city street background, natural evening light, edgy professional',
-  'all-black-minimal':   '[TRIGGER], headshot portrait, all black outfit, black shirt or turtleneck, dark neutral background, soft side light, minimal dramatic',
+  'all-black-minimal':   '[TRIGGER], portrait, all black outfit, black shirt or turtleneck, dark neutral background, soft side light, minimal dramatic',
   'bold-colored-blazer': '[TRIGGER], half body portrait, bold colored blazer (deep red or emerald green), white t-shirt underneath, modern creative background, natural light, confident statement',
   'restaurant-elegant':  '[TRIGGER], medium shot portrait, smart casual button-down or henley, upscale restaurant interior background with warm ambient bokeh lights, candlelit warm lighting, sophisticated dinner atmosphere',
   'wine-bar-relaxed':    '[TRIGGER], medium shot, sitting at wine bar, dark sweater or shirt, warm intimate bar lighting, blurred bottles in background, relaxed sophisticated evening',
@@ -116,24 +116,24 @@ const STYLE_PROMPTS: Record<string, string> = {
   'rooftop-bar-evening': '[TRIGGER], half body portrait, stylish jacket or dark shirt, rooftop bar background with city lights bokeh, evening lighting, urban nightlife vibe',
   'w-power-blazer-navy':   '[TRIGGER], professional woman portrait, navy blue tailored blazer, white silk blouse, soft neutral background, arms crossed confidently, natural light, executive look',
   'w-executive-charcoal':  '[TRIGGER], half body portrait of professional woman, charcoal gray tailored suit, light silk blouse, modern office background, natural professional lighting, confident executive',
-  'w-ceo-black':           '[TRIGGER], elegant headshot portrait of businesswoman, black tailored blazer, white blouse, light neutral background, soft natural light, powerful executive presence',
-  'w-pinstripe-pro':       '[TRIGGER], professional headshot of businesswoman, pinstripe blazer, silk blouse, neutral gray background, soft natural light, sharp sophisticated look',
+  'w-ceo-black':           '[TRIGGER], elegant portrait of businesswoman, black tailored blazer, white blouse, light neutral background, soft natural light, powerful executive presence',
+  'w-pinstripe-pro':       '[TRIGGER], professional portrait of businesswoman, pinstripe blazer, silk blouse, neutral gray background, soft natural light, sharp sophisticated look',
   'w-sheath-classic':      '[TRIGGER], elegant portrait of businesswoman, fitted black sheath dress, minimal jewelry, light neutral background, soft natural lighting, refined executive style',
-  'w-pussybow-elegant':    '[TRIGGER], professional headshot of woman, cream silk blouse with pussy bow detail, tweed jacket, neutral background, soft natural light, classic elegant style',
+  'w-pussybow-elegant':    '[TRIGGER], professional portrait of woman, cream silk blouse with pussy bow detail, tweed jacket, neutral background, soft natural light, classic elegant style',
   'w-cream-blazer-arms':   '[TRIGGER], half body portrait of professional woman, cream beige blazer, white t-shirt underneath, arms crossed, soft neutral background, natural lighting, modern professional',
-  'w-turtleneck-blazer':   '[TRIGGER], headshot of professional woman, black turtleneck under gray tailored blazer, minimalist neutral background, soft natural light, modern sophisticated',
+  'w-turtleneck-blazer':   '[TRIGGER], portrait of professional woman, black turtleneck under gray tailored blazer, minimalist neutral background, soft natural light, modern sophisticated',
   'w-silk-blouse-modern':  '[TRIGGER], half body portrait of woman, navy silk blouse, modern office background, natural window lighting, contemporary professional elegant',
-  'w-cardigan-soft':       '[TRIGGER], headshot portrait of woman, soft beige cardigan over white tee, warm natural window light, cozy professional, approachable smart casual',
-  'w-knit-twinset':        '[TRIGGER], professional headshot of woman, matching knit top and cardigan in neutral tones, soft neutral background, warm natural light, refined smart casual',
+  'w-cardigan-soft':       '[TRIGGER], portrait of woman, soft beige cardigan over white tee, warm natural window light, cozy professional, approachable smart casual',
+  'w-knit-twinset':        '[TRIGGER], professional portrait of woman, matching knit top and cardigan in neutral tones, soft neutral background, warm natural light, refined smart casual',
   'w-startup-casual':      '[TRIGGER], medium shot portrait of woman, light blue button-down shirt, no blazer, modern coworking space background, natural light, energetic approachable professional',
   'w-red-power-suit':      '[TRIGGER], half body portrait of woman, bold red blazer, white t-shirt underneath, modern creative office background, natural light, confident power pose, statement professional',
-  'w-emerald-blazer':      '[TRIGGER], professional headshot of woman, emerald green blazer, black top underneath, soft side natural light, neutral background, bold creative professional',
+  'w-emerald-blazer':      '[TRIGGER], professional portrait of woman, emerald green blazer, black top underneath, soft side natural light, neutral background, bold creative professional',
   'w-mustard-creative':    '[TRIGGER], half body portrait of woman, mustard yellow silk blouse, creative neutral background, natural lighting, artistic professional',
-  'w-statement-coral':     '[TRIGGER], headshot of woman, coral pink tailored blazer, modern creative office background, vibrant natural lighting, bold confident creative professional',
+  'w-statement-coral':     '[TRIGGER], portrait of woman, coral pink tailored blazer, modern creative office background, vibrant natural lighting, bold confident creative professional',
   'w-jewel-purple':        '[TRIGGER], portrait of woman, deep purple silk top, artistic neutral background, soft natural light, jewel-tone creative professional, expressive',
   'w-white-tee-natural':   '[TRIGGER], half body portrait of woman, clean white t-shirt, blurred green nature background, outdoor natural daylight, fresh approachable, genuine smile',
-  'w-cream-sweater-window': '[TRIGGER], headshot portrait of woman, soft cream knit sweater, warm window light, blurred home interior background, relaxed approachable',
-  'w-denim-shirt-fresh':   '[TRIGGER], professional headshot of woman, light chambray denim shirt, white background, natural daylight, casual approachable professional, friendly',
+  'w-cream-sweater-window': '[TRIGGER], portrait of woman, soft cream knit sweater, warm window light, blurred home interior background, relaxed approachable',
+  'w-denim-shirt-fresh':   '[TRIGGER], professional portrait of woman, light chambray denim shirt, white background, natural daylight, casual approachable professional, friendly',
   'w-coffee-shop-warm':    '[TRIGGER], medium shot of woman, casual smart sweater, warm coffee shop interior background, ambient lighting, relaxed approachable, natural casual',
   'w-park-outdoor':        '[TRIGGER], half body portrait of woman, light casual blouse, blurred green park background, soft natural daylight, fresh outdoor relaxed',
   'w-rooftop-golden':      '[TRIGGER], medium shot of woman, smart casual blouse, rooftop setting, city panorama background, warm golden hour lighting, lifestyle professional',
@@ -160,14 +160,14 @@ export async function POST(request: NextRequest) {
     if (!styleIds || styleIds.length === 0) return NextResponse.json({ error: 'No styles selected' }, { status: 400 })
 
     const totalHeadshots = styleIds.length * VARIATIONS_PER_STYLE
-    console.log(`🚀 Start: ${userId} | ${styleIds.length} styles × ${VARIATIONS_PER_STYLE} = ${totalHeadshots} headshots`)
+    console.log(`🚀 Start: ${userId} | ${styleIds.length} styles × ${VARIATIONS_PER_STYLE} = ${totalHeadshots} portraits`)
 
     const { data: user, error: userError } = await supabase
       .from('users').select('*').eq('id', userId).single()
 
     if (userError || !user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
-    // Credits check: 4 credits per stijl (1 per gegenereerde headshot)
+    // Credits check: 4 credits per stijl (1 per gegenereerde portrait)
     const creditsNeeded = totalHeadshots
     if (user.credits < creditsNeeded) {
       return NextResponse.json({
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
     const personDescription = buildPersonDescription(characteristics)
     const negativeAdditions = buildNegativePromptAdditions(characteristics)
 
-    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette, studio strobe lighting, artificial lighting"
+    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, blurry, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette, studio strobe lighting, artificial lighting, cropped head, partial face, head cut off, extreme close-up, face partially out of frame, only neck visible"
     const fullNegativePrompt = negativeAdditions ? `${baseNegativePrompt}, ${negativeAdditions}` : baseNegativePrompt
 
     // Maak generation record met empty result_urls
@@ -225,14 +225,14 @@ export async function POST(request: NextRequest) {
     await supabase.from('users').update({ credits: user.credits - creditsNeeded }).eq('id', userId)
 
     const triggerWithDescription = personDescription ? `${triggerWord}, ${personDescription}` : triggerWord
-    const realism = 'natural skin texture, photorealistic, candid feel, film grain, shot on 50mm lens, subtle skin imperfections'
+    const realism = 'natural skin texture, photorealistic, candid feel, film grain, shot on 50mm lens, subtle skin imperfections, framed from chest up, full head visible, head not cropped'
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${request.headers.get('host')}`
 
     // Start predictions parallel - 4 outputs per stijl
     const predictionPromises = styleIds.map(async (styleId: string) => {
       try {
-        const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional headshot portrait, natural lighting, clean background, sharp focus'
+        const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional portrait portrait, natural lighting, clean background, sharp focus'
         const fullPrompt = promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription) + `, ${realism}`
 
         const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
