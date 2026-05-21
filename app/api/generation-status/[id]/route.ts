@@ -3,6 +3,20 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 const VARIATIONS_PER_STYLE = 4
 
+// Veilig parsen: styles_used / result_urls kunnen als string OF array opgeslagen zijn.
+function toArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value as string[]
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+  return []
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -21,8 +35,8 @@ export async function GET(
       return NextResponse.json({ error: 'Generation not found' }, { status: 404 })
     }
 
-    const styles: string[] = generation.styles_used || []
-    const imageUrls: string[] = generation.result_urls || []
+    const styles = toArray(generation.styles_used)
+    const imageUrls = toArray(generation.result_urls)
     const totalStyles = styles.length
     const total = totalStyles * VARIATIONS_PER_STYLE
     const completed = imageUrls.length

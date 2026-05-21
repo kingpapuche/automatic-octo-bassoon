@@ -11,11 +11,21 @@ const supabase = createClient(
 
 const VARIATIONS_PER_STYLE = 4
 
-// ===========================================
-// GENERATION WEBHOOK — Option C
-// 1 prediction = 4 outputs (1 stijl = 4 variaties)
-// Upload alle 4 en voeg toe aan result_urls
-// ===========================================
+// Veilig parsen: styles_used / result_urls kunnen als string OF array opgeslagen zijn.
+// De kolom is type 'text', dus arrays worden als JSON-string bewaard.
+// .length op een string telt karakters (bug), dus eerst parsen naar echte array.
+function toArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value as string[]
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+  return []
+}
 
 interface ReplicateWebhookPayload {
   id: string
@@ -49,15 +59,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Generation not found' }, { status: 404 })
     }
 
+    // Parse beide velden veilig naar echte arrays
+    const stylesUsed = toArray(generation.styles_used)
+    const existingUrls = toArray(generation.result_urls)
+    const totalExpected = stylesUsed.length * VARIATIONS_PER_STYLE
+
     // === SUCCEEDED ===
     if (payload.status === 'succeeded' && payload.output) {
-      // Output = array van 4 URLs (one per variation)
       const imageUrls = Array.isArray(payload.output) ? payload.output : [payload.output]
       console.log(`Got ${imageUrls.length} variations for ${styleId}`)
 
-      const uploadedUrls: string[] = []
-
-      // Upload alle variaties naar Supabase Storage parallel
       const uploadPromises = imageUrls.map(async (imageUrl, idx) => {
         try {
           const response = await fetch(imageUrl)
@@ -78,7 +89,7 @@ export async function POST(request: NextRequest) {
             return publicUrlData.publicUrl
           } else {
             console.error(`Upload error v${idx + 1}:`, uploadError)
-            return imageUrl // fallback naar Replicate URL
+            return imageUrl
           }
         } catch (err) {
           console.error(`Download error v${idx + 1}:`, err)
@@ -86,12 +97,10 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      const results = await Promise.all(uploadPromises)
-      uploadedUrls.push(...results)
+      const uploadedUrls = await Promise.all(uploadPromises)
 
-      // Voeg alle 4 URLs toe aan result_urls
-      const newUrls = [...(generation.result_urls || []), ...uploadedUrls]
-      const totalExpected = (generation.styles_used?.length || 0) * VARIATIONS_PER_STYLE
+      // Veilig samenvoegen (existingUrls is nu een echte array)
+      const newUrls = [...existingUrls, ...uploadedUrls]
       const isComplete = newUrls.length >= totalExpected
 
       await supabase
@@ -103,15 +112,14 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', generationId)
 
-      console.log(`📊 ${generationId}: ${newUrls.length}/${totalExpected} complete`)
+      console.log(`Progress ${generationId}: ${newUrls.length}/${totalExpected} complete`)
 
-      // Log credit transactie alleen als alles klaar is
       if (isComplete) {
         await supabase.from('credits_transactions').insert({
           user_id: userId,
           amount: -newUrls.length,
           type: 'generation',
-          description: `Generated ${newUrls.length} headshots (${generation.styles_used?.length} styles × ${VARIATIONS_PER_STYLE})`,
+          description: `Generated ${newUrls.length} headshots (${stylesUsed.length} styles x ${VARIATIONS_PER_STYLE})`,
         })
       }
 
@@ -122,7 +130,6 @@ export async function POST(request: NextRequest) {
     if (payload.status === 'failed' || payload.status === 'canceled') {
       console.error(`Prediction ${payload.status}: ${styleId}`, payload.error)
 
-      // Geef de 4 credits voor deze stijl terug
       const { data: userData } = await supabase
         .from('users').select('credits').eq('id', userId).single()
 
@@ -133,8 +140,7 @@ export async function POST(request: NextRequest) {
           .eq('id', userId)
       }
 
-      const totalExpected = (generation.styles_used?.length || 0) * VARIATIONS_PER_STYLE
-      const currentCompleted = (generation.result_urls?.length || 0)
+      const currentCompleted = existingUrls.length
 
       // Forceer complete state als dit de laatste prediction was
       if (currentCompleted >= totalExpected - VARIATIONS_PER_STYLE) {
