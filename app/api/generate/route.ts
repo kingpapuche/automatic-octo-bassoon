@@ -150,6 +150,14 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-leather-jacket-edge': '[TRIGGER], medium shot of woman, black leather jacket, dark top underneath, urban evening background, natural evening light, edgy sophisticated',
   'w-evening-rooftop':     '[TRIGGER], half body portrait of woman, elegant black evening top, rooftop background with city lights, warm evening lighting, glamorous nighttime',
   'w-night-city-glamour':  '[TRIGGER], portrait of woman, stylish dark outfit, city nightlife background with bokeh lights, sophisticated glamorous evening',
+
+  // ===== SPECIALTY POSES (man) =====
+  'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark suit, neutral background, soft natural light, authoritative confident pose',
+  'sitting-confident':   '[TRIGGER], medium shot, sitting in chair confidently, legs crossed, blazer, modern office setting, soft natural light, executive presence',
+  'leaning-elegant':     '[TRIGGER], medium shot, leaning against wall casually, smart casual outfit, modern interior, soft natural light, approachable confidence',
+  'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
+  'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
+  'holding-tablet':      '[TRIGGER], half body portrait, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
 }
 
 export async function POST(request: NextRequest) {
@@ -248,7 +256,7 @@ export async function POST(request: NextRequest) {
             num_outputs: VARIATIONS_PER_STYLE, // 4 variaties per stijl
             aspect_ratio: aspectRatio || '3:4',
             output_format: 'webp',
-            guidance_scale: 2.5,
+            guidance_scale: 3.0,
             output_quality: 90,
             num_inference_steps: 35,
             disable_safety_checker: false,
