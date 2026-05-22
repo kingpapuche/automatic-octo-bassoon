@@ -109,6 +109,20 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     ],
   },
   {
+    id: 'specialty-poses',
+    name: 'Specialty Poses',
+    icon: '🧍',
+    gender: 'male',
+    styles: [
+      { id: 'arms-crossed-power',  label: 'Arms Crossed',       description: 'Arms crossed, dark suit',    icon: '💪' },
+      { id: 'sitting-confident',   label: 'Sitting Confident',  description: 'Sitting in chair, blazer',   icon: '🪑' },
+      { id: 'leaning-elegant',     label: 'Leaning Elegant',    description: 'Leaning casually, modern',   icon: '🚪' },
+      { id: 'hands-in-pockets',    label: 'Hands in Pockets',   description: 'Relaxed, urban background',  icon: '🧍' },
+      { id: 'thoughtful-pose',     label: 'Thoughtful',         description: 'Hand near chin, intellectual', icon: '🤔' },
+      { id: 'holding-tablet',      label: 'Holding Tablet',     description: 'Tablet, modern office',      icon: '📱' },
+    ],
+  },
+  {
     id: 'restaurant-mens',
     name: 'Restaurant / Date Night',
     icon: '🍷',
@@ -189,6 +203,20 @@ const STYLE_CATEGORIES: StyleCategory[] = [
     ],
   },
   {
+    id: 'w-specialty-poses',
+    name: 'Specialty Poses',
+    icon: '🧍‍♀️',
+    gender: 'female',
+    styles: [
+      { id: 'w-arms-crossed-power', label: 'Arms Crossed',      description: 'Arms crossed, blazer',       icon: '💪' },
+      { id: 'w-sitting-confident',  label: 'Sitting Confident', description: 'Sitting in chair, blazer',   icon: '🪑' },
+      { id: 'w-leaning-elegant',    label: 'Leaning Elegant',   description: 'Leaning casually, modern',   icon: '🚪' },
+      { id: 'w-hands-relaxed',      label: 'Hands Relaxed',     description: 'Relaxed pose, urban',        icon: '🧍‍♀️' },
+      { id: 'w-thoughtful-pose',    label: 'Thoughtful',        description: 'Hand near chin, elegant',    icon: '🤔' },
+      { id: 'w-holding-tablet',     label: 'Holding Tablet',    description: 'Tablet, modern office',      icon: '📱' },
+    ],
+  },
+  {
     id: 'w-restaurant',
     name: 'Restaurant / Date Night',
     icon: '🍷',
@@ -224,7 +252,6 @@ export default function CreateStylesPage() {
   const [expandedCategory, setExpandedCategory] = useState<string>('')
   const [gender, setGender] = useState<'male' | 'female'>('male')
 
-  // ONBOARDING + TOAST states
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'add' | 'remove' }>({
     visible: false,
@@ -263,8 +290,6 @@ export default function CreateStylesPage() {
         console.error('Error:', error)
       } finally {
         setLoading(false)
-
-        // ONBOARDING: check localStorage en toon popup eerste bezoek
         const hasOnboarded = localStorage.getItem(ONBOARDING_KEY)
         if (!hasOnboarded) {
           setShowOnboarding(true)
@@ -279,7 +304,6 @@ export default function CreateStylesPage() {
     setShowOnboarding(false)
   }
 
-  // TOAST helper - toon korte feedback bij selectie
   const showToast = (message: string, type: 'add' | 'remove') => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
     setToast({ visible: true, message, type })
@@ -358,21 +382,16 @@ export default function CreateStylesPage() {
   return (
     <div className="min-h-screen bg-[#0a0f1a]">
 
-      {/* ONBOARDING MODAL - eerste bezoek */}
       {showOnboarding && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0a0f1a] rounded-3xl p-8 max-w-md w-full border border-violet-500/30 shadow-2xl">
-
             <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/30">
               <span className="text-3xl">✨</span>
             </div>
-
             <h2 className="text-2xl font-bold text-white text-center mb-3">How It Works</h2>
-
             <p className="text-gray-300 text-center mb-6 leading-relaxed">
-              Pick the looks you want. Each style gives you <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique photos</span> with different poses, angles & lighting.
+              Pick the looks you want. Each style gives you <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique photos</span> with different poses, angles &amp; lighting.
             </p>
-
             <div className="bg-violet-600/10 border border-violet-500/30 rounded-2xl p-5 mb-6">
               <div className="flex items-center justify-center gap-3 mb-3 flex-wrap">
                 <div className="text-center">
@@ -389,7 +408,6 @@ export default function CreateStylesPage() {
                 You have <span className="text-white font-semibold">{userCredits} credits</span> = up to <span className="text-violet-300 font-semibold">{maxStyles} styles</span> = <span className="text-fuchsia-300 font-semibold">{maxStyles * VARIATIONS_PER_STYLE} total headshots</span>
               </p>
             </div>
-
             <button
               onClick={dismissOnboarding}
               className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition shadow-lg shadow-violet-500/25"
@@ -400,7 +418,6 @@ export default function CreateStylesPage() {
         </div>
       )}
 
-      {/* TOAST NOTIFICATION - bij elke selectie */}
       <div
         className={`fixed top-24 right-6 z-[90] transition-all duration-300 ${
           toast.visible
@@ -433,7 +450,6 @@ export default function CreateStylesPage() {
           </p>
         </div>
 
-        {/* INFO BANNER */}
         <div className="bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 border-2 border-violet-500/40 rounded-2xl p-5 mb-8">
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <div className="flex items-center gap-3">
@@ -451,11 +467,10 @@ export default function CreateStylesPage() {
             </div>
           </div>
           <p className="text-center text-violet-200 text-sm mt-3">
-            Each style you pick generates {VARIATIONS_PER_STYLE} different variations with unique poses, angles & lighting
+            Each style you pick generates {VARIATIONS_PER_STYLE} different variations with unique poses, angles &amp; lighting
           </p>
         </div>
 
-        {/* QUOTA CARD */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-8 flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="text-gray-400 text-sm mb-1">Your plan</p>
@@ -586,7 +601,6 @@ export default function CreateStylesPage() {
         </div>
       </div>
 
-      {/* STICKY BOTTOM BAR */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#0a0f1a]/95 backdrop-blur-xl border-t-2 border-white/10 z-50 shadow-2xl">
         <div className="max-w-[900px] mx-auto px-6 py-4">
           <div className="flex items-center justify-between flex-wrap gap-3">

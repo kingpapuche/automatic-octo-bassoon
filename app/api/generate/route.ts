@@ -158,6 +158,14 @@ const STYLE_PROMPTS: Record<string, string> = {
   'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
   'holding-tablet':      '[TRIGGER], half body portrait, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
+
+  // ===== SPECIALTY POSES (vrouw) =====
+  'w-arms-crossed-power': '[TRIGGER], half body portrait of professional woman, arms crossed confidently, tailored blazer, neutral background, soft natural light, authoritative elegant pose',
+  'w-sitting-confident':  '[TRIGGER], medium shot of professional woman, sitting in chair confidently, tailored blazer, modern office setting, soft natural light, executive presence',
+  'w-leaning-elegant':    '[TRIGGER], medium shot of woman, leaning against wall casually, smart casual outfit, modern interior, soft natural light, approachable elegant confidence',
+  'w-hands-relaxed':      '[TRIGGER], half body portrait of woman, relaxed hand pose, blazer, urban background, soft natural light, casual confidence',
+  'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
+  'w-holding-tablet':     '[TRIGGER], half body portrait of woman, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
 }
 
 export async function POST(request: NextRequest) {
