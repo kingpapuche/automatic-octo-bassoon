@@ -11,22 +11,6 @@ const supabase = createClient(
 
 const VARIATIONS_PER_STYLE = 4
 
-// Veilig parsen: styles_used / result_urls kunnen als string OF array opgeslagen zijn.
-// De kolom is type 'text', dus arrays worden als JSON-string bewaard.
-// .length op een string telt karakters (bug), dus eerst parsen naar echte array.
-function toArray(value: unknown): string[] {
-  if (Array.isArray(value)) return value as string[]
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value)
-      return Array.isArray(parsed) ? parsed : []
-    } catch {
-      return []
-    }
-  }
-  return []
-}
-
 interface ReplicateWebhookPayload {
   id: string
   status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled'
@@ -48,27 +32,12 @@ export async function POST(request: NextRequest) {
     const payload = (await request.json()) as ReplicateWebhookPayload
     console.log(`Webhook: ${payload.id} status=${payload.status} style=${styleId}`)
 
-    const { data: generation, error: genError } = await supabase
-      .from('generations')
-      .select('*')
-      .eq('id', generationId)
-      .single()
-
-    if (genError || !generation) {
-      console.error('Generation not found:', generationId)
-      return NextResponse.json({ error: 'Generation not found' }, { status: 404 })
-    }
-
-    // Parse beide velden veilig naar echte arrays
-    const stylesUsed = toArray(generation.styles_used)
-    const existingUrls = toArray(generation.result_urls)
-    const totalExpected = stylesUsed.length * VARIATIONS_PER_STYLE
-
     // === SUCCEEDED ===
     if (payload.status === 'succeeded' && payload.output) {
       const imageUrls = Array.isArray(payload.output) ? payload.output : [payload.output]
       console.log(`Got ${imageUrls.length} variations for ${styleId}`)
 
+      // Download van Replicate -> upload naar eigen storage (permanente urls)
       const uploadPromises = imageUrls.map(async (imageUrl, idx) => {
         try {
           const response = await fetch(imageUrl)
@@ -99,30 +68,25 @@ export async function POST(request: NextRequest) {
 
       const uploadedUrls = await Promise.all(uploadPromises)
 
-      // Veilig samenvoegen (existingUrls is nu een echte array)
-      const newUrls = [...existingUrls, ...uploadedUrls]
-      const isComplete = newUrls.length >= totalExpected
+      // Atomair + idempotent vastleggen: deze prediction werkt z'n EIGEN item-rij
+      // bij, en de DB-functie herberekent de aggregatie onder een row-lock.
+      // Geen lost-update race meer, en webhook-retries zijn idempotent.
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('record_generation_item', {
+        p_generation_id: generationId,
+        p_user_id: userId,
+        p_style_id: styleId,
+        p_prediction_id: payload.id,
+        p_status: 'completed',
+        p_urls: uploadedUrls,
+        p_variations: VARIATIONS_PER_STYLE,
+      })
 
-      await supabase
-        .from('generations')
-        .update({
-          result_urls: newUrls,
-          credits_used: newUrls.length,
-          status: isComplete ? 'completed' : 'processing',
-        })
-        .eq('id', generationId)
-
-      console.log(`Progress ${generationId}: ${newUrls.length}/${totalExpected} complete`)
-
-      if (isComplete) {
-        await supabase.from('credits_transactions').insert({
-          user_id: userId,
-          amount: -newUrls.length,
-          type: 'generation',
-          description: `Generated ${newUrls.length} headshots (${stylesUsed.length} styles x ${VARIATIONS_PER_STYLE})`,
-        })
+      if (rpcError) {
+        console.error('record_generation_item (succeeded) error:', rpcError)
+        return NextResponse.json({ error: 'Failed to record item' }, { status: 500 })
       }
 
+      console.log(`Progress ${generationId}:`, rpcResult)
       return NextResponse.json({ received: true })
     }
 
@@ -130,24 +94,21 @@ export async function POST(request: NextRequest) {
     if (payload.status === 'failed' || payload.status === 'canceled') {
       console.error(`Prediction ${payload.status}: ${styleId}`, payload.error)
 
-      const { data: userData } = await supabase
-        .from('users').select('credits').eq('id', userId).single()
+      // Markeer item als failed; de DB-functie refundt de credits voor deze style
+      // precies één keer en flipt de generation naar completed als dit de laatste was.
+      const { error: rpcError } = await supabase.rpc('record_generation_item', {
+        p_generation_id: generationId,
+        p_user_id: userId,
+        p_style_id: styleId,
+        p_prediction_id: payload.id,
+        p_status: 'failed',
+        p_urls: [],
+        p_variations: VARIATIONS_PER_STYLE,
+      })
 
-      if (userData) {
-        await supabase
-          .from('users')
-          .update({ credits: (userData.credits || 0) + VARIATIONS_PER_STYLE })
-          .eq('id', userId)
-      }
-
-      const currentCompleted = existingUrls.length
-
-      // Forceer complete state als dit de laatste prediction was
-      if (currentCompleted >= totalExpected - VARIATIONS_PER_STYLE) {
-        await supabase
-          .from('generations')
-          .update({ status: 'completed' })
-          .eq('id', generationId)
+      if (rpcError) {
+        console.error('record_generation_item (failed) error:', rpcError)
+        return NextResponse.json({ error: 'Failed to record item' }, { status: 500 })
       }
 
       return NextResponse.json({ received: true })

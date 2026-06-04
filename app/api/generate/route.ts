@@ -193,13 +193,11 @@ export async function POST(request: NextRequest) {
 
     if (!user.trained_model_id) return NextResponse.json({ error: 'No trained model found' }, { status: 400 })
 
-    // ============================================================
-    // BENCHMARK TEST — hardcoded oude LoRA van 17/01/2026 ("perfecte huid")
-    // LET OP: dit gebruikt JOUW persoonlijke oude model. Werkt ALLEEN voor jou.
-    // Niet voor klanten — dit is puur om je oude resultaat te reproduceren als referentie.
-    // ============================================================
-    const versionId = '299216eb243802619536051235ed5ef59d1814a9b610248bb04346249f608d3e'
-    const triggerWord = 'HEADSHOT' // trigger word dat bij deze oude LoRA hoort
+    // Gebruik het per-user getrainde model (productie). Elke klant krijgt z'n eigen LoRA.
+    const modelReference = await resolveModelReference(userId, user.trained_model_id)
+    const versionId = modelReference.split(':')[1]
+    if (!versionId) return NextResponse.json({ error: 'Invalid model reference' }, { status: 500 })
+    const triggerWord = user.trigger_word || 'HEADSHOT'
 
     const characteristics: UserCharacteristics = {
       gender: user.gender, ethnicity: user.ethnicity, eye_color: user.eye_color,
@@ -222,6 +220,7 @@ export async function POST(request: NextRequest) {
         result_urls: [],
         credits_used: 0,
         status: 'processing',
+        total_predictions: styleIds.length,
       })
       .select()
       .single()
@@ -272,6 +271,15 @@ export async function POST(request: NextRequest) {
           webhook: webhookUrl,
           webhook_events_filter: ['completed'],
         })
+
+        // Per-prediction rij: webhook werkt straks z'n EIGEN rij bij (geen race).
+        // Upsert op prediction_id zodat een supersnelle webhook die ons voor is, niet botst.
+        await supabase
+          .from('generation_items')
+          .upsert(
+            { generation_id: generationId, style_id: styleId, prediction_id: prediction.id, status: 'processing' },
+            { onConflict: 'prediction_id', ignoreDuplicates: true }
+          )
 
         console.log(`✅ Started ${styleId} (4 variations) → ${prediction.id}`)
         return { styleId, predictionId: prediction.id, success: true }
