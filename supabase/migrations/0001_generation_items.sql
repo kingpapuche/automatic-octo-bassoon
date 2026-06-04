@@ -1,20 +1,28 @@
 -- ============================================================================
 -- Production-grade generation tracking: per-prediction items + atomic finalize
--- Lost to a race? Not anymore. Each Replicate prediction gets its OWN row,
--- so parallel webhooks never overwrite each other. Completion + credit refunds
--- happen inside one locked transaction, idempotent against Replicate retries.
+-- Each Replicate prediction gets its OWN row, so parallel webhooks never
+-- overwrite each other. Completion + credit refunds happen inside one locked
+-- transaction, idempotent against Replicate retries.
 --
--- Run this in the Supabase SQL editor BEFORE deploying the new app code.
+-- NOTE: generations.result_urls is a Postgres text[] column, so everything
+-- here uses text[] to match it (no jsonb).
+--
+-- Safe to re-run. Run in the Supabase SQL editor BEFORE deploying the app code.
 -- ============================================================================
 
+-- Clean any earlier (jsonb) attempt of this function/table.
+drop function if exists public.record_generation_item(uuid, uuid, text, text, text, jsonb, int);
+drop function if exists public.record_generation_item(uuid, uuid, text, text, text, text[], int);
+drop table if exists public.generation_items cascade;
+
 -- 1) Per-prediction table -----------------------------------------------------
-create table if not exists public.generation_items (
+create table public.generation_items (
   id            uuid primary key default gen_random_uuid(),
   generation_id uuid not null references public.generations(id) on delete cascade,
   style_id      text not null,
-  prediction_id text unique,                       -- Replicate prediction id (idempotency key)
-  status        text not null default 'processing',-- processing | completed | failed
-  result_urls   jsonb not null default '[]'::jsonb,-- the (up to 4) urls for this style
+  prediction_id text unique,                  -- Replicate prediction id (idempotency key)
+  status        text not null default 'processing', -- processing | completed | failed
+  result_urls   text[] not null default '{}', -- the (up to 4) urls for this style
   error         text,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
@@ -28,29 +36,25 @@ alter table public.generations
   add column if not exists total_predictions int;
 
 -- 3) Atomic, idempotent finalize function -------------------------------------
--- Called by the webhook once per prediction. Locks the parent generation row so
--- concurrent webhooks serialize; recomputes the aggregate from the item rows
--- (never a blind append), refunds credits on failure exactly once, and flips
--- the generation to 'completed' only when every prediction is terminal.
 create or replace function public.record_generation_item(
   p_generation_id uuid,
   p_user_id       uuid,
   p_style_id      text,
   p_prediction_id text,
   p_status        text,    -- 'completed' | 'failed'
-  p_urls          jsonb,   -- urls for completed; '[]' for failed
+  p_urls          text[],  -- urls for completed; '{}' for failed
   p_variations    int      -- variations per style (for refund on failure)
 ) returns jsonb
 language plpgsql
 as $$
 declare
-  v_item_status text;
+  v_item_status    text;
   v_old_gen_status text;
-  v_expected int;
-  v_terminal int;
-  v_all_urls jsonb;
-  v_count int;
-  v_is_complete boolean := false;
+  v_expected       int;
+  v_terminal       int;
+  v_all_urls       text[];
+  v_count          int;
+  v_is_complete    boolean := false;
 begin
   -- Serialize all webhooks for this generation.
   select status, total_predictions
@@ -63,7 +67,7 @@ begin
     return jsonb_build_object('error', 'generation_not_found');
   end if;
 
-  -- Idempotency: if this prediction was already recorded as terminal, do nothing.
+  -- Idempotency: if this prediction was already terminal, do nothing.
   select status into v_item_status
     from public.generation_items
    where prediction_id = p_prediction_id;
@@ -77,14 +81,13 @@ begin
     (generation_id, style_id, prediction_id, status, result_urls, updated_at)
   values
     (p_generation_id, p_style_id, p_prediction_id, p_status,
-     coalesce(p_urls, '[]'::jsonb), now())
+     coalesce(p_urls, '{}'), now())
   on conflict (prediction_id) do update
     set status      = excluded.status,
         result_urls = excluded.result_urls,
         updated_at  = now();
 
-  -- Refund credits for a failed prediction (exactly once — guarded by the
-  -- idempotency check above).
+  -- Refund credits for a failed prediction (exactly once).
   if p_status = 'failed' and p_variations > 0 then
     update public.users
        set credits = coalesce(credits, 0) + p_variations
@@ -92,17 +95,14 @@ begin
   end if;
 
   -- Recompute the aggregate from the item rows (atomic, never lost).
-  select coalesce(jsonb_agg(u), '[]'::jsonb)
+  select coalesce(array_agg(t.u order by gi.created_at, t.ord), '{}')
     into v_all_urls
-    from (
-      select jsonb_array_elements(result_urls) u
-        from public.generation_items
-       where generation_id = p_generation_id
-         and status = 'completed'
-       order by created_at
-    ) s;
+    from public.generation_items gi
+         cross join lateral unnest(gi.result_urls) with ordinality as t(u, ord)
+   where gi.generation_id = p_generation_id
+     and gi.status = 'completed';
 
-  v_count := jsonb_array_length(v_all_urls);
+  v_count := coalesce(array_length(v_all_urls, 1), 0);
 
   -- How many predictions are terminal?
   select count(*) into v_terminal
