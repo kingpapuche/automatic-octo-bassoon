@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
         prompt: fullPrompt,
         negative_prompt: fullNegativePrompt,
         model: 'dev',
-        lora_scale: 1,
+        lora_scale: 0.8,
         num_outputs: VARIATIONS_PER_STYLE, // 4 variaties per stijl
         aspect_ratio: aspectRatio || '3:4',
         output_format: 'webp',
