@@ -252,7 +252,16 @@ export async function POST(request: NextRequest) {
 
     for (const styleId of styleIds) {
       const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional portrait, natural lighting, clean background, sharp focus'
-      const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, waist-up composition showing chest and upper body, sharp focus on face, sharp detailed eyes, face in focus, shot on 85mm f1.8 lens, shallow depth of field, strong subject-background separation, creamy background bokeh, soft flattering directional lighting, cinematic color grading, premium editorial headshot, high-end professional photography`
+
+      // Binnen-scenes hebben de achtergrond dichtbij en blijven daardoor scherp/mundaan.
+      // Buiten blurt vanzelf mooi. Dus alleen bij binnen-stijlen extra diepte + sterke blur forceren.
+      const OUTDOOR_MARKERS = ['outdoor', 'park', 'rooftop', 'city street', 'city walk', 'street background', 'beach', 'coastal', 'golden hour', 'nature', 'garden', 'architecture', 'panorama', 'walking']
+      const isOutdoor = OUTDOOR_MARKERS.some(m => promptTemplate.toLowerCase().includes(m))
+      const depthBoost = isOutdoor
+        ? ''
+        : ', spacious setting with the background far behind the subject, large depth between subject and background, background heavily out of focus with very strong bokeh'
+
+      const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, waist-up composition showing chest and upper body, sharp focus on face, sharp detailed eyes, face in focus, shot on 85mm f1.8 lens, shallow depth of field, strong subject-background separation, creamy background bokeh${depthBoost}, soft flattering directional lighting, cinematic color grading, premium editorial headshot, high-end professional photography`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       const input = {
