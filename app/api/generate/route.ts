@@ -79,7 +79,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'corporate-classic':   '[TRIGGER], professional portrait, navy blue suit, white dress shirt, modern office background with windows, natural light, sharp focus, confident look',
   'executive-navy':      '[TRIGGER], half body portrait, arms crossed, navy blue suit with tie, office background with city view, soft natural light, confident pose',
   'ceo-black':           '[TRIGGER], portrait, black suit, white shirt, light gray background, soft natural light, strong presence',
-  'boardroom-charcoal':  '[TRIGGER], half body portrait, arms crossed, charcoal gray suit, modern office background with windows, natural lighting, confident pose',
+  'boardroom-charcoal':  '[TRIGGER], half body portrait, arms crossed, tailored charcoal gray suit, white shirt, standing in a spacious high-end corporate office with floor-to-ceiling windows and a distant blurred city view far in the background, background heavily out of focus with strong bokeh, large depth between subject and background, soft natural window light, confident executive',
   'pinstripe-pro':       '[TRIGGER], professional portrait, pinstripe suit with tie, neutral background, soft natural light, sharp professional look',
   'three-piece':         '[TRIGGER], half body portrait, arms crossed, three piece suit with vest, office background, window light, distinguished look',
   'formal-black-drama':  '[TRIGGER], portrait, black formal suit, white shirt, neutral darker background, soft side window light, elegant moody',
