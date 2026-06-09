@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import Replicate from 'replicate'
 
-export const maxDuration = 30
+export const maxDuration = 60
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -245,67 +245,84 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${request.headers.get('host')}`
 
-    // Start predictions parallel - 4 outputs per stijl
-    const predictionPromises = styleIds.map(async (styleId: string) => {
-      try {
-        const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional portrait, natural lighting, clean background, sharp focus'
-        const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, sharp focus on face, sharp detailed eyes, face in focus`
+    // Start predictions SEQUENTIEEL met retry. Alles tegelijk afvuren liet
+    // Replicate de extra starts weigeren (rate-limit/429) -> dan kwam er maar
+    // 1 stijl door. Sequentieel + backoff voorkomt die burst.
+    const startedPredictions: Array<{ styleId: string; predictionId?: string; success: boolean }> = []
 
-        const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
+    for (const styleId of styleIds) {
+      const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional portrait, natural lighting, clean background, sharp focus'
+      const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, sharp focus on face, sharp detailed eyes, face in focus`
+      const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
-        const prediction = await replicate.predictions.create({
-          version: versionId,
-          input: {
-            prompt: fullPrompt,
-            negative_prompt: fullNegativePrompt,
-            model: 'dev',
-            lora_scale: 1,
-            num_outputs: VARIATIONS_PER_STYLE, // 4 variaties per stijl
-            aspect_ratio: aspectRatio || '3:4',
-            output_format: 'webp',
-            guidance_scale: 3.0,
-            output_quality: 90,
-            num_inference_steps: 35,
-            disable_safety_checker: false,
-          },
-          webhook: webhookUrl,
-          webhook_events_filter: ['completed'],
-        })
+      const input = {
+        prompt: fullPrompt,
+        negative_prompt: fullNegativePrompt,
+        model: 'dev',
+        lora_scale: 1,
+        num_outputs: VARIATIONS_PER_STYLE, // 4 variaties per stijl
+        aspect_ratio: aspectRatio || '3:4',
+        output_format: 'webp',
+        guidance_scale: 3.0,
+        output_quality: 90,
+        num_inference_steps: 35,
+        disable_safety_checker: false,
+      }
 
-        // Per-prediction rij: webhook werkt straks z'n EIGEN rij bij (geen race).
-        // Upsert op prediction_id zodat een supersnelle webhook die ons voor is, niet botst.
+      // Tot 4 pogingen met oplopende vertraging bij tijdelijke fouten (429/5xx).
+      let prediction: { id: string } | null = null
+      let lastErr: unknown = null
+      for (let attempt = 0; attempt < 4; attempt++) {
+        try {
+          prediction = await replicate.predictions.create({
+            version: versionId,
+            input,
+            webhook: webhookUrl,
+            webhook_events_filter: ['completed'],
+          })
+          break
+        } catch (err) {
+          lastErr = err
+          const status = (err as { response?: { status?: number }; status?: number })?.response?.status
+            ?? (err as { status?: number })?.status
+          const retryable = !status || status === 429 || status >= 500
+          if (!retryable || attempt === 3) break
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1))) // 1s, 2s, 3s
+        }
+      }
+
+      if (prediction) {
         await supabase
           .from('generation_items')
           .upsert(
             { generation_id: generationId, style_id: styleId, prediction_id: prediction.id, status: 'processing' },
             { onConflict: 'prediction_id', ignoreDuplicates: true }
           )
-
         console.log(`✅ Started ${styleId} (4 variations) → ${prediction.id}`)
-        return { styleId, predictionId: prediction.id, success: true }
-      } catch (err) {
-        console.error(`❌ Failed to start ${styleId}:`, err)
-        // Voorspelling startte niet (bv. tijdelijke Replicate-fout). Leg een failed
-        // item vast zodat de generatie alsnog kan afronden i.p.v. eeuwig op X% te
-        // blijven hangen, en geef de credits voor deze style terug (idempotent).
+        startedPredictions.push({ styleId, predictionId: prediction.id, success: true })
+      } else {
+        // Startte niet: failed item vastleggen (refund) + de exacte fout bewaren voor diagnose.
+        const errText = (lastErr instanceof Error ? lastErr.message : String(lastErr)).slice(0, 500)
+        console.error(`❌ Failed to start ${styleId}:`, lastErr)
         try {
+          const syntheticId = `failedstart-${generationId}-${styleId}`
           await supabase.rpc('record_generation_item', {
             p_generation_id: generationId,
             p_user_id: userId,
             p_style_id: styleId,
-            p_prediction_id: `failedstart-${generationId}-${styleId}`,
+            p_prediction_id: syntheticId,
             p_status: 'failed',
             p_urls: [],
             p_variations: VARIATIONS_PER_STYLE,
           })
+          await supabase.from('generation_items').update({ error: errText }).eq('prediction_id', syntheticId)
         } catch (rpcErr) {
           console.error(`❌ Kon failed item niet vastleggen voor ${styleId}:`, rpcErr)
         }
-        return { styleId, success: false }
+        startedPredictions.push({ styleId, success: false })
       }
-    })
+    }
 
-    const startedPredictions = await Promise.all(predictionPromises)
     const successfulStarts = startedPredictions.filter(p => p.success).length
 
     return NextResponse.json({
