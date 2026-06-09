@@ -284,7 +284,23 @@ export async function POST(request: NextRequest) {
         console.log(`✅ Started ${styleId} (4 variations) → ${prediction.id}`)
         return { styleId, predictionId: prediction.id, success: true }
       } catch (err) {
-        console.error(`❌ Failed ${styleId}:`, err)
+        console.error(`❌ Failed to start ${styleId}:`, err)
+        // Voorspelling startte niet (bv. tijdelijke Replicate-fout). Leg een failed
+        // item vast zodat de generatie alsnog kan afronden i.p.v. eeuwig op X% te
+        // blijven hangen, en geef de credits voor deze style terug (idempotent).
+        try {
+          await supabase.rpc('record_generation_item', {
+            p_generation_id: generationId,
+            p_user_id: userId,
+            p_style_id: styleId,
+            p_prediction_id: `failedstart-${generationId}-${styleId}`,
+            p_status: 'failed',
+            p_urls: [],
+            p_variations: VARIATIONS_PER_STYLE,
+          })
+        } catch (rpcErr) {
+          console.error(`❌ Kon failed item niet vastleggen voor ${styleId}:`, rpcErr)
+        }
         return { styleId, success: false }
       }
     })
