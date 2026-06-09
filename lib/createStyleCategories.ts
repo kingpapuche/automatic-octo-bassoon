@@ -28,7 +28,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'corporate-classic',   label: 'Corporate Classic',  description: 'Navy suit, modern office',   icon: '🏢' },
       { id: 'executive-navy',      label: 'Executive Navy',     description: 'Navy suit, city skyline',    icon: '🌆' },
       { id: 'ceo-black',           label: 'CEO Black',          description: 'Black suit, light gray bg',  icon: '⬛' },
-      { id: 'boardroom-charcoal',  label: 'Boardroom Charcoal', description: 'Charcoal suit, modern office', icon: '🪟' },
+      { id: 'boardroom-charcoal',  label: 'Light Grey Suit',     description: 'Light grey suit, premium office', icon: '🪟' },
       { id: 'pinstripe-pro',       label: 'Pinstripe Pro',      description: 'Pinstripe suit + tie',       icon: '📐' },
       { id: 'three-piece',         label: 'Three Piece',        description: 'Three piece suit + vest',    icon: '🎩' },
       { id: 'formal-black-drama',  label: 'Formal Black',       description: 'Black suit, dramatic light', icon: '🖤' },
