@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { blurBackground } from '@/lib/processBackground'
 
 export const maxDuration = 60
 
@@ -40,15 +41,26 @@ export async function POST(request: NextRequest) {
       // Download van Replicate -> upload naar eigen storage (permanente urls)
       const uploadPromises = imageUrls.map(async (imageUrl, idx) => {
         try {
-          const response = await fetch(imageUrl)
-          const arrayBuffer = await response.arrayBuffer()
-          const buffer = Buffer.from(arrayBuffer)
+          // Nabewerking: achtergrond professioneel blurren (portret-modus). Raakt het
+          // gezicht niet. Faalt dit, dan gebruiken we de originele foto (fail-safe).
+          const processed = await blurBackground(imageUrl)
+          let buffer: Buffer
+          let ext = 'webp'
+          let contentType = 'image/webp'
+          if (processed) {
+            buffer = processed
+            ext = 'png'
+            contentType = 'image/png'
+          } else {
+            const response = await fetch(imageUrl)
+            buffer = Buffer.from(await response.arrayBuffer())
+          }
 
-          const filename = `generated/${userId}/${Date.now()}-${styleId}-v${idx + 1}.webp`
+          const filename = `generated/${userId}/${Date.now()}-${styleId}-v${idx + 1}.${ext}`
           const { error: uploadError } = await supabase.storage
             .from('headshots')
             .upload(filename, buffer, {
-              contentType: 'image/webp',
+              contentType,
               cacheControl: '31536000',
               upsert: true,
             })
@@ -61,7 +73,7 @@ export async function POST(request: NextRequest) {
             return imageUrl
           }
         } catch (err) {
-          console.error(`Download error v${idx + 1}:`, err)
+          console.error(`Processing/upload error v${idx + 1}:`, err)
           return imageUrl
         }
       })
