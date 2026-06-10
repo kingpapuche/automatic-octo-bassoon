@@ -259,9 +259,9 @@ export async function POST(request: NextRequest) {
       const isOutdoor = OUTDOOR_MARKERS.some(m => promptTemplate.toLowerCase().includes(m))
       const depthBoost = isOutdoor
         ? ''
-        : ', spacious setting with the background far behind the subject, large depth between subject and background, background heavily out of focus with very strong bokeh'
+        : ', set in a spacious high-end upscale interior, background far behind the subject, large depth between subject and background, background extremely out of focus with very strong creamy bokeh'
 
-      const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, waist-up composition showing chest and upper body, sharp focus on face, sharp detailed eyes, face in focus, shot on 85mm f1.8 lens, shallow depth of field, strong subject-background separation, creamy background bokeh${depthBoost}, soft flattering directional lighting, cinematic color grading, premium editorial headshot, high-end professional photography`
+      const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, head shoulders and upper body in frame, waist-up framing with comfortable headroom, not cropped too tight, sharp focus on face, sharp detailed eyes, face in focus, shot on 85mm f1.8 lens, shallow depth of field, very strong creamy background bokeh, strong subject-background separation, subtle rim light separating subject from background${depthBoost}, soft warm cinematic lighting, rich cinematic color grading, tailored well-fitted premium clothing, magazine-quality professional headshot, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       const input = {
