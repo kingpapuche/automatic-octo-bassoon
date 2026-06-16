@@ -98,13 +98,14 @@ export async function POST(request: NextRequest) {
 
       console.log(`✅ Successfully added ${credits} credits + 1 training. New balance: ${newCredits} credits`)
 
-      // ── Stuur email naar jou als het een business klant is ──
-      if (isBusiness) {
+      // ── Verwittiging: alleen BELGISCHE bedrijven (BE-BTW) vereisen een Peppol-factuur ──
+      const isBelgianBusiness = isBusiness && vatNumber.trim().toUpperCase().startsWith('BE')
+      if (isBelgianBusiness) {
         try {
           await resend.emails.send({
             from: 'Nova Imago <onboarding@resend.dev>',
             to:   'novaimagosupport@gmail.com',
-            subject: `🏢 Nieuwe business klant — factuur nodig!`,
+            subject: `🏢 Nieuw Belgisch bedrijf — Peppol-factuur nodig in Billit!`,
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <div style="background: linear-gradient(135deg, #5B4E9D, #0D9488); padding: 32px; border-radius: 12px 12px 0 0; text-align: center;">
