@@ -5,10 +5,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-01-28.clover',
 })
 
+// Prijs-ID's via env (zodat sandbox/test en live makkelijk wisselen).
+// Geen env gezet -> fallback naar de live prijs-ID's, dus productie blijft werken.
 const PRICE_IDS = {
-  starter: 'price_1TGJ250eDPd7Y2qZBWIVAwp2',
-  pro:     'price_1TGJ4D0eDPd7Y2qZnAeyri3K',
-  premium: 'price_1TGJ6Y0eDPd7Y2qZB97lhNIm',
+  starter: process.env.STRIPE_PRICE_STARTER || 'price_1TGJ250eDPd7Y2qZBWIVAwp2',
+  pro:     process.env.STRIPE_PRICE_PRO     || 'price_1TGJ4D0eDPd7Y2qZnAeyri3K',
+  premium: process.env.STRIPE_PRICE_PREMIUM || 'price_1TGJ6Y0eDPd7Y2qZB97lhNIm',
 }
 
 const CREDITS = {
