@@ -262,13 +262,13 @@ export default function BuyCreditsPage() {
                 onChange={(e) => setIsBusiness(e.target.checked)}
                 className="w-5 h-5 rounded accent-violet-500 cursor-pointer"
               />
-              <span className="text-white font-medium">I am buying as a Belgian business (I need a VAT invoice)</span>
+              <span className="text-white font-medium">I am buying as a business (I need an invoice)</span>
             </label>
 
             {isBusiness && (
               <div className="mt-4">
                 <p className="text-gray-400 text-sm">
-                  You&apos;ll enter your <span className="text-white">VAT number</span> and billing address securely at checkout. Your e-invoice is then automatically sent via Peppol.
+                  You&apos;ll enter your <span className="text-white">VAT number</span> and billing address securely at checkout. Belgian businesses receive a Peppol e-invoice; other businesses receive a standard invoice — both automatically.
                 </p>
               </div>
             )}
