@@ -526,7 +526,8 @@ export default function UploadPage() {
                   <>Solo only — no sunglasses or hats</>,
                   <>Mix <span className="text-white font-semibold">smiling</span> and <span className="text-white font-semibold">neutral</span></>,
                   <>Good <span className="text-white font-semibold">natural lighting</span></>,
-                  <>Different <span className="text-white font-semibold">angles</span> and settings</>,
+                  <>Different <span className="text-white font-semibold">angles</span> &amp; expressions</>,
+                  <><span className="text-white font-semibold">Varied backgrounds</span> &amp; locations — important for pro results!</>,
                   <>Photos auto-optimized — any size works</>,
                 ].map((tip, i) => (
                   <div key={i} className="flex items-start gap-2 text-gray-400 text-sm">
