@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
-const VARIATIONS_PER_STYLE = 1
+const VARIATIONS_PER_STYLE = 4
 
 // Veilig parsen: styles_used / result_urls kunnen als string OF array opgeslagen zijn.
 function toArray(value: unknown): string[] {

@@ -4,7 +4,7 @@ import { Resend } from 'resend'
 import { supabaseAdmin } from '@/lib/supabase'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2026-01-28.clover',
 })
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!

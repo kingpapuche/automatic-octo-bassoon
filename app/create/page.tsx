@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
 import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
 
-const VARIATIONS_PER_STYLE = 1
+const VARIATIONS_PER_STYLE = 4
 const ONBOARDING_KEY = 'novaimago_styles_onboarded'
 
 

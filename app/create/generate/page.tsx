@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
 
-const VARIATIONS_PER_STYLE = 1
+const VARIATIONS_PER_STYLE = 4
 
 const ASPECT_RATIO_OPTIONS = [
   { id: '3:4', label: 'Portrait', dimensions: '3:4', description: 'LinkedIn, CV & dating apps', boxW: 60, boxH: 80 },

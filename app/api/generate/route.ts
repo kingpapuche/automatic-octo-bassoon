@@ -14,11 +14,10 @@ const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
 const REPLICATE_USERNAME = process.env.REPLICATE_USERNAME || 'kingpapuche'
 
 // ===========================================
-// Aantal foto's per stijl. TIJDELIJK op 1 gezet om te testen (credits sparen).
-// Terug naar 4 voor productie: zet deze constante in alle 6 bestanden weer op 4
-// (generate, generation-webhook, generation-status, create, create/styles, create/generate).
+// Aantal foto's per stijl (productie). 1 stijl = 4 foto's = 4 credits.
+// Deze constante staat in 6 bestanden — houd ze gelijk bij wijzigen.
 // ===========================================
-const VARIATIONS_PER_STYLE = 1
+const VARIATIONS_PER_STYLE = 4
 
 interface UserCharacteristics {
   gender?: string; ethnicity?: string; eye_color?: string
