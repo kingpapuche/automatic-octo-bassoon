@@ -19,7 +19,7 @@ const CREDITS = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, priceId, credits, amount, isBusiness, companyName, vatNumber } = await request.json()
+    const { userId, priceId, isBusiness } = await request.json()
 
     if (!userId) {
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 })
@@ -29,28 +29,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
     }
 
-    if (isBusiness && (!companyName || !vatNumber)) {
-      return NextResponse.json({ error: 'Company name and VAT number are required for business purchases' }, { status: 400 })
-    }
-
     const stripePriceId = PRICE_IDS[priceId as keyof typeof PRICE_IDS]
     const planCredits = CREDITS[priceId as keyof typeof CREDITS]
 
-    const session = await stripe.checkout.sessions.create({
+    const params: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ['card'],
       line_items: [{ price: stripePriceId, quantity: 1 }],
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/buy-credits`,
       metadata: {
-        userId:      userId,
-        plan:        priceId,
-        credits:     planCredits.toString(),
-        isBusiness:  isBusiness ? 'true' : 'false',
-        companyName: companyName || '',
-        vatNumber:   vatNumber || '',
+        userId:     userId,
+        plan:       priceId,
+        credits:    planCredits.toString(),
+        isBusiness: isBusiness ? 'true' : 'false',
       },
-    })
+    }
+
+    // Alleen voor (Belgische) bedrijven: Stripe verzamelt adres + BTW (gevalideerd)
+    // en maakt een factuur aan -> Billit-app zet die om naar een Peppol e-factuur.
+    // Particulieren houden een wrijvingsloze checkout (geen extra velden).
+    if (isBusiness) {
+      params.customer_creation = 'always'
+      params.billing_address_collection = 'required'
+      params.tax_id_collection = { enabled: true }
+      params.invoice_creation = { enabled: true }
+    }
+
+    const session = await stripe.checkout.sessions.create(params)
 
     return NextResponse.json({ url: session.url })
 

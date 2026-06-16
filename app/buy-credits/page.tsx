@@ -73,10 +73,9 @@ export default function BuyCreditsPage() {
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState<string | null>(null)
 
-  // Business fields
+  // Business: alleen een vinkje. Stripe verzamelt zelf (gevalideerd) BTW + adres
+  // bij de checkout, en de Billit-app maakt de Peppol-factuur.
   const [isBusiness, setIsBusiness] = useState(false)
-  const [companyName, setCompanyName] = useState('')
-  const [vatNumber, setVatNumber] = useState('')
 
   useEffect(() => {
     async function fetchUser() {
@@ -102,13 +101,9 @@ export default function BuyCreditsPage() {
 
   const handlePurchase = async (tier: PricingTier) => {
     if (!user) return
-    if (isBusiness && (!companyName || !vatNumber)) {
-      alert('Please fill in your company name and VAT number.')
-      return
-    }
-    
+
     setPurchasing(tier.id)
-    
+
     try {
       const response = await fetch('/api/create-checkout', {
         method: 'POST',
@@ -116,11 +111,7 @@ export default function BuyCreditsPage() {
         body: JSON.stringify({
           userId: user.id,
           priceId: tier.id,
-          credits: tier.credits,
-          amount: tier.price,
           isBusiness,
-          companyName: isBusiness ? companyName : null,
-          vatNumber: isBusiness ? vatNumber : null,
         }),
       })
 
@@ -271,33 +262,14 @@ export default function BuyCreditsPage() {
                 onChange={(e) => setIsBusiness(e.target.checked)}
                 className="w-5 h-5 rounded accent-violet-500 cursor-pointer"
               />
-              <span className="text-white font-medium">I am purchasing as a business / self-employed</span>
+              <span className="text-white font-medium">I am buying as a Belgian business (I need a VAT invoice)</span>
             </label>
 
             {isBusiness && (
-              <div className="mt-5 space-y-4">
-                <p className="text-gray-400 text-sm">Please provide your business details for invoicing purposes.</p>
-                <div>
-                  <label className="block text-gray-400 text-sm mb-1">Company Name *</label>
-                  <input
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    placeholder="Your company name"
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-400 text-sm mb-1">VAT Number *</label>
-                  <input
-                    type="text"
-                    value={vatNumber}
-                    onChange={(e) => setVatNumber(e.target.value)}
-                    placeholder="e.g. BE0123456789"
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
-                  />
-                </div>
-                <p className="text-yellow-400/80 text-xs">⚠️ You will receive an invoice at your account email address after purchase.</p>
+              <div className="mt-4">
+                <p className="text-gray-400 text-sm">
+                  You&apos;ll enter your <span className="text-white">VAT number</span> and billing address securely at checkout. Your e-invoice is then automatically sent via Peppol.
+                </p>
               </div>
             )}
           </div>
