@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       if (isBelgianBusiness) {
         try {
           await resend.emails.send({
-            from: 'Nova Imago <onboarding@resend.dev>',
+            from: 'Nova Imago <noreply@novaimago.ai>',
             to:   'novaimagosupport@gmail.com',
             subject: `🏢 Nieuw Belgisch bedrijf — Peppol-factuur nodig in Billit!`,
             html: `
