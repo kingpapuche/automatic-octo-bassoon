@@ -33,11 +33,25 @@ export async function POST(request: NextRequest) {
       const isBusiness  = session.metadata?.isBusiness === 'true'
       const companyName = session.metadata?.companyName || ''
       const vatNumber   = session.metadata?.vatNumber || ''
-      const customerEmail = session.customer_email || ''
+      const customerEmail = session.customer_details?.email || session.customer_email || ''
 
       if (!userId || !credits) {
         console.error('Missing metadata:', { userId, credits, plan })
         return NextResponse.json({ error: 'Missing metadata' }, { status: 400 })
+      }
+
+      // Idempotentie: Stripe kan dezelfde event opnieuw sturen (retries). Als deze
+      // sessie al verwerkt is, niet nog eens crediteren (anders dubbel tegoed).
+      const { data: alreadyProcessed } = await supabaseAdmin
+        .from('credits_transactions')
+        .select('id')
+        .eq('user_id', userId)
+        .ilike('description', `%${session.id}%`)
+        .limit(1)
+
+      if (alreadyProcessed && alreadyProcessed.length > 0) {
+        console.log(`↩️ Sessie ${session.id} al verwerkt — credits niet opnieuw toegevoegd`)
+        return NextResponse.json({ received: true, idempotent: true })
       }
 
       console.log(`💰 Adding ${credits} credits to user ${userId} for plan ${plan}`)
