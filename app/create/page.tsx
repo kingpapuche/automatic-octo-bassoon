@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
-import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
+import { STYLE_CATEGORIES, STYLE_FRAMING } from '@/lib/createStyleCategories'
 
 const VARIATIONS_PER_STYLE = 1
 const ONBOARDING_KEY = 'novaimago_styles_onboarded'
@@ -348,12 +348,21 @@ export default function CreateStylesPage() {
                             </span>
                             <span className="text-gray-500 text-xs leading-tight mb-2">{style.description}</span>
 
-                            <div className={`text-[10px] font-semibold uppercase tracking-wider mt-auto px-2 py-1 rounded ${
-                              isSelected
-                                ? 'bg-violet-500/30 text-violet-200'
-                                : 'bg-white/5 text-gray-500'
-                            }`}>
-                              {VARIATIONS_PER_STYLE} photos
+                            <div className="flex items-center gap-1.5 mt-auto flex-wrap justify-center">
+                              <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded ${
+                                isSelected
+                                  ? 'bg-violet-500/30 text-violet-200'
+                                  : 'bg-white/5 text-gray-500'
+                              }`}>
+                                📐 {STYLE_FRAMING[style.id] || 'Headshot'}
+                              </span>
+                              <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded ${
+                                isSelected
+                                  ? 'bg-violet-500/30 text-violet-200'
+                                  : 'bg-white/5 text-gray-500'
+                              }`}>
+                                {VARIATIONS_PER_STYLE} photos
+                              </span>
                             </div>
                           </button>
                         )
