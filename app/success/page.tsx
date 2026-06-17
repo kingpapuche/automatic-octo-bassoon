@@ -47,15 +47,19 @@ export default function SuccessPage() {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col items-center gap-4">
+          <p className="text-sm text-gray-500 mt-6">
+            From your dashboard you can upload photos to train your model, or jump straight to generating if your model is ready.
+          </p>
+
+          <div className="mt-6 flex flex-col items-center gap-4">
             <Link
-              href="/upload"
+              href="/dashboard"
               className="inline-block bg-gradient-to-r from-[#5B4E9D] to-[#0D9488] text-white px-8 py-4 rounded-2xl font-semibold hover:-translate-y-1 transition-all duration-300 shadow-lg"
             >
-              Upload your photos →
+              Go to your dashboard →
             </Link>
             <Link href="/" className="text-[#5B4E9D] hover:text-[#7D6FB8] font-semibold transition-colors">
-              ← Back to Home
+              ← Back to home
             </Link>
           </div>
         </div>
