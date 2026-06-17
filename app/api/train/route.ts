@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         input: {
           input_images: zipUrl,
           trigger_word: triggerWord,
-          steps: 800, // verlaagd van 1000: minder overfit -> minder amateur-achtergrond-lek
+          steps: 1000, // bewezen config met de beste huid/gelijkenis (800 gaf plastic look)
           lora_rank: 16,
           batch_size: 1,
           resolution: '512,768,1024',
