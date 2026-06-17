@@ -17,7 +17,7 @@ const REPLICATE_USERNAME = process.env.REPLICATE_USERNAME || 'kingpapuche'
 // Aantal foto's per stijl (productie). 1 stijl = 4 foto's = 4 credits.
 // Deze constante staat in 6 bestanden — houd ze gelijk bij wijzigen.
 // ===========================================
-const VARIATIONS_PER_STYLE = 4
+const VARIATIONS_PER_STYLE = 1
 
 interface UserCharacteristics {
   gender?: string; ethnicity?: string; eye_color?: string

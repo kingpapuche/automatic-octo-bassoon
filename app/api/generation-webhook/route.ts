@@ -9,7 +9,7 @@ const supabase = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-const VARIATIONS_PER_STYLE = 4
+const VARIATIONS_PER_STYLE = 1
 
 interface ReplicateWebhookPayload {
   id: string
