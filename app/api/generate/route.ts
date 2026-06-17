@@ -251,17 +251,12 @@ export async function POST(request: NextRequest) {
     const startedPredictions: Array<{ styleId: string; predictionId?: string; success: boolean }> = []
 
     for (const styleId of styleIds) {
-      const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional portrait, natural lighting, clean background, sharp focus'
+      const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional portrait, natural lighting, sharp focus'
 
-      // Binnen-scenes hebben de achtergrond dichtbij en blijven daardoor scherp/mundaan.
-      // Buiten blurt vanzelf mooi. Dus alleen bij binnen-stijlen extra diepte + sterke blur forceren.
-      const OUTDOOR_MARKERS = ['outdoor', 'park', 'rooftop', 'city street', 'city walk', 'street background', 'beach', 'coastal', 'golden hour', 'nature', 'garden', 'architecture', 'panorama', 'walking']
-      const isOutdoor = OUTDOOR_MARKERS.some(m => promptTemplate.toLowerCase().includes(m))
-      const depthBoost = isOutdoor
-        ? ''
-        : ', set in a spacious high-end upscale interior, background far behind the subject, large depth between subject and background, background extremely out of focus with very strong creamy bokeh'
-
-      const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, sharp focus on face, sharp detailed eyes, face in focus, shot on 85mm f1.8 lens, shallow depth of field, very strong creamy background bokeh, strong subject-background separation, subtle rim light separating subject from background${depthBoost}, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored bespoke clothing, sharp structured tailoring, luxurious fine fabric, slim modern fit, crisp refined details, elegant high-end designer outfit, magazine-quality professional portrait, high-end editorial photography, 4k`
+      // Geen geforceerde achtergrond-blur/generiek-interieur meer: de setting van de
+      // stijl (wijnbar, café, restaurant, rooftop...) moet HERKENBAAR blijven. Lichte
+      // natuurlijke blur volstaat; we vragen expliciet dat de locatie zichtbaar is.
+      const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, sharp focus on face, sharp detailed eyes, the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       const input = {
