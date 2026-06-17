@@ -16,25 +16,6 @@ export interface StyleCategory {
   styles: StyleOption[]
 }
 
-// Kadrering per stijl (afgeleid uit de generate-prompts). Wordt op het stijl-kaartje
-// getoond zodat de klant vooraf weet of het een close-up, half body, enz. wordt.
-export const STYLE_FRAMING: Record<string, string> = {
-  'corporate-classic': 'Headshot', 'executive-navy': 'Half body', 'ceo-black': 'Headshot', 'boardroom-charcoal': 'Half body', 'pinstripe-pro': 'Headshot', 'three-piece': 'Half body', 'formal-black-drama': 'Headshot', 'wall-street-power': 'Headshot',
-  'navy-blazer-open': 'Close-up', 'gray-blazer-blue': 'Half body', 'beige-elegance': 'Half body', 'teal-blazer': 'Half body', 'light-blue-blazer': 'Half body', 'creative-director': 'Half body', 'consultant-look': 'Half body',
-  'tech-turtleneck': 'Close-up', 'gray-sweater-pro': 'Headshot', 'knit-cozy': 'Half body', 'v-neck-smart': 'Headshot',
-  'white-button-down': 'Headshot', 'light-blue-oxford': 'Half body', 'navy-polo': 'Headshot', 'denim-shirt-fresh': 'Headshot', 'plaid-friendly': 'Headshot', 'white-tee-clean': 'Close-up', 'black-tee-clean': 'Close-up', 'henley-relaxed': 'Headshot',
-  'golden-hour': 'Headshot', 'park-natural': 'Medium shot', 'rooftop-city': 'Medium shot', 'city-walk': 'Medium shot',
-  'leather-jacket-urban': 'Medium shot', 'all-black-minimal': 'Headshot', 'bold-colored-blazer': 'Half body',
-  'restaurant-elegant': 'Medium shot', 'wine-bar-relaxed': 'Medium shot', 'coffee-shop-date': 'Medium shot', 'rooftop-bar-evening': 'Half body',
-  'arms-crossed-power': 'Half body', 'sitting-confident': 'Medium shot', 'leaning-elegant': 'Medium shot', 'hands-in-pockets': 'Half body', 'thoughtful-pose': 'Headshot', 'holding-tablet': 'Half body',
-  'w-power-blazer-navy': 'Headshot', 'w-executive-charcoal': 'Half body', 'w-ceo-black': 'Headshot', 'w-pinstripe-pro': 'Headshot', 'w-sheath-classic': 'Headshot', 'w-pussybow-elegant': 'Headshot', 'w-cream-blazer-arms': 'Half body', 'w-turtleneck-blazer': 'Headshot',
-  'w-silk-blouse-modern': 'Half body', 'w-cardigan-soft': 'Headshot', 'w-knit-twinset': 'Headshot', 'w-startup-casual': 'Medium shot',
-  'w-red-power-suit': 'Half body', 'w-emerald-blazer': 'Headshot', 'w-mustard-creative': 'Half body', 'w-statement-coral': 'Headshot', 'w-jewel-purple': 'Headshot',
-  'w-white-tee-natural': 'Half body', 'w-cream-sweater-window': 'Headshot', 'w-denim-shirt-fresh': 'Headshot', 'w-coffee-shop-warm': 'Medium shot', 'w-park-outdoor': 'Half body', 'w-rooftop-golden': 'Medium shot', 'w-architectural': 'Half body', 'w-city-walk': 'Medium shot', 'w-beach-professional': 'Half body',
-  'w-restaurant-elegant': 'Headshot', 'w-wine-bar-casual': 'Medium shot', 'w-cocktail-glamour': 'Half body', 'w-cafe-date': 'Medium shot', 'w-rooftop-bar': 'Half body', 'w-restaurant-evening': 'Headshot', 'w-bistro-warm': 'Medium shot', 'w-leather-jacket-edge': 'Medium shot', 'w-evening-rooftop': 'Half body', 'w-night-city-glamour': 'Headshot',
-  'w-arms-crossed-power': 'Half body', 'w-sitting-confident': 'Medium shot', 'w-leaning-elegant': 'Medium shot', 'w-hands-relaxed': 'Half body', 'w-thoughtful-pose': 'Headshot', 'w-holding-tablet': 'Half body',
-}
-
 export const STYLE_CATEGORIES: StyleCategory[] = [
 
   // MANNEN-STIJLEN
