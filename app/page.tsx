@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import BeforeAfterSlider from '@/components/beforeafterslider'
+import { supabase } from '@/lib/supabase'
 import {
   Zap, Palette, Gem, Lock, BadgeDollarSign, ShieldCheck,
   Upload, SlidersHorizontal, Download,
@@ -12,6 +13,13 @@ import {
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setLoggedIn(!!session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setLoggedIn(!!session))
+    return () => subscription.unsubscribe()
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] overflow-x-hidden">
@@ -33,10 +41,18 @@ export default function HomePage() {
             <Link href="#pricing" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Plans</Link>
             <Link href="#how-it-works" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">How It Works</Link>
             <Link href="#faq" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Help</Link>
-            <Link href="/login" className="text-[#5B4E9D] hover:text-[#483A7C] font-semibold transition">Login</Link>
-            <Link href="/login" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:scale-105">
-              Get Started →
-            </Link>
+            {loggedIn ? (
+              <Link href="/dashboard" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:scale-105">
+                Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-[#5B4E9D] hover:text-[#483A7C] font-semibold transition">Login</Link>
+                <Link href="/login" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:scale-105">
+                  Get Started →
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -53,10 +69,18 @@ export default function HomePage() {
             <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Plans</Link>
             <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">How It Works</Link>
             <Link href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Help</Link>
-            <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[#5B4E9D] font-semibold text-lg transition">Login</Link>
-            <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold text-center transition shadow-md">
-              Get Started →
-            </Link>
+            {loggedIn ? (
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold text-center transition shadow-md">
+                Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[#5B4E9D] font-semibold text-lg transition">Login</Link>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold text-center transition shadow-md">
+                  Get Started →
+                </Link>
+              </>
+            )}
           </div>
         )}
       </nav>
