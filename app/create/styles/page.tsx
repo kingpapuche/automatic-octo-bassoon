@@ -369,13 +369,6 @@ export default function CreateStylesPage() {
                               }`}>
                                 📐 {STYLE_FRAMING[style.id] || 'Headshot'}
                               </span>
-                              <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded ${
-                                isSelected
-                                  ? 'bg-violet-500/30 text-violet-200'
-                                  : 'bg-white/5 text-gray-500'
-                              }`}>
-                                {VARIATIONS_PER_STYLE} photos
-                              </span>
                             </div>
                           </button>
                         )
