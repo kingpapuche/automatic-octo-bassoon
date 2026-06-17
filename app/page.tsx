@@ -21,6 +21,9 @@ export default function HomePage() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Ingelogd -> naar dashboard; anders naar login. Houdt alle CTA's consistent.
+  const ctaHref = loggedIn ? '/dashboard' : '/login'
+
   return (
     <div className="min-h-screen bg-[#FAFAF9] overflow-x-hidden">
 
@@ -47,8 +50,8 @@ export default function HomePage() {
               </Link>
             ) : (
               <>
-                <Link href="/login" className="text-[#5B4E9D] hover:text-[#483A7C] font-semibold transition">Login</Link>
-                <Link href="/login" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:scale-105">
+                <Link href={ctaHref} className="text-[#5B4E9D] hover:text-[#483A7C] font-semibold transition">Login</Link>
+                <Link href={ctaHref} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:scale-105">
                   Get Started →
                 </Link>
               </>
@@ -75,8 +78,8 @@ export default function HomePage() {
               </Link>
             ) : (
               <>
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[#5B4E9D] font-semibold text-lg transition">Login</Link>
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold text-center transition shadow-md">
+                <Link href={ctaHref} onClick={() => setMobileMenuOpen(false)} className="text-[#5B4E9D] font-semibold text-lg transition">Login</Link>
+                <Link href={ctaHref} onClick={() => setMobileMenuOpen(false)} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold text-center transition shadow-md">
                   Get Started →
                 </Link>
               </>
@@ -103,7 +106,7 @@ export default function HomePage() {
                 Upload 8–15 photos. Choose your style. Get studio-quality headshots in under 30 minutes — without a photographer, studio, or expensive session.
               </p>
               <div className="flex flex-wrap gap-4 mb-10">
-                <Link href="/login" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-105">
+                <Link href={ctaHref} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-105">
                   Get Your Headshots Now →
                 </Link>
                 <Link href="#pricing" className="bg-white hover:bg-[#5B4E9D] text-[#5B4E9D] hover:text-white px-8 py-4 rounded-full font-semibold text-lg transition border-2 border-[#5B4E9D] hover:-translate-y-1">
@@ -213,7 +216,7 @@ export default function HomePage() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/login" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-105 inline-block">
+            <Link href={ctaHref} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-105 inline-block">
               Get Your Headshots Now →
             </Link>
           </div>
@@ -278,7 +281,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/login" className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
+              <Link href={ctaHref} className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
             </div>
 
             {/* Pro */}
@@ -302,7 +305,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/login" className="block w-full bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
+              <Link href={ctaHref} className="block w-full bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
             </div>
 
             {/* Premium */}
@@ -325,7 +328,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/login" className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
+              <Link href={ctaHref} className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
             </div>
 
           </div>
@@ -381,7 +384,7 @@ export default function HomePage() {
         <div className="max-w-[720px] mx-auto relative z-10">
           <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] mb-7">Your Best Photo Is One Upload Away</h2>
           <p className="text-[1.375rem] mb-12 opacity-95">No photographer. No studio. No awkward posing. Just upload your selfies and let the AI do the work.</p>
-          <Link href="/login" className="inline-block bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] px-10 py-4 rounded-full font-bold text-lg transition shadow-xl hover:scale-105">
+          <Link href={ctaHref} className="inline-block bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] px-10 py-4 rounded-full font-bold text-lg transition shadow-xl hover:scale-105">
             Get Started — From $29 →
           </Link>
           <div className="mt-10 inline-flex items-center gap-3 bg-white/15 backdrop-blur-sm px-7 py-4 rounded-full">
