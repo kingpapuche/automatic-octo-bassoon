@@ -129,11 +129,13 @@ export async function POST(request: NextRequest) {
         input: {
           input_images: zipUrl,
           trigger_word: triggerWord,
-          steps: 1000, // bewezen config met de beste huid/gelijkenis (800 gaf plastic look)
-          lora_rank: 16,
+          // Exacte recipe van het bewezen goede model (maart, c6e0c78a):
+          // rank 32 + alleen 1024 + autocaption uit. Geeft premium achtergronden + goede huid.
+          steps: 1000,
+          lora_rank: 32,
           batch_size: 1,
-          resolution: '512,768,1024',
-          autocaption: true,
+          resolution: '1024',
+          autocaption: false,
           learning_rate: 0.0004,
         },
         webhook: webhookUrl,
