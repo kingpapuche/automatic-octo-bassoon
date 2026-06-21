@@ -263,16 +263,18 @@ export async function POST(request: NextRequest) {
       // sowieso ongemoeid -> natuurlijke variatie blijft.
       const isPortrait = !aspectRatio || aspectRatio === '3:4'
       const isWoman = /of woman|of businesswoman|woman portrait|of professional woman/i.test(promptTemplate)
+      // Erkende cinematografische shot-termen (research: die begrijpt het model;
+      // 'upper body' is te vaag). Prominent vooraan + verderop herhaald.
       const mediumFraming = isWoman
-        ? 'medium shot of a woman showing the head and upper body'
-        : 'medium shot showing the head and upper body'
+        ? 'cowboy shot of a woman, three-quarter length portrait, waist-up framing'
+        : 'cowboy shot, three-quarter length portrait, waist-up framing'
       const template = isPortrait
         ? promptTemplate.replace(
             /^(\[TRIGGER\], )(professional portrait of businesswoman|professional portrait of woman|professional woman portrait|portrait of professional woman|elegant portrait of businesswoman|elegant portrait of woman|portrait of woman|close up portrait|professional headshot|professional portrait|portrait)\b/,
             `$1${mediumFraming}`
           )
         : promptTemplate
-      const bodyHint = isPortrait ? ', chest and torso visible in frame' : ''
+      const bodyHint = isPortrait ? ', three-quarter length composition, waist-up shot, the torso and waist visible in frame' : ''
 
       const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${bodyHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
