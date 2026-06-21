@@ -253,21 +253,28 @@ export async function POST(request: NextRequest) {
     for (const styleId of styleIds) {
       const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional portrait, natural lighting, sharp focus'
 
-      // Ruimere kadrering forceren (research: shot-type expliciet + VOORAAN = meeste
-      // gewicht). De strakke openings-framing ("portrait" / "headshot" / "close up")
-      // vervangen door een "medium shot" (kop + bovenlichaam), met behoud van geslacht.
+      // Kadrering hangt af van het GEKOZEN formaat (research: shot-type expliciet +
+      // VOORAAN weegt het zwaarst):
+      //  - 3:4 Portrait (LinkedIn/CV/dating): ruimer -> meer lichaam. Strakke
+      //    openings-framing ("portrait"/"headshot"/"close up") -> "medium shot".
+      //  - 1:1 Square (profielpic) & 4:3 Landscape (web): gezicht prominent houden,
+      //    dus de oorspronkelijke (strakkere) kadrering laten staan.
       // Stijlen die al ruimer zijn (half body / medium shot / three-quarter) blijven
-      // ongemoeid -> natuurlijke variatie blijft.
+      // sowieso ongemoeid -> natuurlijke variatie blijft.
+      const isPortrait = !aspectRatio || aspectRatio === '3:4'
       const isWoman = /of woman|of businesswoman|woman portrait|of professional woman/i.test(promptTemplate)
       const mediumFraming = isWoman
         ? 'medium shot of a woman showing the head and upper body'
         : 'medium shot showing the head and upper body'
-      const template = promptTemplate.replace(
-        /^(\[TRIGGER\], )(professional portrait of businesswoman|professional portrait of woman|professional woman portrait|portrait of professional woman|elegant portrait of businesswoman|elegant portrait of woman|portrait of woman|close up portrait|professional headshot|professional portrait|portrait)\b/,
-        `$1${mediumFraming}`
-      )
+      const template = isPortrait
+        ? promptTemplate.replace(
+            /^(\[TRIGGER\], )(professional portrait of businesswoman|professional portrait of woman|professional woman portrait|portrait of professional woman|elegant portrait of businesswoman|elegant portrait of woman|portrait of woman|close up portrait|professional headshot|professional portrait|portrait)\b/,
+            `$1${mediumFraming}`
+          )
+        : promptTemplate
+      const bodyHint = isPortrait ? ', chest and torso visible in frame' : ''
 
-      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}, chest and torso visible in frame, not a tight close-up, sharp focus on face, sharp detailed eyes, the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
+      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${bodyHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       const input = {
