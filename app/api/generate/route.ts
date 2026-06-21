@@ -253,10 +253,21 @@ export async function POST(request: NextRequest) {
     for (const styleId of styleIds) {
       const promptTemplate = STYLE_PROMPTS[styleId] || '[TRIGGER], professional portrait, natural lighting, sharp focus'
 
-      // Geen geforceerde achtergrond-blur/generiek-interieur meer: de setting van de
-      // stijl (wijnbar, café, restaurant, rooftop...) moet HERKENBAAR blijven. Lichte
-      // natuurlijke blur volstaat; we vragen expliciet dat de locatie zichtbaar is.
-      const fullPrompt = `${promptTemplate.replace(/\[TRIGGER\]/g, triggerWithDescription)}, medium shot showing the head and upper body, chest and torso visible in frame, not a tight close-up, sharp focus on face, sharp detailed eyes, the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
+      // Ruimere kadrering forceren (research: shot-type expliciet + VOORAAN = meeste
+      // gewicht). De strakke openings-framing ("portrait" / "headshot" / "close up")
+      // vervangen door een "medium shot" (kop + bovenlichaam), met behoud van geslacht.
+      // Stijlen die al ruimer zijn (half body / medium shot / three-quarter) blijven
+      // ongemoeid -> natuurlijke variatie blijft.
+      const isWoman = /of woman|of businesswoman|woman portrait|of professional woman/i.test(promptTemplate)
+      const mediumFraming = isWoman
+        ? 'medium shot of a woman showing the head and upper body'
+        : 'medium shot showing the head and upper body'
+      const template = promptTemplate.replace(
+        /^(\[TRIGGER\], )(professional portrait of businesswoman|professional portrait of woman|professional woman portrait|portrait of professional woman|elegant portrait of businesswoman|elegant portrait of woman|portrait of woman|close up portrait|professional headshot|professional portrait|portrait)\b/,
+        `$1${mediumFraming}`
+      )
+
+      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}, chest and torso visible in frame, not a tight close-up, sharp focus on face, sharp detailed eyes, the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       const input = {
