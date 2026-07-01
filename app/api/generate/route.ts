@@ -92,7 +92,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'creative-director':   '[TRIGGER], half body portrait, black blazer, black turtleneck, smooth mid-grey editorial studio backdrop, dramatic directional lighting, sophisticated creative director look',
   'consultant-look':     '[TRIGGER], half body portrait, light gray suit, no tie, arms relaxed, modern office, soft natural light, confident',
   'tech-turtleneck':     '[TRIGGER], close up portrait, gray turtleneck sweater, clean seamless studio backdrop, smooth plain neutral background, soft studio lighting, intelligent gaze',
-  'gray-sweater-pro':    '[TRIGGER], portrait, gray crew neck sweater over collared shirt, clean background, soft window light, smart casual',
+  'gray-sweater-pro':    '[TRIGGER], portrait, gray crew neck sweater over collared shirt, bright modern office, clean and uncluttered, soft window light, smart casual',
   'knit-cozy':           '[TRIGGER], half body portrait, chunky knit sweater, warm ambient light, cozy neutral background, approachable',
   'v-neck-smart':        '[TRIGGER], portrait, blue v-neck sweater over collared shirt, light background, soft natural light, smart casual',
   'white-button-down':   '[TRIGGER], portrait, clean white button-down shirt, soft neutral background, natural window light, approachable professional',
