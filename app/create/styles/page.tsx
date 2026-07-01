@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
 import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
+import StyleThumb from '@/components/StyleThumb'
 
 const VARIATIONS_PER_STYLE = 4
 const ONBOARDING_KEY = 'novaimago_styles_onboarded'
@@ -355,7 +356,7 @@ export default function CreateStylesPage() {
                               </div>
                             )}
 
-                            <span className="text-2xl mb-2 mt-2">{style.icon}</span>
+                            <StyleThumb styleId={style.id} icon={style.icon} label={style.label} />
                             <span className={`text-sm font-semibold mb-1 ${isSelected ? 'text-white' : 'text-gray-300'}`}>
                               {style.label}
                             </span>
