@@ -77,7 +77,7 @@ async function resolveModelReference(userId: string, trainedModelId: string): Pr
 
 const STYLE_PROMPTS: Record<string, string> = {
   'corporate-classic':   '[TRIGGER], professional portrait, navy blue suit, white dress shirt, modern office background with windows, natural light, sharp focus, confident look',
-  'executive-navy':      '[TRIGGER], half body portrait, arms crossed, navy blue suit with tie, office background with city view, soft natural light, confident pose',
+  'executive-navy':      '[TRIGGER], half body portrait, arms crossed, navy blue suit with tie, standing by large floor-to-ceiling windows with a clear city skyline visible behind, modern high-rise office, soft natural light, confident pose',
   'ceo-black':           '[TRIGGER], portrait, black suit, white shirt, light gray background, soft natural light, strong presence',
   'boardroom-charcoal':  '[TRIGGER], three-quarter length shot showing head to thighs, the full tailored light gray suit visible, white dress shirt, dark patterned tie, hands in pockets, standing in a spacious high-end office interior with large windows and soft natural light, confident executive',
   'pinstripe-pro':       '[TRIGGER], professional portrait, pinstripe suit with tie, neutral background, soft natural light, sharp professional look',
