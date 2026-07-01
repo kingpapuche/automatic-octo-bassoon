@@ -16,7 +16,7 @@ export default function CreateStylesPage() {
   const [loading, setLoading] = useState(true)
   const [userCredits, setUserCredits] = useState(0)
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
-  const [expandedCategory, setExpandedCategory] = useState<string>('')
+  const [collapsedCategories, setCollapsedCategories] = useState<string[]>([])
   const [gender, setGender] = useState<'male' | 'female'>('male')
 
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -47,10 +47,8 @@ export default function CreateStylesPage() {
           setUserCredits(userData.credits || 0)
           if (userData.gender === 'female') {
             setGender('female')
-            setExpandedCategory('w-formal')
           } else {
             setGender('male')
-            setExpandedCategory('formal')
           }
         }
       } catch (error) {
@@ -82,20 +80,10 @@ export default function CreateStylesPage() {
   const filteredCategories = STYLE_CATEGORIES.filter(c => c.gender === gender)
 
   const toggleCategory = (categoryId: string) => {
-    if (expandedCategory === categoryId) {
-      setExpandedCategory('')
-      return
-    }
-    setExpandedCategory(categoryId)
-    setTimeout(() => {
-      const el = categoryRefs.current[categoryId]
-      if (el) {
-        const headerOffset = 160
-        const elementPosition = el.getBoundingClientRect().top
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
-      }
-    }, 50)
+    // Standaard staat alles open; klikken op een kop klapt die sectie in/uit.
+    setCollapsedCategories(prev =>
+      prev.includes(categoryId) ? prev.filter(id => id !== categoryId) : [...prev, categoryId]
+    )
   }
 
   const toggleStyle = (styleId: string, styleLabel: string) => {
@@ -267,7 +255,7 @@ export default function CreateStylesPage() {
 
         <div className="space-y-4">
           {filteredCategories.map((category) => {
-            const isExpanded = expandedCategory === category.id
+            const isExpanded = !collapsedCategories.includes(category.id)
             const selectedCount = category.styles.filter(s => selectedStyles.includes(s.id)).length
             const allSelected = selectedCount === category.styles.length
 
