@@ -32,7 +32,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'pinstripe-pro',       label: 'Pinstripe Pro',      description: 'Pinstripe suit + tie',       icon: '📐' },
       { id: 'three-piece',         label: 'Three Piece',        description: 'Three piece suit + vest',    icon: '🎩' },
       { id: 'formal-black-drama',  label: 'Formal Black',       description: 'Black suit, dramatic light', icon: '🖤' },
-      { id: 'wall-street-power',   label: 'Wall Street Power',  description: 'Dark suit, red tie, street', icon: '📈' },
+      { id: 'wall-street-power',   label: 'Wall Street Power',  description: 'Dark suit, red tie, skyscrapers', icon: '📈' },
     ],
   },
   {
