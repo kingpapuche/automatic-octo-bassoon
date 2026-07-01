@@ -83,7 +83,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'pinstripe-pro':       '[TRIGGER], professional portrait, pinstripe suit with tie, neutral background, soft natural light, sharp professional look',
   'three-piece':         '[TRIGGER], half body portrait, arms crossed, three piece suit with vest, office background, window light, distinguished look',
   'formal-black-drama':  '[TRIGGER], portrait, black formal suit, crisp white shirt, elegant refined dark interior, moody atmospheric low-key side lighting, sophisticated editorial look',
-  'wall-street-power':   '[TRIGGER], professional portrait, dark suit, red tie, standing outdoors in a modern financial district, tall glass skyscrapers and corporate towers behind, city plaza, natural daylight, confident expression',
+  'wall-street-power':   '[TRIGGER], professional portrait, dark suit, red tie, standing outdoors in a downtown financial district surrounded by towering glass skyscrapers and high-rise corporate towers, dramatic tall skyscraper skyline directly behind, natural daylight, confident expression',
   'navy-blazer-open':    '[TRIGGER], close up portrait, navy blazer, open collar white shirt, soft blurred modern office interior, soft natural light, friendly expression',
   'gray-blazer-blue':    '[TRIGGER], half body portrait, arms crossed, gray blazer, bright modern office, soft window light, approachable professional',
   'beige-elegance':      '[TRIGGER], half body portrait, beige linen suit, dark background, warm ambient light, sophisticated',
