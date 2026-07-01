@@ -329,16 +329,16 @@ export default function CreateStylesPage() {
                                 : 'bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20'
                             }`}
                           >
-                            <div className={`absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-md ${
+                            <div className={`absolute top-2 left-2 z-10 text-xs font-bold px-2 py-0.5 rounded-md shadow-md ${
                               isSelected
                                 ? 'bg-fuchsia-600 text-white'
-                                : 'bg-white/10 text-gray-400'
+                                : 'bg-black/60 text-white backdrop-blur-sm'
                             }`}>
                               ×{VARIATIONS_PER_STYLE}
                             </div>
 
                             {isSelected && (
-                              <div className="absolute top-2 right-2 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center">
+                              <div className="absolute top-2 right-2 z-10 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center shadow-md">
                                 <span className="text-white text-xs">✓</span>
                               </div>
                             )}
