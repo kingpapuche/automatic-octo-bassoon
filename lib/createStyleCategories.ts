@@ -92,6 +92,18 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     ],
   },
   {
+    id: 'travel-adventure',
+    name: 'Travel / Adventure',
+    icon: '🌍',
+    gender: 'male',
+    styles: [
+      { id: 'mountain-snow',       label: 'Snowy Mountains',    description: 'Winter jacket, snowy peaks',   icon: '⛰️' },
+      { id: 'poolside-resort',     label: 'Poolside Resort',    description: 'Luxury pool, sunny vacation',  icon: '🏊' },
+      { id: 'autumn-forest',       label: 'Autumn Forest',      description: 'Sweater, golden fall foliage', icon: '🍂' },
+      { id: 'mountain-lake',       label: 'Mountain Lake',      description: 'Outdoor jacket, scenic lake',  icon: '🏞️' },
+    ],
+  },
+  {
     id: 'creative',
     name: 'Creative / Bold',
     icon: '🎸',
