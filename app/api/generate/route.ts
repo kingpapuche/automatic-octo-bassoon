@@ -51,7 +51,7 @@ function buildNegativePromptAdditions(c: UserCharacteristics): string {
   if (c.gender === 'male') negatives.push('female','woman','feminine features','makeup','lipstick','long eyelashes','breasts','cleavage')
   else if (c.gender === 'female') negatives.push('male','man','masculine features','beard','mustache','stubble','facial hair','adam apple')
   if (c.is_bald) negatives.push('hair on head','full head of hair','long hair','short hair','hairstyle')
-  if (c.has_glasses === false) negatives.push('glasses','eyeglasses','spectacles','sunglasses')
+  if (c.has_glasses === false) negatives.push('glasses','eyeglasses','spectacles')
   if (c.has_beard === false) negatives.push('beard','mustache','stubble','facial hair','goatee')
   return negatives.join(', ')
 }
@@ -107,7 +107,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'park-natural':        '[TRIGGER], medium shot, outdoor park setting, casual smart outfit or plain t-shirt, dappled sunlight, blurred green background, relaxed natural pose',
   'rooftop-city':        '[TRIGGER], medium shot, rooftop setting, city skyline background, smart casual outfit, natural daylight',
   'city-walk':           '[TRIGGER], medium shot, walking pose, casual jacket, city street background, urban lifestyle, natural movement',
-  'beach-professional':  '[TRIGGER], medium shot, crisp white linen shirt, relaxed at a tropical beach with palm trees and turquoise ocean in the background, bright sunny natural daylight, warm relaxed vacation vibe',
+  'beach-professional':  '[TRIGGER], medium shot, crisp white linen shirt, wearing stylish sunglasses, relaxed at a tropical beach with palm trees and turquoise ocean in the background, bright sunny natural daylight, warm relaxed vacation vibe',
   'leather-jacket-urban': '[TRIGGER], medium shot, black leather jacket, white t-shirt, city street background, natural evening light, edgy professional',
   'all-black-minimal':   '[TRIGGER], portrait, all black outfit, black shirt or turtleneck, dark neutral background, soft side light, minimal dramatic',
   'bold-colored-blazer': '[TRIGGER], half body portrait, bold colored blazer (deep red or emerald green), white t-shirt underneath, bright creative studio with a bold colored backdrop, natural light, confident statement',

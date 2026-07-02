@@ -88,7 +88,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'park-natural',        label: 'Park Natural',       description: 'Green park, daylight',       icon: '🌳' },
       { id: 'rooftop-city',        label: 'Rooftop City',       description: 'City skyline, rooftop',      icon: '🏙️' },
       { id: 'city-walk',           label: 'City Walk',          description: 'Walking, urban street',      icon: '🚶' },
-      { id: 'beach-professional',  label: 'Beach',              description: 'White linen, tropical beach', icon: '🏖️' },
+      { id: 'beach-professional',  label: 'Beach',              description: 'White linen, sunglasses, beach', icon: '🏖️' },
     ],
   },
   {
