@@ -207,7 +207,20 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'w-rooftop-golden',      label: 'Rooftop Golden',    description: 'City panorama, golden hour', icon: '🌅' },
       { id: 'w-architectural',       label: 'Architectural',     description: 'Modern architecture bg',     icon: '🏛️' },
       { id: 'w-city-walk',           label: 'City Walk',         description: 'Walking, urban street',      icon: '🚶‍♀️' },
-      { id: 'w-beach-professional',  label: 'Beach Professional', description: 'Linen blouse, coastal',     icon: '🏖️' },
+    ],
+  },
+  {
+    id: 'w-travel-adventure',
+    name: 'Travel / Adventure',
+    icon: '🌍',
+    gender: 'female',
+    styles: [
+      { id: 'w-beach-professional',  label: 'Beach',             description: 'Linen blouse, coastal',       icon: '🏖️' },
+      { id: 'w-mountain-snow',       label: 'Snowy Mountains',   description: 'Winter jacket, snowy peaks',   icon: '⛰️' },
+      { id: 'w-poolside-resort',     label: 'Poolside Resort',   description: 'Luxury pool, sunny vacation',  icon: '🏊‍♀️' },
+      { id: 'w-autumn-forest',       label: 'Autumn Forest',     description: 'Sweater, golden fall foliage', icon: '🍂' },
+      { id: 'w-mountain-lake',       label: 'Mountain Lake',     description: 'Outdoor jacket, scenic lake',  icon: '🏞️' },
+      { id: 'w-equestrian',          label: 'Equestrian',        description: 'With a horse, countryside',    icon: '🐴' },
     ],
   },
   {
