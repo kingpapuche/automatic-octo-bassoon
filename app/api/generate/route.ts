@@ -276,7 +276,17 @@ export async function POST(request: NextRequest) {
         : promptTemplate
       const bodyHint = isPortrait ? ', three-quarter length composition, waist-up shot, the torso and waist visible in frame' : ''
 
-      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${bodyHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
+      // Expressie per stijl-groep: formeel/dramatisch = serieus/zelfverzekerd;
+      // casual/lifestyle/date = warme oprechte glimlach; overige = subtiel vriendelijk.
+      const SERIOUS_STYLES = new Set(['corporate-classic','executive-navy','ceo-black','boardroom-charcoal','pinstripe-pro','three-piece','formal-black-drama','wall-street-power','all-black-minimal','creative-director','leather-jacket-urban','arms-crossed-power','w-power-blazer-navy','w-executive-charcoal','w-ceo-black','w-pinstripe-pro','w-sheath-classic','w-leather-jacket-edge','w-evening-rooftop','w-night-city-glamour','w-arms-crossed-power'])
+      const SMILE_STYLES = new Set(['white-tee-clean','black-tee-clean','navy-polo','henley-relaxed','plaid-friendly','white-button-down','light-blue-oxford','denim-shirt-fresh','golden-hour','park-natural','rooftop-city','city-walk','knit-cozy','restaurant-elegant','wine-bar-relaxed','coffee-shop-date','rooftop-bar-evening','w-white-tee-natural','w-denim-shirt-fresh','w-coffee-shop-warm','w-park-outdoor','w-rooftop-golden','w-city-walk','w-beach-professional','w-startup-casual','w-cardigan-soft','w-cafe-date','w-bistro-warm','w-restaurant-elegant','w-restaurant-evening','w-wine-bar-casual','w-rooftop-bar','w-cocktail-glamour'])
+      const expression = SMILE_STYLES.has(styleId)
+        ? ', warm genuine smile, friendly approachable expression'
+        : SERIOUS_STYLES.has(styleId)
+        ? ', confident composed expression, serious and not smiling'
+        : ', pleasant confident expression, subtle friendly look'
+
+      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${expression}${bodyHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       const input = {
