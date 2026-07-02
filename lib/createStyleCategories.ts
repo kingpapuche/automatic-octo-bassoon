@@ -112,6 +112,8 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'leather-jacket-urban', label: 'Leather Jacket',   description: 'Black leather, urban',       icon: '🧥' },
       { id: 'all-black-minimal',   label: 'All Black Minimal', description: 'All black, dramatic',        icon: '🌑' },
       { id: 'bold-colored-blazer', label: 'Bold Colored Blazer', description: 'Red/emerald blazer',       icon: '🌈' },
+      { id: 'motorcycle-street',   label: 'Motorcycle',        description: 'Leather jacket, motorbike',  icon: '🏍️' },
+      { id: 'classic-car',         label: 'Classic Car',       description: 'Smart casual, classic car',  icon: '🚗' },
     ],
   },
   {

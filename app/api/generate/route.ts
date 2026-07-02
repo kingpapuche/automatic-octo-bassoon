@@ -115,6 +115,8 @@ const STYLE_PROMPTS: Record<string, string> = {
   'leather-jacket-urban': '[TRIGGER], medium shot, black leather jacket, white t-shirt, city street background, natural evening light, edgy professional',
   'all-black-minimal':   '[TRIGGER], portrait, all black outfit, black shirt or turtleneck, dark neutral background, soft side light, minimal dramatic',
   'bold-colored-blazer': '[TRIGGER], half body portrait, bold colored blazer (deep red or emerald green), white t-shirt underneath, bright creative studio with a bold colored backdrop, natural light, confident statement',
+  'motorcycle-street':   '[TRIGGER], medium shot, brown leather jacket over a white t-shirt, leaning against a classic motorcycle on an urban street, natural daylight, cool confident relaxed vibe',
+  'classic-car':         '[TRIGGER], medium shot, smart casual jacket, leaning against a sleek classic premium car on a city street, natural daylight, confident stylish vibe',
   'restaurant-elegant':  '[TRIGGER], medium-wide shot showing head to waist, smart casual button-down, sitting at a table in an elegant restaurant, set dining tables with plates and wine glasses visible behind, warm candlelit fine-dining ambiance',
   'wine-bar-relaxed':    '[TRIGGER], medium-wide shot showing head to waist, dark sweater or shirt, sitting at a cozy wine bar, rows of wine bottles on wooden shelves and a bar counter clearly visible behind, warm intimate lighting',
   'coffee-shop-date':    '[TRIGGER], medium-wide shot showing head to waist, casual smart sweater or shirt, in a modern coffee shop, espresso machine, coffee cups and a cafe counter visible behind, warm casual daytime lighting',
