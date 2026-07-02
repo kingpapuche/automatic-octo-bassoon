@@ -94,7 +94,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'tech-turtleneck':     '[TRIGGER], close up portrait, gray turtleneck sweater, clean seamless studio backdrop, smooth plain neutral background, soft studio lighting, intelligent gaze',
   'gray-sweater-pro':    '[TRIGGER], portrait, gray crew neck sweater over collared shirt, bright modern office, clean and uncluttered, soft window light, smart casual',
   'knit-cozy':           '[TRIGGER], half body portrait, chunky knit sweater, warm ambient light, cozy neutral background, approachable',
-  'v-neck-smart':        '[TRIGGER], portrait, blue v-neck sweater over collared shirt, light background, soft natural light, smart casual',
+  'v-neck-smart':        '[TRIGGER], portrait, blue v-neck sweater over collared shirt, bright modern office, clean and uncluttered, soft natural light, smart casual',
   'white-button-down':   '[TRIGGER], portrait, clean white button-down shirt, soft neutral background, natural window light, approachable professional',
   'light-blue-oxford':   '[TRIGGER], half body portrait, light blue oxford button-down shirt, open collar, soft neutral background, natural window light, classic smart casual',
   'navy-polo':           '[TRIGGER], portrait, navy blue polo shirt, clean light background, soft natural light, friendly expression',
