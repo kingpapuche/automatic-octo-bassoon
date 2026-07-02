@@ -88,7 +88,6 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'park-natural',        label: 'Park Natural',       description: 'Green park, daylight',       icon: '🌳' },
       { id: 'rooftop-city',        label: 'Rooftop City',       description: 'City skyline, rooftop',      icon: '🏙️' },
       { id: 'city-walk',           label: 'City Walk',          description: 'Walking, urban street',      icon: '🚶' },
-      { id: 'beach-professional',  label: 'Beach',              description: 'White linen, sunglasses, beach', icon: '🏖️' },
     ],
   },
   {
@@ -97,6 +96,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     icon: '🌍',
     gender: 'male',
     styles: [
+      { id: 'beach-professional',  label: 'Beach',              description: 'White linen, sunglasses, beach', icon: '🏖️' },
       { id: 'mountain-snow',       label: 'Snowy Mountains',    description: 'Winter jacket, snowy peaks',   icon: '⛰️' },
       { id: 'poolside-resort',     label: 'Poolside Resort',    description: 'Luxury pool, sunny vacation',  icon: '🏊' },
       { id: 'autumn-forest',       label: 'Autumn Forest',      description: 'Sweater, golden fall foliage', icon: '🍂' },
