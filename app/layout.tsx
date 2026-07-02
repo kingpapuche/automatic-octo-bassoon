@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Nova Imago | Professional AI Headshots",
-  description: "Get stunning professional headshots in minutes with AI. 93+ styles, 30 minute delivery, starting at $29.",
+  description: "Get stunning professional headshots in minutes with AI. 90+ styles, 30 minute delivery, starting at $29.",
 };
 
 export default function RootLayout({

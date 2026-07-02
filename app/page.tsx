@@ -274,7 +274,7 @@ export default function HomePage() {
               <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>29</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['1 AI model training', '40 HD headshots', 'Choose 10 styles × 4 variations', 'All 70+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['1 AI model training', '40 HD headshots', 'Choose 10 styles × 4 variations', 'All 90+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-[#6B6B6B] text-sm">{f}</span>
@@ -298,7 +298,7 @@ export default function HomePage() {
               <div className="font-serif text-5xl mb-1"><span className="text-2xl font-sans">$</span>39</div>
               <p className="text-white/60 mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['1 AI model training', '80 HD headshots', 'Choose 20 styles × 4 variations', 'All 70+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['1 AI model training', '80 HD headshots', 'Choose 20 styles × 4 variations', 'All 90+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#D4AF37] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-white/90 text-sm">{f}</span>
@@ -321,7 +321,7 @@ export default function HomePage() {
               <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>49</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
-                {['2 AI model trainings', '120 HD headshots', 'Choose 30 styles × 4 variations', 'All 70+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
+                {['2 AI model trainings', '120 HD headshots', 'Choose 30 styles × 4 variations', 'All 90+ styles available', 'HD quality', 'Ready in 30 minutes'].map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
                     <span className="text-[#6B6B6B] text-sm">{f}</span>
