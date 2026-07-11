@@ -165,7 +165,7 @@ const STYLE_PROMPTS: Record<string, string> = {
 
   // ===== SPECIALTY POSES (man) =====
   'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark tailored suit, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative confident pose',
-  'sitting-confident':   '[TRIGGER], full body shot from head to feet, sitting confidently in a leather armchair with legs crossed and the whole body visible, tailored blazer, modern office setting with bookshelves and a window, soft natural light, relaxed executive presence',
+  'sitting-confident':   '[TRIGGER], seated at a wooden desk, leaning slightly forward with both hands clasped together on the table, tailored blazer over a turtleneck or shirt, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
   'leaning-elegant':     '[TRIGGER], medium shot, leaning against wall casually, smart casual outfit, modern interior, soft natural light, approachable confidence',
   'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
@@ -173,7 +173,7 @@ const STYLE_PROMPTS: Record<string, string> = {
 
   // ===== SPECIALTY POSES (vrouw) =====
   'w-arms-crossed-power': '[TRIGGER], half body portrait of professional woman, arms crossed confidently, tailored blazer, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative elegant pose',
-  'w-sitting-confident':  '[TRIGGER], full body shot from head to feet of professional woman, sitting confidently in a leather armchair with legs crossed and the whole body visible, tailored blazer, modern office setting with bookshelves and a window, soft natural light, relaxed executive presence',
+  'w-sitting-confident':  '[TRIGGER], portrait of professional woman seated at a wooden desk, leaning slightly forward with both hands clasped together on the table, tailored blazer, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
   'w-leaning-elegant':    '[TRIGGER], medium shot of woman, leaning against wall casually, smart casual outfit, modern interior, soft natural light, approachable elegant confidence',
   'w-hands-relaxed':      '[TRIGGER], half body portrait of woman, relaxed hand pose, blazer, urban background, soft natural light, casual confidence',
   'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
       // Expressie per stijl-groep: formeel/dramatisch = serieus/zelfverzekerd;
       // casual/lifestyle/date = warme oprechte glimlach; overige = subtiel vriendelijk.
       const SERIOUS_STYLES = new Set(['corporate-classic','executive-navy','ceo-black','boardroom-charcoal','pinstripe-pro','three-piece','formal-black-drama','wall-street-power','all-black-minimal','creative-director','leather-jacket-urban','arms-crossed-power','w-power-blazer-navy','w-executive-charcoal','w-ceo-black','w-pinstripe-pro','w-sheath-classic','w-leather-jacket-edge','w-evening-rooftop','w-night-city-glamour','w-arms-crossed-power'])
-      const SMILE_STYLES = new Set(['white-tee-clean','black-tee-clean','navy-polo','henley-relaxed','plaid-friendly','white-button-down','light-blue-oxford','denim-shirt-fresh','golden-hour','park-natural','rooftop-city','city-walk','beach-professional','mountain-snow','poolside-resort','autumn-forest','mountain-lake','knit-cozy','restaurant-elegant','wine-bar-relaxed','coffee-shop-date','rooftop-bar-evening','w-white-tee-natural','w-denim-shirt-fresh','w-coffee-shop-warm','w-park-outdoor','w-rooftop-golden','w-city-walk','w-beach-professional','w-mountain-snow','w-poolside-resort','w-autumn-forest','w-mountain-lake','w-equestrian','w-startup-casual','w-cardigan-soft','w-cafe-date','w-bistro-warm','w-restaurant-elegant','w-restaurant-evening','w-wine-bar-casual','w-rooftop-bar','w-cocktail-glamour'])
+      const SMILE_STYLES = new Set(['white-tee-clean','black-tee-clean','navy-polo','henley-relaxed','plaid-friendly','white-button-down','light-blue-oxford','denim-shirt-fresh','golden-hour','park-natural','rooftop-city','city-walk','beach-professional','mountain-snow','poolside-resort','autumn-forest','mountain-lake','knit-cozy','sitting-confident','restaurant-elegant','wine-bar-relaxed','coffee-shop-date','rooftop-bar-evening','w-white-tee-natural','w-denim-shirt-fresh','w-coffee-shop-warm','w-park-outdoor','w-rooftop-golden','w-city-walk','w-beach-professional','w-mountain-snow','w-poolside-resort','w-autumn-forest','w-mountain-lake','w-equestrian','w-startup-casual','w-cardigan-soft','w-sitting-confident','w-cafe-date','w-bistro-warm','w-restaurant-elegant','w-restaurant-evening','w-wine-bar-casual','w-rooftop-bar','w-cocktail-glamour'])
       const expression = SMILE_STYLES.has(styleId)
         ? ', warm genuine smile, friendly approachable expression'
         : SERIOUS_STYLES.has(styleId)

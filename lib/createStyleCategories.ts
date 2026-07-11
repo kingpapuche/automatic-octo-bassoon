@@ -123,7 +123,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     gender: 'male',
     styles: [
       { id: 'arms-crossed-power',  label: 'Arms Crossed',       description: 'Arms crossed, dark suit',    icon: '💪' },
-      { id: 'sitting-confident',   label: 'Sitting Confident',  description: 'Sitting in chair, blazer',   icon: '🪑' },
+      { id: 'sitting-confident',   label: 'Sitting Confident',  description: 'Seated at desk, engaging',   icon: '🪑' },
       { id: 'leaning-elegant',     label: 'Leaning Elegant',    description: 'Leaning casually, modern',   icon: '🚪' },
       { id: 'hands-in-pockets',    label: 'Hands in Pockets',   description: 'Relaxed, urban background',  icon: '🧍' },
       { id: 'thoughtful-pose',     label: 'Thoughtful',         description: 'Hand near chin, intellectual', icon: '🤔' },
@@ -230,7 +230,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     gender: 'female',
     styles: [
       { id: 'w-arms-crossed-power', label: 'Arms Crossed',      description: 'Arms crossed, blazer',       icon: '💪' },
-      { id: 'w-sitting-confident',  label: 'Sitting Confident', description: 'Sitting in chair, blazer',   icon: '🪑' },
+      { id: 'w-sitting-confident',  label: 'Sitting Confident', description: 'Seated at desk, engaging',   icon: '🪑' },
       { id: 'w-leaning-elegant',    label: 'Leaning Elegant',   description: 'Leaning casually, modern',   icon: '🚪' },
       { id: 'w-hands-relaxed',      label: 'Hands Relaxed',     description: 'Relaxed pose, urban',        icon: '🧍‍♀️' },
       { id: 'w-thoughtful-pose',    label: 'Thoughtful',        description: 'Hand near chin, elegant',    icon: '🤔' },
