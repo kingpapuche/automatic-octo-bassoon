@@ -165,7 +165,7 @@ const STYLE_PROMPTS: Record<string, string> = {
 
   // ===== SPECIALTY POSES (man) =====
   'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark tailored suit, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative confident pose',
-  'sitting-confident':   '[TRIGGER], medium shot, sitting in chair confidently, legs crossed, blazer, modern office setting, soft natural light, executive presence',
+  'sitting-confident':   '[TRIGGER], full body shot from head to feet, sitting confidently in a leather armchair with legs crossed and the whole body visible, tailored blazer, modern office setting with bookshelves and a window, soft natural light, relaxed executive presence',
   'leaning-elegant':     '[TRIGGER], medium shot, leaning against wall casually, smart casual outfit, modern interior, soft natural light, approachable confidence',
   'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
@@ -173,7 +173,7 @@ const STYLE_PROMPTS: Record<string, string> = {
 
   // ===== SPECIALTY POSES (vrouw) =====
   'w-arms-crossed-power': '[TRIGGER], half body portrait of professional woman, arms crossed confidently, tailored blazer, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative elegant pose',
-  'w-sitting-confident':  '[TRIGGER], medium shot of professional woman, sitting in chair confidently, tailored blazer, modern office setting, soft natural light, executive presence',
+  'w-sitting-confident':  '[TRIGGER], full body shot from head to feet of professional woman, sitting confidently in a leather armchair with legs crossed and the whole body visible, tailored blazer, modern office setting with bookshelves and a window, soft natural light, relaxed executive presence',
   'w-leaning-elegant':    '[TRIGGER], medium shot of woman, leaning against wall casually, smart casual outfit, modern interior, soft natural light, approachable elegant confidence',
   'w-hands-relaxed':      '[TRIGGER], half body portrait of woman, relaxed hand pose, blazer, urban background, soft natural light, casual confidence',
   'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
