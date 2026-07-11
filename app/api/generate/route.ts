@@ -165,7 +165,7 @@ const STYLE_PROMPTS: Record<string, string> = {
 
   // ===== SPECIALTY POSES (man) =====
   'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark tailored suit, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative confident pose',
-  'sitting-confident':   '[TRIGGER], seated at a wooden desk, leaning slightly forward with both hands clasped together on the table, tailored blazer over a turtleneck or shirt, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
+  'sitting-confident':   '[TRIGGER], seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of him, tailored blazer over a turtleneck or shirt, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
   'leaning-elegant':     '[TRIGGER], medium shot, leaning casually against a wall, smart casual outfit, stylish upscale modern loft interior with warm design details like exposed brick, wood and greenery, softly blurred background, soft natural light, approachable elegant confidence',
   'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
@@ -173,7 +173,7 @@ const STYLE_PROMPTS: Record<string, string> = {
 
   // ===== SPECIALTY POSES (vrouw) =====
   'w-arms-crossed-power': '[TRIGGER], half body portrait of professional woman, arms crossed confidently, tailored blazer, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative elegant pose',
-  'w-sitting-confident':  '[TRIGGER], portrait of professional woman seated at a wooden desk, leaning slightly forward with both hands clasped together on the table, tailored blazer, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
+  'w-sitting-confident':  '[TRIGGER], portrait of professional woman seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of her, tailored blazer, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
   'w-leaning-elegant':    '[TRIGGER], medium shot of woman, leaning casually against a wall, smart casual outfit, stylish upscale modern loft interior with warm design details like exposed brick, wood and greenery, softly blurred background, soft natural light, approachable elegant confidence',
   'w-hands-relaxed':      '[TRIGGER], half body portrait of woman, relaxed hand pose, blazer, urban background, soft natural light, casual confidence',
   'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
