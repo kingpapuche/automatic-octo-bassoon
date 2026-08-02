@@ -166,8 +166,8 @@ const STYLE_PROMPTS: Record<string, string> = {
   // ===== SPECIALTY POSES (man) =====
   'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark tailored suit, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative confident pose',
   'sitting-confident':   '[TRIGGER], seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of him, tailored blazer over a turtleneck or shirt, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
-  'leaning-elegant':     '[TRIGGER], leaning sideways with one shoulder against a clean modern building exterior wall outdoors, body relaxed and tilted at an angle resting his weight on the wall, one hand in pocket, smart casual blazer over a shirt, soft natural daylight, approachable elegant confidence',
-  'leaning-office':      '[TRIGGER], leaning sideways against a wall in a modern office, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting his weight on the wall, one hand in pocket, tailored business blazer, softly blurred modern office interior with glass and wood, soft natural light, confident professional presence',
+  'leaning-elegant':     '[TRIGGER], leaning sideways with one shoulder against a clean modern building exterior wall outdoors, body relaxed and tilted at an angle resting his weight on the wall, one hand in pocket, relaxed casual outfit such as a fine knit sweater or an open casual shirt, no blazer and no tie, soft natural daylight, approachable relaxed confidence',
+  'leaning-office':      '[TRIGGER], leaning sideways with one shoulder against a wall in a modern corporate office, body relaxed and tilted at an angle resting his weight on the wall, one hand in pocket, tailored business blazer, softly blurred professional open-plan office behind him with glass-walled meeting rooms, desks and office chairs and a city view through large windows, soft natural light, confident professional presence',
   'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
   'holding-tablet':      '[TRIGGER], half body portrait, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
@@ -175,8 +175,8 @@ const STYLE_PROMPTS: Record<string, string> = {
   // ===== SPECIALTY POSES (vrouw) =====
   'w-arms-crossed-power': '[TRIGGER], half body portrait of professional woman, arms crossed confidently, tailored blazer, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative elegant pose',
   'w-sitting-confident':  '[TRIGGER], portrait of professional woman seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of her, tailored blazer, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
-  'w-leaning-elegant':    '[TRIGGER], portrait of woman leaning sideways with one shoulder against a clean modern building exterior wall outdoors, body relaxed and tilted at an angle resting her weight on the wall, one hand in pocket, smart casual blazer, soft natural daylight, approachable elegant confidence',
-  'w-leaning-office':     '[TRIGGER], portrait of woman leaning sideways against a wall in a modern office, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting her weight on the wall, one hand in pocket, tailored business blazer, softly blurred modern office interior with glass and wood, soft natural light, confident professional presence',
+  'w-leaning-elegant':    '[TRIGGER], portrait of woman leaning sideways with one shoulder against a clean modern building exterior wall outdoors, body relaxed and tilted at an angle resting her weight on the wall, one hand in pocket, relaxed casual outfit such as a fine knit top or an open casual blouse, no blazer, soft natural daylight, approachable relaxed confidence',
+  'w-leaning-office':     '[TRIGGER], portrait of woman leaning sideways with one shoulder against a wall in a modern corporate office, body relaxed and tilted at an angle resting her weight on the wall, one hand in pocket, tailored business blazer, softly blurred professional open-plan office behind her with glass-walled meeting rooms, desks and office chairs and a city view through large windows, soft natural light, confident professional presence',
   'w-hands-relaxed':      '[TRIGGER], half body portrait of woman, relaxed hand pose, blazer, urban background, soft natural light, casual confidence',
   'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
   'w-holding-tablet':     '[TRIGGER], half body portrait of woman, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
@@ -324,6 +324,11 @@ export async function POST(request: NextRequest) {
       if (CLEAN_BG_STYLES.has(styleId)) {
         // Outdoor architecturaal: dwing buiten af, weer interieur en straatdrukte.
         styleNegative += ', indoor room, interior, curtains, furniture, busy street, crowd, people in background, parked cars, traffic, cluttered messy background'
+      }
+      const OFFICE_STYLES = new Set(['leaning-office', 'w-leaning-office'])
+      if (OFFICE_STYLES.has(styleId)) {
+        // Dwing een echt kantoor af, weer huiselijke settings.
+        styleNegative += ', home, apartment, living room, dining table, dining room, kitchen, residential interior, balcony, bedroom'
       }
 
       const input = {

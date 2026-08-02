@@ -124,7 +124,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     styles: [
       { id: 'arms-crossed-power',  label: 'Arms Crossed',       description: 'Arms crossed, dark suit',    icon: '💪' },
       { id: 'sitting-confident',   label: 'Sitting Confident',  description: 'Seated at desk, engaging',   icon: '🪑' },
-      { id: 'leaning-elegant',     label: 'Leaning Elegant',    description: 'Leaning, clean all-round',   icon: '🚪' },
+      { id: 'leaning-elegant',     label: 'Leaning Casual',     description: 'Leaning casual, outdoor',    icon: '🚪' },
       { id: 'leaning-office',      label: 'Leaning Office',     description: 'Leaning, modern office',     icon: '🏢' },
       { id: 'hands-in-pockets',    label: 'Hands in Pockets',   description: 'Relaxed, urban background',  icon: '🧍' },
       { id: 'thoughtful-pose',     label: 'Thoughtful',         description: 'Hand near chin, intellectual', icon: '🤔' },
@@ -232,7 +232,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     styles: [
       { id: 'w-arms-crossed-power', label: 'Arms Crossed',      description: 'Arms crossed, blazer',       icon: '💪' },
       { id: 'w-sitting-confident',  label: 'Sitting Confident', description: 'Seated at desk, engaging',   icon: '🪑' },
-      { id: 'w-leaning-elegant',    label: 'Leaning Elegant',   description: 'Leaning, clean all-round',   icon: '🚪' },
+      { id: 'w-leaning-elegant',    label: 'Leaning Casual',    description: 'Leaning casual, outdoor',    icon: '🚪' },
       { id: 'w-leaning-office',     label: 'Leaning Office',    description: 'Leaning, modern office',     icon: '🏢' },
       { id: 'w-hands-relaxed',      label: 'Hands Relaxed',     description: 'Relaxed pose, urban',        icon: '🧍‍♀️' },
       { id: 'w-thoughtful-pose',    label: 'Thoughtful',        description: 'Hand near chin, elegant',    icon: '🤔' },
