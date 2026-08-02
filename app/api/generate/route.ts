@@ -309,20 +309,27 @@ export async function POST(request: NextRequest) {
       // zichtbaar 'environmental' decor (dat maakt de achtergrond juist druk).
       const CLEAN_BG_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant'])
       const backgroundClause = CLEAN_BG_STYLES.has(styleId)
-        ? ', calm minimal uncluttered background, plain simple backdrop far out of focus, strong background blur, shallow depth of field, subject prominent and sharp'
+        ? ', smooth plain neutral wall of a single solid color directly behind the subject, calm minimal uncluttered background far out of focus, strong background blur, shallow depth of field, subject prominent and sharp'
         : ', the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings'
       const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${expression}${bodyHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, matte natural skin with realistic texture and subtle pores, non-shiny complexion, soft even flattering light on the face${backgroundClause}, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       // Stijl-specifieke negatieven: forceer bv. de leun-pose in elke variatie.
       const LEANING_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant', 'leaning-office', 'w-leaning-office'])
-      const styleNegative = LEANING_STYLES.has(styleId)
-        ? ', sitting, seated, sitting down, standing upright straight, rigid upright posture, standing away from the wall, body not touching the wall, square to camera facing forward, not leaning'
-        : ''
+      let effectiveNegative = fullNegativePrompt
+      let styleNegative = ''
+      if (LEANING_STYLES.has(styleId)) {
+        styleNegative += ', sitting, seated, sitting down, standing upright straight, rigid upright posture, standing away from the wall, body not touching the wall, square to camera facing forward, not leaning'
+      }
+      if (CLEAN_BG_STYLES.has(styleId)) {
+        // Voor rustige stijlen: laat het verbod op een effen muur vallen, en verbied juist clutter.
+        effectiveNegative = effectiveNegative.replace(', plain empty wall, boring flat background, bare wall background, dull background', '')
+        styleNegative += ', furniture, plants, curtains, doorway, hallway, room clutter, busy interior, visible room details, framed pictures on the wall'
+      }
 
       const input = {
         prompt: fullPrompt,
-        negative_prompt: `${fullNegativePrompt}${styleNegative}`,
+        negative_prompt: `${effectiveNegative}${styleNegative}`,
         model: 'dev',
         lora_scale: 1,
         num_outputs: VARIATIONS_PER_STYLE, // 4 variaties per stijl
