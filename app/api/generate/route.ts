@@ -166,7 +166,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   // ===== SPECIALTY POSES (man) =====
   'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark tailored suit, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative confident pose',
   'sitting-confident':   '[TRIGGER], seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of him, tailored blazer over a turtleneck or shirt, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
-  'leaning-elegant':     '[TRIGGER], leaning sideways against the edge of a wall in a warm upscale interior, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting his weight on the wall, one hand in pocket, smart casual blazer over a shirt, soft natural window light, approachable elegant confidence',
+  'leaning-elegant':     '[TRIGGER], leaning sideways with one shoulder against a clean modern building exterior wall outdoors, body relaxed and tilted at an angle resting his weight on the wall, one hand in pocket, smart casual blazer over a shirt, soft natural daylight, approachable elegant confidence',
   'leaning-office':      '[TRIGGER], leaning sideways against a wall in a modern office, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting his weight on the wall, one hand in pocket, tailored business blazer, softly blurred modern office interior with glass and wood, soft natural light, confident professional presence',
   'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
@@ -175,7 +175,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   // ===== SPECIALTY POSES (vrouw) =====
   'w-arms-crossed-power': '[TRIGGER], half body portrait of professional woman, arms crossed confidently, tailored blazer, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative elegant pose',
   'w-sitting-confident':  '[TRIGGER], portrait of professional woman seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of her, tailored blazer, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
-  'w-leaning-elegant':    '[TRIGGER], portrait of woman leaning sideways against the edge of a wall in a warm upscale interior, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting her weight on the wall, one hand in pocket, smart casual blazer, soft natural window light, approachable elegant confidence',
+  'w-leaning-elegant':    '[TRIGGER], portrait of woman leaning sideways with one shoulder against a clean modern building exterior wall outdoors, body relaxed and tilted at an angle resting her weight on the wall, one hand in pocket, smart casual blazer, soft natural daylight, approachable elegant confidence',
   'w-leaning-office':     '[TRIGGER], portrait of woman leaning sideways against a wall in a modern office, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting her weight on the wall, one hand in pocket, tailored business blazer, softly blurred modern office interior with glass and wood, soft natural light, confident professional presence',
   'w-hands-relaxed':      '[TRIGGER], half body portrait of woman, relaxed hand pose, blazer, urban background, soft natural light, casual confidence',
   'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
@@ -309,7 +309,7 @@ export async function POST(request: NextRequest) {
       // zichtbaar 'environmental' decor (dat maakt de achtergrond juist druk).
       const CLEAN_BG_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant'])
       const backgroundClause = CLEAN_BG_STYLES.has(styleId)
-        ? ', in a warm upscale interior, the background strongly and softly blurred with a shallow depth of field, only subtle tasteful decor faintly visible such as a blurred framed picture and an armchair, refined minimal and uncluttered, soft natural directional window light, the subject sharp and in focus'
+        ? ', photographed outdoors on location against a clean modern architectural building facade with columns and clean geometric lines, real upscale urban setting with natural depth and perspective receding behind him, softly blurred background, soft natural daylight, authentic editorial photograph, the subject sharp and in focus'
         : ', the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings'
       const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${expression}${bodyHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, matte natural skin with realistic texture and subtle pores, non-shiny complexion, soft even flattering light on the face${backgroundClause}, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
@@ -322,8 +322,8 @@ export async function POST(request: NextRequest) {
         styleNegative += ', sitting, seated, sitting down, standing upright straight, rigid upright posture, standing away from the wall, body not touching the wall, square to camera facing forward, not leaning'
       }
       if (CLEAN_BG_STYLES.has(styleId)) {
-        // Warm verfijnd interieur: subtiele decor (kader/fauteuil) mag, maar geen drukte/clutter.
-        styleNegative += ', plants, curtains, doorway, hallway, busy cluttered background, people in background, messy objects, cluttered room'
+        // Outdoor architecturaal: dwing buiten af, weer interieur en straatdrukte.
+        styleNegative += ', indoor room, interior, curtains, furniture, busy street, crowd, people in background, parked cars, traffic, cluttered messy background'
       }
 
       const input = {
