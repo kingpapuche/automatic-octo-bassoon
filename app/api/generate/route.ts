@@ -286,7 +286,12 @@ export async function POST(request: NextRequest) {
             `$1${mediumFraming}`
           )
         : promptTemplate
-      const bodyHint = isPortrait ? ', three-quarter length composition, waist-up shot, the torso and waist visible in frame' : ''
+      // Pose-stijlen die iets meer lichaam tonen (head-to-knees) om de houding te laten zien,
+      // zonder full-body (dat de gezichtsgelijkenis zou schaden).
+      const THREE_QUARTER_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant'])
+      const bodyHint = THREE_QUARTER_STYLES.has(styleId)
+        ? ', three-quarter length shot from head to knees, showing the relaxed leaning stance'
+        : isPortrait ? ', three-quarter length composition, waist-up shot, the torso and waist visible in frame' : ''
 
       // Expressie per stijl-groep: formeel/dramatisch = serieus/zelfverzekerd;
       // casual/lifestyle/date = warme oprechte glimlach; overige = subtiel vriendelijk.
