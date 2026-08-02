@@ -168,7 +168,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'sitting-confident':   '[TRIGGER], seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of him, tailored blazer over a turtleneck or shirt, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
   'leaning-elegant':     '[TRIGGER], leaning sideways with one shoulder against a clean modern building exterior wall outdoors, body relaxed and tilted at an angle resting his weight on the wall, one hand in pocket, relaxed casual outfit such as a fine knit sweater or an open casual shirt, no blazer and no tie, soft natural daylight, approachable relaxed confidence',
   'leaning-office':      '[TRIGGER], leaning sideways with one shoulder against a wall in a modern corporate office, body relaxed and tilted at an angle resting his weight on the wall, one hand in pocket, tailored business blazer, softly blurred professional open-plan office behind him with glass-walled meeting rooms, desks and office chairs and a city view through large windows, soft natural light, confident professional presence',
-  'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
+  'hands-in-pockets':    '[TRIGGER], three-quarter length shot from head to thighs, standing relaxed with both hands clearly tucked into his trouser pockets, the hands in pockets clearly visible, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
   'holding-tablet':      '[TRIGGER], half body portrait, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
 
@@ -177,7 +177,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-sitting-confident':  '[TRIGGER], portrait of professional woman seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of her, tailored blazer, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
   'w-leaning-elegant':    '[TRIGGER], portrait of woman leaning sideways with one shoulder against a clean modern building exterior wall outdoors, body relaxed and tilted at an angle resting her weight on the wall, one hand in pocket, relaxed casual outfit such as a fine knit top or an open casual blouse, no blazer, soft natural daylight, approachable relaxed confidence',
   'w-leaning-office':     '[TRIGGER], portrait of woman leaning sideways with one shoulder against a wall in a modern corporate office, body relaxed and tilted at an angle resting her weight on the wall, one hand in pocket, tailored business blazer, softly blurred professional open-plan office behind her with glass-walled meeting rooms, desks and office chairs and a city view through large windows, soft natural light, confident professional presence',
-  'w-hands-relaxed':      '[TRIGGER], half body portrait of woman, relaxed hand pose, blazer, urban background, soft natural light, casual confidence',
+  'w-hands-relaxed':      '[TRIGGER], three-quarter length shot from head to thighs of woman, standing relaxed with both hands clearly tucked into her trouser pockets, the hands in pockets clearly visible, blazer, urban background, soft natural light, casual confidence',
   'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
   'w-holding-tablet':     '[TRIGGER], half body portrait of woman, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
 }
@@ -290,9 +290,9 @@ export async function POST(request: NextRequest) {
         : promptTemplate
       // Pose-stijlen die iets meer lichaam tonen (head-to-knees) om de houding te laten zien,
       // zonder full-body (dat de gezichtsgelijkenis zou schaden).
-      const THREE_QUARTER_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant', 'leaning-office', 'w-leaning-office'])
+      const THREE_QUARTER_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant', 'leaning-office', 'w-leaning-office', 'hands-in-pockets', 'w-hands-relaxed'])
       const bodyHint = THREE_QUARTER_STYLES.has(styleId)
-        ? ', three-quarter length shot from head to knees, showing the relaxed leaning stance'
+        ? ', three-quarter length shot from head to the knees, showing the full pose and stance including the hips'
         : isPortrait ? ', three-quarter length composition, waist-up shot, the torso and waist visible in frame' : ''
 
       // Expressie per stijl-groep: formeel/dramatisch = serieus/zelfverzekerd;
