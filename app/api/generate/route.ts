@@ -166,7 +166,8 @@ const STYLE_PROMPTS: Record<string, string> = {
   // ===== SPECIALTY POSES (man) =====
   'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark tailored suit, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative confident pose',
   'sitting-confident':   '[TRIGGER], seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of him, tailored blazer over a turtleneck or shirt, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
-  'leaning-elegant':     '[TRIGGER], casually leaning with his shoulder and back clearly resting against a plain smooth wall directly behind him, relaxed leaning pose against the wall, one hand in pocket, smart casual blazer over a shirt, calm minimal setting, soft natural light, approachable elegant confidence',
+  'leaning-elegant':     '[TRIGGER], leaning sideways against a plain wall, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting his weight on the wall, one hand in pocket, smart casual blazer over a shirt, calm minimal setting, soft natural light, approachable elegant confidence',
+  'leaning-office':      '[TRIGGER], leaning sideways against a wall in a modern office, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting his weight on the wall, one hand in pocket, tailored business blazer, softly blurred modern office interior with glass and wood, soft natural light, confident professional presence',
   'hands-in-pockets':    '[TRIGGER], half body portrait, hands in pockets relaxed, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
   'holding-tablet':      '[TRIGGER], half body portrait, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
@@ -174,7 +175,8 @@ const STYLE_PROMPTS: Record<string, string> = {
   // ===== SPECIALTY POSES (vrouw) =====
   'w-arms-crossed-power': '[TRIGGER], half body portrait of professional woman, arms crossed confidently, tailored blazer, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative elegant pose',
   'w-sitting-confident':  '[TRIGGER], portrait of professional woman seated at a wooden desk, leaning slightly forward with both hands fully visible and clasped together on the desk in front of her, tailored blazer, modern office with large floor-to-ceiling windows and a city view, soft natural light, warm confident engaging presence',
-  'w-leaning-elegant':    '[TRIGGER], portrait of woman casually leaning with her shoulder and back clearly resting against a plain smooth wall directly behind her, relaxed leaning pose against the wall, one hand in pocket, smart casual blazer, calm minimal setting, soft natural light, approachable elegant confidence',
+  'w-leaning-elegant':    '[TRIGGER], portrait of woman leaning sideways against a plain wall, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting her weight on the wall, one hand in pocket, smart casual blazer, calm minimal setting, soft natural light, approachable elegant confidence',
+  'w-leaning-office':     '[TRIGGER], portrait of woman leaning sideways against a wall in a modern office, one shoulder and upper arm pressed firmly against the wall with the body relaxed and tilted at an angle, clearly resting her weight on the wall, one hand in pocket, tailored business blazer, softly blurred modern office interior with glass and wood, soft natural light, confident professional presence',
   'w-hands-relaxed':      '[TRIGGER], half body portrait of woman, relaxed hand pose, blazer, urban background, soft natural light, casual confidence',
   'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
   'w-holding-tablet':     '[TRIGGER], half body portrait of woman, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
@@ -288,7 +290,7 @@ export async function POST(request: NextRequest) {
         : promptTemplate
       // Pose-stijlen die iets meer lichaam tonen (head-to-knees) om de houding te laten zien,
       // zonder full-body (dat de gezichtsgelijkenis zou schaden).
-      const THREE_QUARTER_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant'])
+      const THREE_QUARTER_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant', 'leaning-office', 'w-leaning-office'])
       const bodyHint = THREE_QUARTER_STYLES.has(styleId)
         ? ', three-quarter length shot from head to knees, showing the relaxed leaning stance'
         : isPortrait ? ', three-quarter length composition, waist-up shot, the torso and waist visible in frame' : ''
@@ -296,7 +298,7 @@ export async function POST(request: NextRequest) {
       // Expressie per stijl-groep: formeel/dramatisch = serieus/zelfverzekerd;
       // casual/lifestyle/date = warme oprechte glimlach; overige = subtiel vriendelijk.
       const SERIOUS_STYLES = new Set(['corporate-classic','executive-navy','ceo-black','boardroom-charcoal','pinstripe-pro','three-piece','formal-black-drama','wall-street-power','all-black-minimal','creative-director','leather-jacket-urban','arms-crossed-power','w-power-blazer-navy','w-executive-charcoal','w-ceo-black','w-pinstripe-pro','w-sheath-classic','w-leather-jacket-edge','w-evening-rooftop','w-night-city-glamour','w-arms-crossed-power'])
-      const SMILE_STYLES = new Set(['white-tee-clean','black-tee-clean','navy-polo','henley-relaxed','plaid-friendly','white-button-down','light-blue-oxford','denim-shirt-fresh','golden-hour','park-natural','rooftop-city','city-walk','beach-professional','mountain-snow','poolside-resort','autumn-forest','mountain-lake','knit-cozy','sitting-confident','leaning-elegant','restaurant-elegant','wine-bar-relaxed','coffee-shop-date','rooftop-bar-evening','w-white-tee-natural','w-denim-shirt-fresh','w-coffee-shop-warm','w-park-outdoor','w-rooftop-golden','w-city-walk','w-beach-professional','w-mountain-snow','w-poolside-resort','w-autumn-forest','w-mountain-lake','w-equestrian','w-startup-casual','w-cardigan-soft','w-sitting-confident','w-leaning-elegant','w-cafe-date','w-bistro-warm','w-restaurant-elegant','w-restaurant-evening','w-wine-bar-casual','w-rooftop-bar','w-cocktail-glamour'])
+      const SMILE_STYLES = new Set(['white-tee-clean','black-tee-clean','navy-polo','henley-relaxed','plaid-friendly','white-button-down','light-blue-oxford','denim-shirt-fresh','golden-hour','park-natural','rooftop-city','city-walk','beach-professional','mountain-snow','poolside-resort','autumn-forest','mountain-lake','knit-cozy','sitting-confident','leaning-elegant','leaning-office','restaurant-elegant','wine-bar-relaxed','coffee-shop-date','rooftop-bar-evening','w-white-tee-natural','w-denim-shirt-fresh','w-coffee-shop-warm','w-park-outdoor','w-rooftop-golden','w-city-walk','w-beach-professional','w-mountain-snow','w-poolside-resort','w-autumn-forest','w-mountain-lake','w-equestrian','w-startup-casual','w-cardigan-soft','w-sitting-confident','w-leaning-elegant','w-leaning-office','w-cafe-date','w-bistro-warm','w-restaurant-elegant','w-restaurant-evening','w-wine-bar-casual','w-rooftop-bar','w-cocktail-glamour'])
       const expression = SMILE_STYLES.has(styleId)
         ? ', warm genuine smile, friendly approachable expression'
         : SERIOUS_STYLES.has(styleId)
@@ -313,9 +315,9 @@ export async function POST(request: NextRequest) {
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       // Stijl-specifieke negatieven: forceer bv. de leun-pose in elke variatie.
-      const LEANING_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant'])
+      const LEANING_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant', 'leaning-office', 'w-leaning-office'])
       const styleNegative = LEANING_STYLES.has(styleId)
-        ? ', sitting, seated, sitting down, standing upright away from the wall, not leaning'
+        ? ', sitting, seated, sitting down, standing upright straight, rigid upright posture, standing away from the wall, body not touching the wall, square to camera facing forward, not leaning'
         : ''
 
       const input = {
