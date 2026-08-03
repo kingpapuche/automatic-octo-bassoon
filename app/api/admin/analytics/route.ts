@@ -107,11 +107,14 @@ export async function POST(request: NextRequest) {
     if (fetchIso) genQ = genQ.gte('created_at', fetchIso)
     let usrQ = supabaseAdmin.from('users').select('use_cases, gender, age_range, created_at')
     if (fetchIso) usrQ = usrQ.gte('created_at', fetchIso)
+    let pvQ = supabaseAdmin.from('page_views').select('visitor_id, source, path, created_at')
+    if (fetchIso) pvQ = pvQ.gte('created_at', fetchIso)
 
-    const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions] = await Promise.all([
+    const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions, { data: pvRaw, error: pvErr }] = await Promise.all([
       genQ,
       usrQ,
       fetchStripeSessions(fetchSince ? Math.floor(fetchSince.getTime() / 1000) : null),
+      pvQ,
     ])
     if (gErr) return NextResponse.json({ error: gErr.message }, { status: 500 })
     if (uErr) return NextResponse.json({ error: uErr.message }, { status: 500 })
@@ -187,6 +190,41 @@ export async function POST(request: NextRequest) {
     const allKeys = Array.from(new Set([...Object.keys(genBuckets), ...Object.keys(revBuckets)])).sort()
     const timeline = allKeys.map(label => ({ label, generations: genBuckets[label] || 0, revenue: revBuckets[label] || 0 }))
 
+    // 6) Verkeer & bezoekers (first-party page_views)
+    interface Pv { visitor_id: string; source: string | null; path: string | null; created_at: string }
+    const trafficAvailable = !pvErr
+    const allPv = (pvRaw || []) as Pv[]
+    const curPv = allPv.filter(p => new Date(p.created_at).getTime() >= startMs)
+    const prevPv = allPv.filter(p => new Date(p.created_at).getTime() < startMs)
+    const uniq = (arr: Pv[]) => new Set(arr.map(p => p.visitor_id)).size
+    const sourceCounts: Record<string, number> = {}
+    const pageCounts: Record<string, number> = {}
+    for (const p of curPv) {
+      const src = p.source || 'direct'
+      sourceCounts[src] = (sourceCounts[src] || 0) + 1
+      const pg = p.path || '/'
+      pageCounts[pg] = (pageCounts[pg] || 0) + 1
+    }
+    const curVisitors = uniq(curPv)
+    const prevVisitors = uniq(prevPv)
+    const traffic = {
+      available: trafficAvailable,
+      visits: curPv.length,
+      uniqueVisitors: curVisitors,
+      visitsDelta: pct(curPv.length, prevPv.length),
+      visitorsDelta: pct(curVisitors, prevVisitors),
+      sources: Object.entries(sourceCounts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
+      topPages: Object.entries(pageCounts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 10),
+    }
+    // Funnel: unieke bezoekers -> signups -> betaalde orders
+    const funnel = {
+      visitors: curVisitors,
+      signups: cur.signups,
+      orders: cur.orders,
+      visitorToSignup: curVisitors ? (cur.signups / curVisitors) * 100 : null,
+      signupToOrder: cur.signups ? (cur.orders / cur.signups) * 100 : null,
+    }
+
     return NextResponse.json({
       period,
       stripeConnected: !!stripe,
@@ -201,6 +239,8 @@ export async function POST(request: NextRequest) {
       audience: { gender: audienceGender, ageRanges },
       styleGender,
       timeline,
+      traffic,
+      funnel,
     })
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : 'Error' }, { status: 500 })

@@ -39,6 +39,8 @@ interface Analytics {
   audience: { gender: Record<string, number>; ageRanges: Record<string, number> }
   styleGender: Record<string, number>
   timeline: { label: string; generations: number; revenue: number }[]
+  traffic: { available: boolean; visits: number; uniqueVisitors: number; visitsDelta: number | null; visitorsDelta: number | null; sources: { name: string; count: number }[]; topPages: { name: string; count: number }[] }
+  funnel: { visitors: number; signups: number; orders: number; visitorToSignup: number | null; signupToOrder: number | null }
 }
 
 function Delta({ v }: { v: number | null }) {
@@ -228,10 +230,43 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Traffic (Fase 2) */}
-            <div className="bg-white/5 border border-dashed border-white/15 rounded-xl p-5 text-sm text-white/50">
-              <span className="text-white/70 font-semibold">Verkeer & bezoekers (Fase 2)</span> — aantal bezoeken, unieke bezoekers, verkeersbron (Google/Instagram/direct…) en de funnel bezoek→signup→koop. Vereist bezoekers-tracking; komt in de volgende stap in ditzelfde dashboard.
-            </div>
+            {/* Verkeer & funnel */}
+            {!data.traffic.available ? (
+              <div className="bg-amber-500/10 border border-amber-500/30 text-amber-200 rounded-xl p-5 text-sm">
+                <span className="font-semibold">Verkeer-tracking nog niet actief.</span> Maak eenmalig de <code>page_views</code>-tabel aan in Supabase (SQL staat klaar), daarna verschijnen hier automatisch bezoeken, unieke bezoekers, verkeersbron en de funnel.
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                  <Kpi label="Bezoeken" value={num(data.traffic.visits)} delta={data.traffic.visitsDelta} />
+                  <Kpi label="Unieke bezoekers" value={num(data.traffic.uniqueVisitors)} delta={data.traffic.visitorsDelta} />
+                  <Kpi label="Bezoek → signup" value={data.funnel.visitorToSignup !== null ? `${data.funnel.visitorToSignup.toFixed(1)}%` : '—'} />
+                  <Kpi label="Signup → koop" value={data.funnel.signupToOrder !== null ? `${data.funnel.signupToOrder.toFixed(1)}%` : '—'} />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <BarList title="Verkeersbron" max={Math.max(1, ...data.traffic.sources.map(s => s.count))}
+                    items={data.traffic.sources.map(s => ({ label: s.name.charAt(0).toUpperCase() + s.name.slice(1), count: s.count }))} />
+                  <BarList title="Populairste pagina's" max={Math.max(1, ...data.traffic.topPages.map(s => s.count))}
+                    items={data.traffic.topPages.map(s => ({ label: s.name, count: s.count }))} />
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-5 mt-4">
+                  <h3 className="text-white font-semibold mb-3">Funnel</h3>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="flex-1 bg-indigo-500/20 border border-indigo-500/40 rounded-lg p-3 text-center">
+                      <div className="text-lg font-bold text-white">{num(data.funnel.visitors)}</div><div className="text-white/50 text-xs">bezoekers</div>
+                    </div>
+                    <span className="text-white/30">→</span>
+                    <div className="flex-1 bg-indigo-500/30 border border-indigo-500/50 rounded-lg p-3 text-center">
+                      <div className="text-lg font-bold text-white">{num(data.funnel.signups)}</div><div className="text-white/50 text-xs">signups</div>
+                    </div>
+                    <span className="text-white/30">→</span>
+                    <div className="flex-1 bg-emerald-500/30 border border-emerald-500/50 rounded-lg p-3 text-center">
+                      <div className="text-lg font-bold text-white">{num(data.funnel.orders)}</div><div className="text-white/50 text-xs">betaald</div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
