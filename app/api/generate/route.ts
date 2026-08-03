@@ -311,7 +311,16 @@ export async function POST(request: NextRequest) {
       const backgroundClause = CLEAN_BG_STYLES.has(styleId)
         ? ', photographed outdoors on location against a clean modern architectural building facade with columns and clean geometric lines, real upscale urban setting with natural depth and perspective receding behind him, softly blurred background, soft natural daylight, authentic editorial photograph, the subject sharp and in focus'
         : ', the location and setting clearly visible and recognizable behind the subject, softly blurred background with natural depth, environmental portrait showing the surroundings'
-      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${expression}${bodyHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, matte natural skin with realistic texture and subtle pores, non-shiny complexion, soft even flattering light on the face${backgroundClause}, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
+      // Date-night / dining: handen rustig houden om AI-handglitches te vermijden.
+      const ONE_DRINK_STYLES = new Set([
+        'restaurant-elegant', 'wine-bar-relaxed', 'coffee-shop-date', 'rooftop-bar-evening',
+        'w-restaurant-elegant', 'w-restaurant-evening', 'w-wine-bar-casual', 'w-cafe-date',
+        'w-bistro-warm', 'w-rooftop-bar', 'w-cocktail-glamour',
+      ])
+      const diningHands = ONE_DRINK_STYLES.has(styleId)
+        ? ', both hands resting calmly and relaxed on the table, not holding any cutlery or utensils, not eating'
+        : ''
+      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${expression}${bodyHint}${diningHands}, not a tight close-up, sharp focus on face, sharp detailed eyes, matte natural skin with realistic texture and subtle pores, non-shiny complexion, soft even flattering light on the face${backgroundClause}, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       // Stijl-specifieke negatieven: forceer bv. de leun-pose in elke variatie.
@@ -330,14 +339,9 @@ export async function POST(request: NextRequest) {
         // Dwing een echt kantoor af, weer huiselijke settings.
         styleNegative += ', home, apartment, living room, dining table, dining room, kitchen, residential interior, balcony, bedroom'
       }
-      const ONE_DRINK_STYLES = new Set([
-        'restaurant-elegant', 'wine-bar-relaxed', 'coffee-shop-date', 'rooftop-bar-evening',
-        'w-restaurant-elegant', 'w-restaurant-evening', 'w-wine-bar-casual', 'w-cafe-date',
-        'w-bistro-warm', 'w-rooftop-bar', 'w-cocktail-glamour',
-      ])
       if (ONE_DRINK_STYLES.has(styleId)) {
-        // Slechts één drankje: weer een tweede/meerdere glazen (staged look).
-        styleNegative += ', two wine glasses, multiple wine glasses, several glasses, pair of glasses, extra glass, many glasses on the table'
+        // Slechts één drankje + geen bestek-in-hand (minder AI-handglitches).
+        styleNegative += ', two wine glasses, multiple wine glasses, several glasses, pair of glasses, extra glass, many glasses on the table, deformed hands, malformed hands, holding cutlery, fork in hand, knife in hand, hands touching food, extra fingers, distorted fingers'
       }
 
       const input = {
