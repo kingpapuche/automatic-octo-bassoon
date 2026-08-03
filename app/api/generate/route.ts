@@ -343,6 +343,11 @@ export async function POST(request: NextRequest) {
         // Slechts één drankje + geen bestek-in-hand (minder AI-handglitches).
         styleNegative += ', two wine glasses, multiple wine glasses, several glasses, pair of glasses, extra glass, many glasses on the table, deformed hands, malformed hands, holding a wine glass, hand gripping the glass, fist wrapped around the glass, hand around the glass bowl, holding cutlery, fork in hand, knife in hand, hands touching food, extra fingers, distorted fingers'
       }
+      // Alle date-night stijlen: dwing af dat er altijd een drankje zichtbaar is.
+      const DRINK_STYLES = new Set([...ONE_DRINK_STYLES, 'coffee-shop-date', 'w-cafe-date'])
+      if (DRINK_STYLES.has(styleId)) {
+        styleNegative += ', empty table, no drink, no glass, no cup, table without a drink, missing drink'
+      }
 
       const input = {
         prompt: fullPrompt,
