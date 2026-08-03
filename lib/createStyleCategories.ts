@@ -275,10 +275,10 @@ export const NEW_STYLE_IDS: string[] = [
   'w-equestrian', 'w-leaning-office',
 ]
 
-// Startlijst voor "Populair" zolang er nog te weinig echte selectie-data is (cold-start).
-// Zodra de data groeit, neemt /api/popular-styles dit automatisch over.
-export const POPULAR_FALLBACK: string[] = [
-  'corporate-classic', 'ceo-black', 'executive-navy', 'white-tee-clean', 'leather-jacket-urban', 'navy-blazer-open',
-  'w-power-blazer-navy', 'w-ceo-black', 'w-white-tee-natural',
-]
+// Startlijst voor "Populair" per geslacht zolang er nog te weinig echte selectie-data is
+// (cold-start). Zodra de data groeit, neemt /api/popular-styles dit automatisch over.
+export const POPULAR_FALLBACK: { male: string[]; female: string[] } = {
+  male: ['corporate-classic', 'ceo-black', 'executive-navy', 'white-tee-clean', 'leather-jacket-urban', 'navy-blazer-open'],
+  female: ['w-power-blazer-navy', 'w-ceo-black', 'w-white-tee-natural', 'w-cream-blazer-arms', 'w-leather-jacket-edge'],
+}
 

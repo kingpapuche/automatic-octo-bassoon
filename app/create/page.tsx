@@ -20,12 +20,12 @@ export default function CreateStylesPage() {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([])
   const [gender, setGender] = useState<'male' | 'female'>('male')
-  const [popularSet, setPopularSet] = useState<Set<string>>(new Set())
+  const [popularSet, setPopularSet] = useState<{ male: Set<string>; female: Set<string> }>({ male: new Set(), female: new Set() })
 
   useEffect(() => {
     fetch('/api/popular-styles')
       .then(r => r.json())
-      .then(d => setPopularSet(new Set(d.popular || [])))
+      .then(d => setPopularSet({ male: new Set(d.popular?.male || []), female: new Set(d.popular?.female || []) }))
       .catch(() => {})
   }, [])
 
@@ -339,7 +339,7 @@ export default function CreateStylesPage() {
                               <div className="absolute top-2 right-2 z-10 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center shadow-md">
                                 <span className="text-white text-xs">✓</span>
                               </div>
-                            ) : popularSet.has(style.id) ? (
+                            ) : popularSet[gender].has(style.id) ? (
                               <div className="absolute top-2 right-2 z-10 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md bg-rose-500 text-white">
                                 Populair
                               </div>
