@@ -120,7 +120,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'restaurant-elegant':  '[TRIGGER], medium-wide shot showing head to waist, smart casual button-down, sitting at a dining table in an elegant restaurant, on the table in the foreground a plate of beautifully plated gourmet food and a single glass of red wine clearly visible, warm candlelit fine-dining ambiance, softly blurred restaurant background with shallow depth of field',
   'wine-bar-relaxed':    '[TRIGGER], medium-wide shot showing head to waist, dark sweater or shirt, sitting at a cozy wine bar, a single large glass of red wine standing on the table prominently in the foreground, fully visible and not cropped, nobody touching the glass, rows of wine bottles on wooden shelves softly blurred behind, warm intimate lighting, shallow depth of field',
   'coffee-shop-date':    '[TRIGGER], medium-wide shot showing head to waist, casual smart sweater or shirt, sitting at a table in a modern coffee shop, holding a warm cup of coffee, the coffee is either a black espresso or a cappuccino with latte art, cozy cafe with an espresso machine softly blurred behind, warm casual daytime lighting, shallow depth of field',
-  'rooftop-bar-evening': '[TRIGGER], medium-wide shot showing head to waist, stylish smart-casual summer outfit in a light warm color such as light blue, sand, white or terracotta, a linen or short-sleeve shirt, sitting at a table on a rooftop bar terrace in the evening, holding a cocktail in a rocks glass (an old fashioned) clearly visible, city skyline and string lights softly blurred behind, warm summer dusk sky, warm evening ambiance, shallow depth of field',
+  'rooftop-bar-evening': '[TRIGGER], medium-wide shot showing head to waist, wearing a light-colored linen summer shirt in a bright warm tone such as light blue, sand, white or terracotta, no jacket, bright light summer clothing, sitting at a table on a rooftop bar terrace in the evening, holding a cocktail in a rocks glass (an old fashioned) clearly visible, city skyline and string lights softly blurred behind, warm summer dusk sky, warm evening ambiance, shallow depth of field',
   'w-power-blazer-navy':   '[TRIGGER], professional woman portrait, navy blue tailored blazer, white silk blouse, bright modern office, arms crossed confidently, soft natural light, executive look',
   'w-executive-charcoal':  '[TRIGGER], half body portrait of professional woman, charcoal gray tailored suit, light silk blouse, modern office background, natural professional lighting, confident executive',
   'w-ceo-black':           '[TRIGGER], elegant portrait of businesswoman, black tailored blazer, crisp white blouse, dramatic dark charcoal background, moody cinematic side lighting, powerful executive presence',
@@ -347,6 +347,11 @@ export async function POST(request: NextRequest) {
       const DRINK_STYLES = new Set([...ONE_DRINK_STYLES, 'coffee-shop-date', 'w-cafe-date', 'rooftop-bar-evening'])
       if (DRINK_STYLES.has(styleId)) {
         styleNegative += ', empty table, no drink, no glass, no cup, table without a drink, missing drink'
+      }
+      const LIGHT_OUTFIT_STYLES = new Set(['rooftop-bar-evening', 'w-rooftop-bar'])
+      if (LIGHT_OUTFIT_STYLES.has(styleId)) {
+        // Zomeravond: dwing lichte/kleurige kleding af, weer donker/zwart.
+        styleNegative += ', black shirt, all-black outfit, dark clothing, black clothing, dark leather jacket, dark jacket'
       }
 
       const input = {
