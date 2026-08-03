@@ -330,6 +330,15 @@ export async function POST(request: NextRequest) {
         // Dwing een echt kantoor af, weer huiselijke settings.
         styleNegative += ', home, apartment, living room, dining table, dining room, kitchen, residential interior, balcony, bedroom'
       }
+      const ONE_DRINK_STYLES = new Set([
+        'restaurant-elegant', 'wine-bar-relaxed', 'coffee-shop-date', 'rooftop-bar-evening',
+        'w-restaurant-elegant', 'w-restaurant-evening', 'w-wine-bar-casual', 'w-cafe-date',
+        'w-bistro-warm', 'w-rooftop-bar', 'w-cocktail-glamour',
+      ])
+      if (ONE_DRINK_STYLES.has(styleId)) {
+        // Slechts één drankje: weer een tweede/meerdere glazen (staged look).
+        styleNegative += ', two wine glasses, multiple wine glasses, several glasses, pair of glasses, extra glass, many glasses on the table'
+      }
 
       const input = {
         prompt: fullPrompt,
