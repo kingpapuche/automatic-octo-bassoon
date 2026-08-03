@@ -266,3 +266,19 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     ],
   },
 ]
+
+// Recent toegevoegde stijlen -> tonen een "Nieuw"-badge in de picker.
+export const NEW_STYLE_IDS: string[] = [
+  'beach-professional', 'mountain-snow', 'poolside-resort', 'autumn-forest', 'mountain-lake',
+  'motorcycle-street', 'classic-car', 'leaning-office',
+  'w-beach-professional', 'w-mountain-snow', 'w-poolside-resort', 'w-autumn-forest', 'w-mountain-lake',
+  'w-equestrian', 'w-leaning-office',
+]
+
+// Startlijst voor "Populair" zolang er nog te weinig echte selectie-data is (cold-start).
+// Zodra de data groeit, neemt /api/popular-styles dit automatisch over.
+export const POPULAR_FALLBACK: string[] = [
+  'corporate-classic', 'ceo-black', 'executive-navy', 'white-tee-clean', 'leather-jacket-urban', 'navy-blazer-open',
+  'w-power-blazer-navy', 'w-ceo-black', 'w-white-tee-natural',
+]
+

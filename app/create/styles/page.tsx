@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
-import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
+import { STYLE_CATEGORIES, NEW_STYLE_IDS } from '@/lib/createStyleCategories'
 import StyleThumb from '@/components/StyleThumb'
+
+const NEW_SET = new Set(NEW_STYLE_IDS)
 
 const VARIATIONS_PER_STYLE = 4
 const ONBOARDING_KEY = 'novaimago_styles_onboarded'
@@ -18,6 +20,15 @@ export default function CreateStylesPage() {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([])
   const [gender, setGender] = useState<'male' | 'female'>('male')
+  const [popularSet, setPopularSet] = useState<Set<string>>(new Set())
+
+  // Populaire stijlen ophalen (data-driven badge)
+  useEffect(() => {
+    fetch('/api/popular-styles')
+      .then(r => r.json())
+      .then(d => setPopularSet(new Set(d.popular || [])))
+      .catch(() => {})
+  }, [])
 
   // ONBOARDING + TOAST states
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -338,11 +349,19 @@ export default function CreateStylesPage() {
                               ×{VARIATIONS_PER_STYLE}
                             </div>
 
-                            {isSelected && (
+                            {isSelected ? (
                               <div className="absolute top-2 right-2 z-10 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center shadow-md">
                                 <span className="text-white text-xs">✓</span>
                               </div>
-                            )}
+                            ) : popularSet.has(style.id) ? (
+                              <div className="absolute top-2 right-2 z-10 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md bg-rose-500 text-white">
+                                Populair
+                              </div>
+                            ) : NEW_SET.has(style.id) ? (
+                              <div className="absolute top-2 right-2 z-10 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md bg-emerald-500 text-white">
+                                Nieuw
+                              </div>
+                            ) : null}
 
                             <StyleThumb styleId={style.id} icon={style.icon} label={style.label} />
                             <span className={`text-sm font-semibold mb-1 ${isSelected ? 'text-white' : 'text-gray-300'}`}>
