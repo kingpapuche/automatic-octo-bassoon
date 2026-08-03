@@ -355,11 +355,11 @@ export default function CreateStylesPage() {
                               </div>
                             ) : popularSet[gender].has(style.id) ? (
                               <div className="absolute top-2 right-2 z-10 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md bg-rose-500 text-white">
-                                Populair
+                                Popular
                               </div>
                             ) : NEW_SET.has(style.id) ? (
                               <div className="absolute top-2 right-2 z-10 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md bg-emerald-500 text-white">
-                                Nieuw
+                                New
                               </div>
                             ) : null}
 
