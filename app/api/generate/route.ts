@@ -170,7 +170,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'leaning-office':      '[TRIGGER], leaning sideways with one shoulder against a wall in a modern corporate office, body relaxed and tilted at an angle resting his weight on the wall, one hand in pocket, tailored business blazer, softly blurred professional open-plan office behind him with glass-walled meeting rooms, desks and office chairs and a city view through large windows, soft natural light, confident professional presence',
   'hands-in-pockets':    '[TRIGGER], three-quarter length shot from head to thighs, standing relaxed with both hands clearly tucked into his trouser pockets, the hands in pockets clearly visible, blazer, urban background, soft natural light, casual confidence',
   'thoughtful-pose':     '[TRIGGER], portrait, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intellectual look',
-  'holding-tablet':      '[TRIGGER], half body portrait, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
+  'holding-tablet':      '[TRIGGER], three-quarter length shot from head to thighs, holding a tablet device with both hands in front of him, the tablet clearly and fully visible in frame, business casual attire, modern office, soft natural light, tech-savvy professional',
 
   // ===== SPECIALTY POSES (vrouw) =====
   'w-arms-crossed-power': '[TRIGGER], half body portrait of professional woman, arms crossed confidently, tailored blazer, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative elegant pose',
@@ -179,7 +179,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-leaning-office':     '[TRIGGER], portrait of woman leaning sideways with one shoulder against a wall in a modern corporate office, body relaxed and tilted at an angle resting her weight on the wall, one hand in pocket, tailored business blazer, softly blurred professional open-plan office behind her with glass-walled meeting rooms, desks and office chairs and a city view through large windows, soft natural light, confident professional presence',
   'w-hands-relaxed':      '[TRIGGER], three-quarter length shot from head to thighs of woman, standing relaxed with both hands clearly tucked into her trouser pockets, the hands in pockets clearly visible, blazer, urban background, soft natural light, casual confidence',
   'w-thoughtful-pose':    '[TRIGGER], portrait of woman, hand near chin thoughtfully, professional attire, soft neutral background, soft natural light, intelligent elegant look',
-  'w-holding-tablet':     '[TRIGGER], half body portrait of woman, holding tablet device, business casual attire, modern office, soft natural light, tech-savvy professional',
+  'w-holding-tablet':     '[TRIGGER], three-quarter length shot from head to thighs of woman, holding a tablet device with both hands in front of her, the tablet clearly and fully visible in frame, business casual attire, modern office, soft natural light, tech-savvy professional',
 }
 
 export async function POST(request: NextRequest) {
@@ -290,7 +290,7 @@ export async function POST(request: NextRequest) {
         : promptTemplate
       // Pose-stijlen die iets meer lichaam tonen (head-to-knees) om de houding te laten zien,
       // zonder full-body (dat de gezichtsgelijkenis zou schaden).
-      const THREE_QUARTER_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant', 'leaning-office', 'w-leaning-office', 'hands-in-pockets', 'w-hands-relaxed'])
+      const THREE_QUARTER_STYLES = new Set(['leaning-elegant', 'w-leaning-elegant', 'leaning-office', 'w-leaning-office', 'hands-in-pockets', 'w-hands-relaxed', 'holding-tablet', 'w-holding-tablet'])
       const bodyHint = THREE_QUARTER_STYLES.has(styleId)
         ? ', three-quarter length shot from head to the knees, showing the full pose and stance including the hips'
         : isPortrait ? ', three-quarter length composition, waist-up shot, the torso and waist visible in frame' : ''
