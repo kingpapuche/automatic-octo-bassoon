@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
-interface Model { id: string; name: string; status: string; gender: string | null }
+interface Model { id: string; name: string; status: string; gender: string | null; preview_url: string | null }
 
 // Sla het gekozen model op en ga naar de stijl-picker.
 function pick(model: Model, router: ReturnType<typeof useRouter>) {
@@ -58,9 +58,14 @@ export default function ModelSelectPage() {
               onClick={() => pick(m, router)}
               className="group bg-white/5 border border-white/10 hover:border-violet-500 hover:bg-violet-600/10 rounded-2xl p-6 text-left transition"
             >
-              <div className="w-12 h-12 rounded-full bg-violet-600/30 flex items-center justify-center text-xl mb-4">
-                {m.gender === 'female' ? '👩' : '👨'}
-              </div>
+              {m.preview_url ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={m.preview_url} alt={m.name} className="w-14 h-14 rounded-full object-cover mb-4 border border-white/10" />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-violet-600/30 flex items-center justify-center text-xl mb-4">
+                  {m.gender === 'female' ? '👩' : '👨'}
+                </div>
+              )}
               <div className="text-lg font-semibold">{m.name}</div>
               <div className="text-white/40 text-sm capitalize">{m.gender || 'model'}</div>
               <div className="mt-4 text-violet-300 text-sm font-medium opacity-0 group-hover:opacity-100 transition">

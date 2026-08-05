@@ -352,7 +352,7 @@ export default function UploadPage() {
 
             <div className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border border-violet-500/20 rounded-2xl p-6 mb-5">
               <label className="block text-white font-semibold mb-1">Who are these photos for? *</label>
-              <p className="text-gray-500 text-sm mb-3">This name identifies your AI model.</p>
+              <p className="text-gray-500 text-sm mb-3">Use the full name (first + last) — it identifies this AI model.</p>
               <input
                 type="text"
                 value={characteristics.full_name}

@@ -154,6 +154,7 @@ export async function POST(request: NextRequest) {
         training_id: training.id,
         trigger_word: triggerWord,
         status: 'training',
+        preview_url: Array.isArray(photoUrls) && photoUrls[0] ? photoUrls[0] : null,
         gender: c.gender ?? null,
         ethnicity: c.ethnicity ?? null,
         eye_color: c.eye_color ?? null,
