@@ -51,6 +51,18 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     ],
   },
   {
+    id: 'restaurant-mens',
+    name: 'Restaurant / Date Night',
+    icon: '🍷',
+    gender: 'male',
+    styles: [
+      { id: 'restaurant-elegant',   label: 'Restaurant Elegant', description: 'Upscale restaurant, candlelit', icon: '🕯️' },
+      { id: 'wine-bar-relaxed',     label: 'Wine Bar Relaxed',   description: 'At wine bar, warm light',    icon: '🍷' },
+      { id: 'coffee-shop-date',     label: 'Coffee Shop Date',   description: 'Coffee shop, ambient',       icon: '☕' },
+      { id: 'rooftop-bar-evening',  label: 'Rooftop Bar Evening', description: 'City lights, evening',      icon: '🌃' },
+    ],
+  },
+  {
     id: 'tech-founder',
     name: 'Tech Founder / Sweater',
     icon: '⚡',
@@ -131,18 +143,6 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'holding-tablet',      label: 'Holding Tablet',     description: 'Tablet, modern office',      icon: '📱' },
     ],
   },
-  {
-    id: 'restaurant-mens',
-    name: 'Restaurant / Date Night',
-    icon: '🍷',
-    gender: 'male',
-    styles: [
-      { id: 'restaurant-elegant',   label: 'Restaurant Elegant', description: 'Upscale restaurant, candlelit', icon: '🕯️' },
-      { id: 'wine-bar-relaxed',     label: 'Wine Bar Relaxed',   description: 'At wine bar, warm light',    icon: '🍷' },
-      { id: 'coffee-shop-date',     label: 'Coffee Shop Date',   description: 'Coffee shop, ambient',       icon: '☕' },
-      { id: 'rooftop-bar-evening',  label: 'Rooftop Bar Evening', description: 'City lights, evening',      icon: '🌃' },
-    ],
-  },
 
   // VROUWEN-STIJLEN
   {
@@ -171,6 +171,21 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'w-cardigan-soft',       label: 'Cardigan Soft',     description: 'Beige cardigan, warm',       icon: '🧶' },
       { id: 'w-knit-twinset',        label: 'Knit Twinset',      description: 'Matching knit, neutral',     icon: '🌾' },
       { id: 'w-startup-casual',      label: 'Startup Casual',    description: 'Light blue shirt, modern',   icon: '🚀' },
+    ],
+  },
+  {
+    id: 'w-restaurant',
+    name: 'Restaurant / Date Night',
+    icon: '🍷',
+    gender: 'female',
+    styles: [
+      { id: 'w-restaurant-elegant',  label: 'Restaurant Elegant', description: 'Silk blouse, candlelit',    icon: '🕯️' },
+      { id: 'w-wine-bar-casual',     label: 'Wine Bar Casual',   description: 'At wine bar, warm light',    icon: '🍷' },
+      { id: 'w-cocktail-glamour',    label: 'Cocktail Glamour',  description: 'Cocktail dress, evening',    icon: '✨' },
+      { id: 'w-cafe-date',           label: 'Café Date',         description: 'Charming cafe interior',     icon: '☕' },
+      { id: 'w-rooftop-bar',         label: 'Rooftop Bar',       description: 'Rooftop bar, city lights',   icon: '🌃' },
+      { id: 'w-restaurant-evening',  label: 'Restaurant Evening', description: 'Intimate, candlelight',     icon: '🌙' },
+      { id: 'w-bistro-warm',         label: 'Bistro Warm',       description: 'Smart casual, bistro',       icon: '🥂' },
     ],
   },
   {
@@ -237,21 +252,6 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'w-hands-relaxed',      label: 'Hands Relaxed',     description: 'Relaxed pose, urban',        icon: '🧍‍♀️' },
       { id: 'w-thoughtful-pose',    label: 'Thoughtful',        description: 'Hand near chin, elegant',    icon: '🤔' },
       { id: 'w-holding-tablet',     label: 'Holding Tablet',    description: 'Tablet, modern office',      icon: '📱' },
-    ],
-  },
-  {
-    id: 'w-restaurant',
-    name: 'Restaurant / Date Night',
-    icon: '🍷',
-    gender: 'female',
-    styles: [
-      { id: 'w-restaurant-elegant',  label: 'Restaurant Elegant', description: 'Silk blouse, candlelit',    icon: '🕯️' },
-      { id: 'w-wine-bar-casual',     label: 'Wine Bar Casual',   description: 'At wine bar, warm light',    icon: '🍷' },
-      { id: 'w-cocktail-glamour',    label: 'Cocktail Glamour',  description: 'Cocktail dress, evening',    icon: '✨' },
-      { id: 'w-cafe-date',           label: 'Café Date',         description: 'Charming cafe interior',     icon: '☕' },
-      { id: 'w-rooftop-bar',         label: 'Rooftop Bar',       description: 'Rooftop bar, city lights',   icon: '🌃' },
-      { id: 'w-restaurant-evening',  label: 'Restaurant Evening', description: 'Intimate, candlelight',     icon: '🌙' },
-      { id: 'w-bistro-warm',         label: 'Bistro Warm',       description: 'Smart casual, bistro',       icon: '🥂' },
     ],
   },
   {
