@@ -343,7 +343,11 @@ export async function POST(request: NextRequest) {
       const diningHands = ONE_DRINK_STYLES.has(styleId)
         ? ', both hands resting calmly and relaxed on the table, not holding the glass, not holding any cutlery or utensils, not eating, the drink standing on the table'
         : ''
-      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${expression}${bodyHint}${diningHands}, not a tight close-up, sharp focus on face, sharp detailed eyes, matte natural skin with realistic texture and subtle pores, non-shiny complexion, soft even flattering light on the face${backgroundClause}, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
+      // Subtiel vrouwelijk accent: fijne juwelen (oorbellen/ketting = veilig bij het gezicht).
+      const jewelryHint = isWoman
+        ? ', wearing subtle tasteful jewelry, small elegant earrings and a fine delicate necklace, optionally a slim bracelet or watch, understated and elegant'
+        : ''
+      const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${expression}${bodyHint}${diningHands}${jewelryHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, matte natural skin with realistic texture and subtle pores, non-shiny complexion, soft even flattering light on the face${backgroundClause}, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
 
       // Stijl-specifieke negatieven: forceer bv. de leun-pose in elke variatie.
