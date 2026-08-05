@@ -134,13 +134,13 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Train a Model</h3>
             <p className="text-gray-400 mb-4">
-              Upload 10-20 selfies to create your custom AI
+              Upload 10-20 selfies to create a custom AI model — for yourself or someone else.
             </p>
-            <button 
+            <button
               onClick={() => router.push('/upload')}
               className="w-full bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] hover:from-[#483A7C] hover:to-[#5B4E9D] text-white py-3 rounded-lg font-semibold transition"
             >
-              {hasModel ? 'Retrain Model →' : 'Start Training →'}
+              {hasModel ? 'Train new model →' : 'Start Training →'}
             </button>
           </div>
 
