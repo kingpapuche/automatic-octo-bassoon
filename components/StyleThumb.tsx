@@ -33,7 +33,7 @@ export default function StyleThumb({
             className="absolute inset-0 w-full h-full object-cover"
           />
           <span className="absolute bottom-1 right-1 bg-black/55 text-white/80 text-[8px] px-1.5 py-0.5 rounded uppercase tracking-wider">
-            voorbeeld
+            example
           </span>
         </>
       ) : (
