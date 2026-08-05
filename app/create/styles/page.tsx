@@ -4,10 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
-import { STYLE_CATEGORIES, NEW_STYLE_IDS } from '@/lib/createStyleCategories'
+import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
 import StyleThumb from '@/components/StyleThumb'
-
-const NEW_SET = new Set(NEW_STYLE_IDS)
 
 const VARIATIONS_PER_STYLE = 4
 const ONBOARDING_KEY = 'novaimago_styles_onboarded'
@@ -356,10 +354,6 @@ export default function CreateStylesPage() {
                             ) : popularSet[gender].has(style.id) ? (
                               <div className="absolute top-2 right-2 z-10 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md bg-rose-500 text-white">
                                 Popular
-                              </div>
-                            ) : NEW_SET.has(style.id) ? (
-                              <div className="absolute top-2 right-2 z-10 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md bg-emerald-500 text-white">
-                                New
                               </div>
                             ) : null}
 
