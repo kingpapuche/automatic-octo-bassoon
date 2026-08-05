@@ -268,7 +268,12 @@ export default function UploadPage() {
       const trainResponse = await fetch('/api/train', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ userId: user.id, photoUrls }),
+        body:    JSON.stringify({
+          userId: user.id,
+          photoUrls,
+          name: characteristics.full_name,   // per-persoon modelnaam (Steve / Sarah / …)
+          characteristics,                    // per-model kenmerken (geslacht, kaal, bril, baard…)
+        }),
       })
       const trainData = await trainResponse.json()
       if (!trainResponse.ok || trainData.error) throw new Error(trainData.error || 'Failed to start training')

@@ -237,7 +237,8 @@ export async function POST(request: NextRequest) {
 
     const characteristics: UserCharacteristics = {
       gender: charSource.gender as string, ethnicity: charSource.ethnicity as string, eye_color: charSource.eye_color as string,
-      hair_color: charSource.hair_color as string, is_bald: charSource.is_bald as boolean, has_glasses: charSource.has_glasses as boolean, age_range: charSource.age_range as string,
+      hair_color: charSource.hair_color as string, is_bald: charSource.is_bald as boolean, has_glasses: charSource.has_glasses as boolean,
+      has_beard: charSource.has_beard as boolean, age_range: charSource.age_range as string,
     }
 
     const personDescription = buildPersonDescription(characteristics)

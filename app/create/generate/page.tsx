@@ -24,6 +24,8 @@ export default function CreateGeneratePage() {
   const [aspectRatio, setAspectRatio] = useState('3:4')
 
   const [styleIds, setStyleIds] = useState<string[]>([])
+  const [models, setModels] = useState<{ id: string; name: string; status: string }[]>([])
+  const [selectedModelId, setSelectedModelId] = useState<string>('')
 
   const [showCreditsPopup, setShowCreditsPopup] = useState(false)
   const [showModelPopup, setShowModelPopup] = useState(false)
@@ -56,7 +58,18 @@ export default function CreateGeneratePage() {
         if (userData) {
           setUserId(userData.id)
           setUserCredits(userData.credits || 0)
-          setHasModel(!!userData.trained_model_id)
+
+          // Multi-model: haal de getrainde modellen op voor de kiezer.
+          let readyModels: { id: string; name: string; status: string }[] = []
+          try {
+            const res = await fetch(`/api/models?userId=${userData.id}`)
+            const md = await res.json()
+            readyModels = (md.models || []).filter((m: { status: string }) => m.status === 'completed')
+            setModels(readyModels)
+            if (readyModels.length) setSelectedModelId(readyModels[0].id)
+          } catch { /* modellen-lijst optioneel */ }
+
+          setHasModel(!!userData.trained_model_id || readyModels.length > 0)
         }
       } catch (error) {
         console.error('Error:', error)
@@ -85,7 +98,7 @@ export default function CreateGeneratePage() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, styleIds, aspectRatio }),
+        body: JSON.stringify({ userId, styleIds, aspectRatio, modelId: selectedModelId || undefined }),
       })
 
       const data = await response.json()
@@ -206,6 +219,31 @@ export default function CreateGeneratePage() {
             Each style generates <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique variations</span> with different poses and expressions.
           </p>
         </div>
+
+        {models.length > 0 && (
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
+            <h3 className="text-white font-semibold text-lg mb-4">Which model?</h3>
+            <div className="flex flex-wrap gap-3">
+              {models.map((m) => {
+                const isSel = selectedModelId === m.id
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => setSelectedModelId(m.id)}
+                    className={`px-4 py-2 rounded-xl border text-sm font-medium transition ${
+                      isSel
+                        ? 'bg-violet-600/25 border-violet-500 text-white'
+                        : 'bg-white/[0.03] border-white/10 text-gray-300 hover:border-white/20'
+                    }`}
+                  >
+                    {m.name}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="text-gray-500 text-sm mt-3">Headshots are generated for the selected person.</p>
+          </div>
+        )}
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
           <h3 className="text-white font-semibold text-lg mb-4">Photo Format</h3>

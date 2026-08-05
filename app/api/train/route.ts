@@ -27,7 +27,7 @@ function isValidImage(buffer: ArrayBuffer): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, photoUrls, name } = await request.json()
+    const { userId, photoUrls, name, characteristics } = await request.json()
 
     if (!userId) return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     if (!photoUrls || photoUrls.length < 8) {
@@ -143,8 +143,9 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // Multi-model: elke training is een apart, benoemd model.
+    // Multi-model: elke training is een apart, benoemd model met EIGEN kenmerken.
     const modelName = (typeof name === 'string' && name.trim()) || userData.full_name || 'My model'
+    const c = characteristics || {}
     await supabase
       .from('models')
       .insert({
@@ -153,6 +154,14 @@ export async function POST(request: NextRequest) {
         training_id: training.id,
         trigger_word: triggerWord,
         status: 'training',
+        gender: c.gender ?? null,
+        ethnicity: c.ethnicity ?? null,
+        eye_color: c.eye_color ?? null,
+        hair_color: c.hair_color ?? null,
+        is_bald: c.is_bald ?? null,
+        has_glasses: c.has_glasses ?? null,
+        has_beard: c.has_beard ?? null,
+        age_range: c.age_range ?? null,
       })
 
     // Backward-compat: ook het 'actieve' model op users bijwerken (huidige generate-flow).
