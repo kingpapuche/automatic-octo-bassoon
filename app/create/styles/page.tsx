@@ -55,7 +55,11 @@ export default function CreateStylesPage() {
           .single()
         if (userData) {
           setUserCredits(userData.credits || 0)
-          if (userData.gender === 'female') {
+          // Geslacht komt van het GEKOZEN model (multi-model), anders van het account.
+          const modelGender = typeof window !== 'undefined' ? sessionStorage.getItem('nova_modelGender') : null
+          if (modelGender === 'female' || modelGender === 'male') {
+            setGender(modelGender)
+          } else if (userData.gender === 'female') {
             setGender('female')
           } else {
             setGender('male')

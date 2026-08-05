@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabaseAdmin
     .from('models')
-    .select('id, name, status, created_at')
+    .select('id, name, status, gender, created_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 

@@ -155,7 +155,7 @@ export default function DashboardPage() {
             </p>
             {hasModel ? (
               <button 
-                onClick={() => router.push('/create/styles')}
+                onClick={() => router.push('/create/model-select')}
                 className="mt-auto w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white py-3 rounded-lg font-semibold transition"
               >
                 Generate Headshots →

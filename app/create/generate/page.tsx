@@ -24,8 +24,8 @@ export default function CreateGeneratePage() {
   const [aspectRatio, setAspectRatio] = useState('3:4')
 
   const [styleIds, setStyleIds] = useState<string[]>([])
-  const [models, setModels] = useState<{ id: string; name: string; status: string }[]>([])
   const [selectedModelId, setSelectedModelId] = useState<string>('')
+  const [modelName, setModelName] = useState<string>('')
 
   const [showCreditsPopup, setShowCreditsPopup] = useState(false)
   const [showModelPopup, setShowModelPopup] = useState(false)
@@ -59,17 +59,13 @@ export default function CreateGeneratePage() {
           setUserId(userData.id)
           setUserCredits(userData.credits || 0)
 
-          // Multi-model: haal de getrainde modellen op voor de kiezer.
-          let readyModels: { id: string; name: string; status: string }[] = []
-          try {
-            const res = await fetch(`/api/models?userId=${userData.id}`)
-            const md = await res.json()
-            readyModels = (md.models || []).filter((m: { status: string }) => m.status === 'completed')
-            setModels(readyModels)
-            if (readyModels.length) setSelectedModelId(readyModels[0].id)
-          } catch { /* modellen-lijst optioneel */ }
+          // Model is al gekozen in de "voor wie?"-stap (multi-model).
+          const chosenId = typeof window !== 'undefined' ? sessionStorage.getItem('nova_modelId') : null
+          const chosenName = typeof window !== 'undefined' ? sessionStorage.getItem('nova_modelName') : null
+          if (chosenId) setSelectedModelId(chosenId)
+          if (chosenName) setModelName(chosenName)
 
-          setHasModel(!!userData.trained_model_id || readyModels.length > 0)
+          setHasModel(!!userData.trained_model_id || !!chosenId)
         }
       } catch (error) {
         console.error('Error:', error)
@@ -220,28 +216,21 @@ export default function CreateGeneratePage() {
           </p>
         </div>
 
-        {models.length > 0 && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
-            <h3 className="text-white font-semibold text-lg mb-4">Which model?</h3>
-            <div className="flex flex-wrap gap-3">
-              {models.map((m) => {
-                const isSel = selectedModelId === m.id
-                return (
-                  <button
-                    key={m.id}
-                    onClick={() => setSelectedModelId(m.id)}
-                    className={`px-4 py-2 rounded-xl border text-sm font-medium transition ${
-                      isSel
-                        ? 'bg-violet-600/25 border-violet-500 text-white'
-                        : 'bg-white/[0.03] border-white/10 text-gray-300 hover:border-white/20'
-                    }`}
-                  >
-                    {m.name}
-                  </button>
-                )
-              })}
+        {modelName && (
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-white font-semibold text-lg">Generating for</h3>
+              <p className="text-gray-500 text-sm">Headshots will be created for this person.</p>
             </div>
-            <p className="text-gray-500 text-sm mt-3">Headshots are generated for the selected person.</p>
+            <div className="flex items-center gap-3">
+              <span className="text-violet-300 font-semibold text-lg">{modelName}</span>
+              <button
+                onClick={() => router.push('/create/model-select')}
+                className="text-xs text-white/50 hover:text-white underline"
+              >
+                change
+              </button>
+            </div>
           </div>
         )}
 
