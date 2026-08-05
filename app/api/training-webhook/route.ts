@@ -63,6 +63,13 @@ export async function POST(request: NextRequest) {
           .eq('id', userId)
       }
 
+      // Multi-model: markeer de bijbehorende modelrij als klaar (+ resolved ref indien beschikbaar).
+      const fullRef = modelVersion ? `${modelPath}:${modelVersion}` : null
+      await supabase
+        .from('models')
+        .update({ status: 'completed', ...(fullRef ? { training_id: fullRef } : {}) })
+        .eq('training_id', payload.id)
+
       if (userData?.email) {
         try {
           await resend.emails.send({
@@ -86,15 +93,25 @@ export async function POST(request: NextRequest) {
     if (payload.status === 'failed' || payload.status === 'canceled') {
       console.error(`Training ${payload.status}:`, payload.error)
 
-      // Null stale velden
+      // Multi-model: markeer enkel deze modelrij als mislukt.
       await supabase
+        .from('models')
+        .update({ status: 'failed' })
+        .eq('training_id', payload.id)
+
+      // Alleen het 'actieve' model op users nullen als dit net die training was
+      // (anders zou een mislukte 2e training een bestaand werkend model wissen).
+      const { data: activeUser } = await supabase
         .from('users')
-        .update({
-          trained_model_id: null,
-          trigger_word: null,
-          model_trained_at: null,
-        })
+        .select('trained_model_id')
         .eq('id', userId)
+        .single()
+      if (activeUser?.trained_model_id === payload.id) {
+        await supabase
+          .from('users')
+          .update({ trained_model_id: null, trigger_word: null, model_trained_at: null })
+          .eq('id', userId)
+      }
 
       if (userData?.email) {
         try {

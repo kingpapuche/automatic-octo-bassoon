@@ -56,11 +56,17 @@ function buildNegativePromptAdditions(c: UserCharacteristics): string {
   return negatives.join(', ')
 }
 
-async function resolveModelReference(userId: string, trainedModelId: string): Promise<string> {
+// Lost een training_id/ref op naar "owner/name:version". Cachet het resultaat:
+// naar de models-rij als modelRowId is meegegeven, anders naar users (backward-compat).
+async function resolveModelReference(userId: string, trainedModelId: string, modelRowId?: string): Promise<string> {
+  const persist = async (ref: string) => {
+    if (modelRowId) await supabase.from('models').update({ training_id: ref }).eq('id', modelRowId)
+    else await supabase.from('users').update({ trained_model_id: ref }).eq('id', userId)
+  }
   if (trainedModelId.includes('/') && trainedModelId.includes(':')) return trainedModelId
   if (trainedModelId.includes(':') && !trainedModelId.includes('/')) {
     const fullRef = `${REPLICATE_USERNAME}/${trainedModelId}`
-    await supabase.from('users').update({ trained_model_id: fullRef }).eq('id', userId)
+    await persist(fullRef)
     return fullRef
   }
   const training = await replicate.trainings.get(trainedModelId)
@@ -71,7 +77,7 @@ async function resolveModelReference(userId: string, trainedModelId: string): Pr
   else if (typeof output === 'string' && output.includes(':')) fullRef = output
   if (!fullRef) throw new Error('Kon model version niet ophalen.')
   if (!fullRef.includes('/')) fullRef = `${REPLICATE_USERNAME}/${fullRef}`
-  await supabase.from('users').update({ trained_model_id: fullRef }).eq('id', userId)
+  await persist(fullRef)
   return fullRef
 }
 
@@ -184,7 +190,7 @@ const STYLE_PROMPTS: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, styleIds, aspectRatio } = await request.json()
+    const { userId, styleIds, aspectRatio, modelId } = await request.json()
 
     if (!userId) return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     if (!styleIds || styleIds.length === 0) return NextResponse.json({ error: 'No styles selected' }, { status: 400 })
@@ -205,17 +211,33 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    if (!user.trained_model_id) return NextResponse.json({ error: 'No trained model found' }, { status: 400 })
-
-    // Gebruik het per-user getrainde model (productie). Elke klant krijgt z'n eigen LoRA.
-    const modelReference = await resolveModelReference(userId, user.trained_model_id)
+    // Kies het model: expliciet modelId (multi-model) of het 'actieve' model op users (backward-compat).
+    let modelTrainingRef: string
+    let triggerWord: string
+    // Bron van de kenmerken (geslacht, kaal, bril, baard): per-model indien opgeslagen, anders het account.
+    let charSource: Record<string, unknown> = user
+    if (modelId) {
+      const { data: model } = await supabase
+        .from('models').select('*').eq('id', modelId).eq('user_id', userId).single()
+      if (!model) return NextResponse.json({ error: 'Model not found' }, { status: 404 })
+      if (model.status !== 'completed') return NextResponse.json({ error: 'Dit model is nog niet klaar' }, { status: 400 })
+      if (!model.training_id) return NextResponse.json({ error: 'Model has no training reference' }, { status: 400 })
+      modelTrainingRef = await resolveModelReference(userId, model.training_id, model.id)
+      triggerWord = model.trigger_word || 'HEADSHOT'
+      // Per-model kenmerken indien aanwezig (kolommen kunnen ontbreken -> val terug op account).
+      if (model.gender != null) charSource = model
+    } else {
+      if (!user.trained_model_id) return NextResponse.json({ error: 'No trained model found' }, { status: 400 })
+      modelTrainingRef = await resolveModelReference(userId, user.trained_model_id)
+      triggerWord = user.trigger_word || 'HEADSHOT'
+    }
+    const modelReference = modelTrainingRef
     const versionId = modelReference.split(':')[1]
     if (!versionId) return NextResponse.json({ error: 'Invalid model reference' }, { status: 500 })
-    const triggerWord = user.trigger_word || 'HEADSHOT'
 
     const characteristics: UserCharacteristics = {
-      gender: user.gender, ethnicity: user.ethnicity, eye_color: user.eye_color,
-      hair_color: user.hair_color, is_bald: user.is_bald, has_glasses: user.has_glasses, age_range: user.age_range,
+      gender: charSource.gender as string, ethnicity: charSource.ethnicity as string, eye_color: charSource.eye_color as string,
+      hair_color: charSource.hair_color as string, is_bald: charSource.is_bald as boolean, has_glasses: charSource.has_glasses as boolean, age_range: charSource.age_range as string,
     }
 
     const personDescription = buildPersonDescription(characteristics)

@@ -27,7 +27,7 @@ function isValidImage(buffer: ArrayBuffer): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, photoUrls } = await request.json()
+    const { userId, photoUrls, name } = await request.json()
 
     if (!userId) return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     if (!photoUrls || photoUrls.length < 8) {
@@ -143,7 +143,20 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // Sla op: trained_model_id = training.id (wordt later overschreven door webhook)
+    // Multi-model: elke training is een apart, benoemd model.
+    const modelName = (typeof name === 'string' && name.trim()) || userData.full_name || 'My model'
+    await supabase
+      .from('models')
+      .insert({
+        user_id: userId,
+        name: modelName,
+        training_id: training.id,
+        trigger_word: triggerWord,
+        status: 'training',
+      })
+
+    // Backward-compat: ook het 'actieve' model op users bijwerken (huidige generate-flow).
+    // trained_model_id = training.id (wordt later overschreven door webhook)
     await supabase
       .from('users')
       .update({
