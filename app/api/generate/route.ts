@@ -136,7 +136,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-cream-blazer-arms':   '[TRIGGER], three-quarter length shot of woman showing head to thighs, the full cream beige blazer visible, cream beige blazer, white t-shirt underneath, arms crossed, soft blurred modern professional office, upscale interior, soft warm natural light, modern professional',
   'w-turtleneck-blazer':   '[TRIGGER], three-quarter length shot of woman showing head to thighs, the full gray tailored blazer visible, black turtleneck under gray tailored blazer, smooth mid-grey editorial studio backdrop, dramatic directional lighting, modern sophisticated',
   'w-silk-blouse-modern':  '[TRIGGER], medium-wide shot of woman showing head to waist, navy silk blouse, bright modern office, soft window light, contemporary professional elegant',
-  'w-cardigan-soft':       '[TRIGGER], medium-wide shot of woman showing head to waist, soft beige cardigan over a blouse, soft blurred modern professional office, upscale interior, soft warm natural light, approachable smart casual professional',
+  'w-cardigan-soft':       '[TRIGGER], medium-wide shot of woman showing head to waist, alone by herself with no one else present, soft beige cardigan over a blouse, quiet empty modern professional office interior softly blurred, upscale and uncluttered, soft warm natural light, approachable smart casual professional',
   'w-knit-twinset':        '[TRIGGER], medium-wide shot of woman showing head to waist, matching knit top and cardigan in neutral tones, warm ambient light, cozy neutral background, refined smart casual',
   'w-startup-casual':      '[TRIGGER], medium shot portrait of woman, light blue button-down shirt, no blazer, modern coworking space background, natural light, energetic approachable professional',
   'w-red-power-suit':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the entire blazer visible from shoulders to waist, bold red blazer, white t-shirt underneath, modern creative office background, natural light, confident power pose, statement professional',
@@ -412,7 +412,7 @@ export async function POST(request: NextRequest) {
       }
       // Vrouwen (behalve date-night, waar wazige gasten sfeer geven): geen vreemden op de achtergrond.
       if (isWoman && !ONE_DRINK_STYLES.has(styleId)) {
-        styleNegative += ', other people, another person, background figures, people walking by, second person, strangers in the background'
+        styleNegative += ', other people, another person, background figures, people walking by, second person, strangers in the background, coworkers, colleagues, people at desks, people at tables, people sitting in the background, silhouettes of people, crowd'
       }
       // Dramatische donkere studio-stijlen: dwing de donkere backdrop af, weer kamer/raam.
       const DARK_BG_STYLES = new Set(['w-ceo-black'])
