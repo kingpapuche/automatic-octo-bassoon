@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
     const personDescription = buildPersonDescription(characteristics)
     const negativeAdditions = buildNegativePromptAdditions(characteristics)
 
-    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, shiny skin, oily skin, greasy skin, sweaty skin, glossy skin, shiny forehead, shiny bald head, shiny scalp, specular highlights on skin, skin glare, overexposed skin, blown-out highlights on face, waxy skin, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette, studio strobe lighting, artificial lighting, cropped head, partial face, head cut off, extreme close-up, tightly cropped, face filling the frame, macro face shot, face partially out of frame, only neck visible, sharp background, busy background, cluttered background, everything in focus, deep focus, cheap clothing, ill-fitting clothing, wrinkled suit, amateur snapshot, low budget, blurry face, out of focus face, soft focus on face, blurry eyes, soft blurry features, plain empty wall, boring flat background, bare wall background, dull background, amateur smartphone photo, selfie, snapshot, flat dull lighting, harsh lighting, people in background, bystanders in background, crowd in background, random clutter, messy objects, bedroom, bed, pillows, hotel room, kitchen, kitchen appliances, oven, refrigerator, tattoos, arm tattoos, tattooed arms, tattooed skin"
+    const baseNegativePrompt = "different person, wrong face, deformed, distorted, bad anatomy, extra limbs, low quality, disfigured, altered body proportions, unnatural body shape, bad hands, missing fingers, extra fingers, fused fingers, plastic skin, airbrushed, oversmoothed, unrealistic skin texture, perfect flawless skin, porcelain skin, skin retouching, heavy skin smoothing, shiny skin, oily skin, greasy skin, sweaty skin, glossy skin, shiny forehead, shiny bald head, shiny scalp, specular highlights on skin, skin glare, overexposed skin, blown-out highlights on face, waxy skin, uncanny valley, CGI, 3d render, illustration, cartoon, oversaturated, HDR, oversharpened, instagram filter, heavy vignette, studio strobe lighting, artificial lighting, cropped head, partial face, head cut off, extreme close-up, tightly cropped, face filling the frame, macro face shot, face partially out of frame, only neck visible, sharp background, busy background, cluttered background, everything in focus, deep focus, cheap clothing, ill-fitting clothing, wrinkled suit, amateur snapshot, low budget, blurry face, out of focus face, soft focus on face, blurry eyes, soft blurry features, plain empty wall, boring flat background, bare wall background, dull background, amateur smartphone photo, selfie, snapshot, flat dull lighting, harsh lighting, people in background, bystanders in background, crowd in background, random clutter, messy objects, bedroom, bed, pillows, hotel room, kitchen, kitchen appliances, oven, refrigerator, bathroom, sink, toilet, living room, home interior, residential home, tattoos, arm tattoos, tattooed arms, tattooed skin"
     const fullNegativePrompt = negativeAdditions ? `${baseNegativePrompt}, ${negativeAdditions}` : baseNegativePrompt
 
     // Maak generation record met empty result_urls
@@ -397,6 +397,15 @@ export async function POST(request: NextRequest) {
       const TSHIRT_STYLES = new Set(['coffee-shop-date'])
       if (TSHIRT_STYLES.has(styleId)) {
         styleNegative += ', button-down shirt, dress shirt, formal collared shirt'
+      }
+      // Kleding-is-kenmerk stijlen: weer close-up/borst-crop zodat vaker het hele kledingstuk in beeld komt.
+      const MORE_BODY_STYLES = new Set([
+        'boardroom-charcoal', 'bold-colored-blazer', 'leather-jacket-urban', 'hands-in-pockets', 'holding-tablet',
+        'w-pinstripe-pro', 'w-sheath-classic', 'w-pussybow-elegant', 'w-cream-blazer-arms', 'w-turtleneck-blazer',
+        'w-red-power-suit', 'w-emerald-blazer', 'w-statement-coral', 'w-leather-jacket-edge', 'w-hands-relaxed', 'w-holding-tablet',
+      ])
+      if (MORE_BODY_STYLES.has(styleId)) {
+        styleNegative += ', close-up, tight crop, cropped at the chest, only head and shoulders, headshot framing, face filling the frame'
       }
 
       const input = {
