@@ -132,7 +132,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-ceo-black':           '[TRIGGER], full-length three-quarter shot of woman from head to the knees, standing confidently with hands relaxed or in pockets, black tailored blazer, crisp white blouse, isolated against a seamless plain dramatic dark charcoal photographic studio backdrop with subtle warm texture, no furniture and no room visible, moody cinematic side lighting, powerful executive presence',
   'w-pinstripe-pro':       '[TRIGGER], full-length three-quarter shot of woman from head to the knees, standing confidently with hands relaxed or in pockets, the full pinstripe suit clearly visible from shoulders to hips, pinstripe blazer, silk blouse, neutral gray background, soft natural light, sharp sophisticated look',
   'w-sheath-classic':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the fitted black sheath dress fully visible, fitted black sheath dress, isolated against a clean seamless light grey studio backdrop, soft even studio lighting, refined executive editorial style',
-  'w-pussybow-elegant':    '[TRIGGER], three-quarter length shot of woman showing head to thighs, the tweed jacket and blouse visible, cream silk blouse with pussy bow detail, tweed jacket, isolated against a clean seamless light grey studio backdrop, soft even studio lighting, classic elegant style',
+  'w-pussybow-elegant':    '[TRIGGER], three-quarter length shot of woman showing head to thighs, wearing a cream silk pussy-bow blouse with a soft bow tied at the neck clearly visible, tweed jacket, isolated against a clean seamless light grey studio backdrop, soft even studio lighting, classic elegant style',
   'w-cream-blazer-arms':   '[TRIGGER], three-quarter length shot of woman showing head to thighs, the full cream beige blazer visible, cream beige blazer, white t-shirt underneath, arms crossed, soft neutral background, natural lighting, modern professional',
   'w-turtleneck-blazer':   '[TRIGGER], three-quarter length shot of woman showing head to thighs, the full gray tailored blazer visible, black turtleneck under gray tailored blazer, minimalist neutral background, soft natural light, modern sophisticated',
   'w-silk-blouse-modern':  '[TRIGGER], medium-wide shot of woman showing head to waist, navy silk blouse, modern office background, natural window lighting, contemporary professional elegant',
@@ -345,7 +345,9 @@ export async function POST(request: NextRequest) {
         : ''
       // Subtiel vrouwelijk accent: fijne juwelen (oorbellen/ketting = veilig bij het gezicht).
       const jewelryHint = isWoman
-        ? ', wearing subtle tasteful jewelry, small elegant earrings and a fine delicate necklace, optionally a slim bracelet or watch, understated and elegant'
+        ? (styleId === 'w-pussybow-elegant'
+            ? ', small elegant earrings, understated and elegant'   // strik is het hals-accent, geen ketting
+            : ', wearing subtle tasteful jewelry, small elegant earrings and a fine delicate necklace, optionally a slim bracelet or watch, understated and elegant')
         : ''
       const fullPrompt = `${template.replace(/\[TRIGGER\]/g, triggerWithDescription)}${expression}${bodyHint}${diningHands}${jewelryHint}, not a tight close-up, sharp focus on face, sharp detailed eyes, matte natural skin with realistic texture and subtle pores, non-shiny complexion, soft even flattering light on the face${backgroundClause}, soft warm cinematic lighting, rich cinematic color grading, impeccably tailored well-fitted premium clothing, magazine-quality professional portrait, high-end editorial photography, 4k`
       const webhookUrl = `${baseUrl}/api/generation-webhook?generationId=${generationId}&styleId=${encodeURIComponent(styleId)}&userId=${userId}`
@@ -417,6 +419,10 @@ export async function POST(request: NextRequest) {
       const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-pussybow-elegant'])
       if (CLEAN_STUDIO_STYLES.has(styleId)) {
         styleNegative += ', office, desk, glass walls, room interior, home interior, hallway, furniture, chair, lamp, table, curtains, plant, visible room, window, floor visible'
+      }
+      // Pussybow: dwing de strik af, weer open kraag/ketting die ermee concurreren.
+      if (styleId === 'w-pussybow-elegant') {
+        styleNegative += ', necklace, open collar without a bow, plain collar, no bow at the neck'
       }
 
       const input = {
