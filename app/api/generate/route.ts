@@ -129,7 +129,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'rooftop-bar-evening': '[TRIGGER], medium shot showing the head, upper body and the table in front, wearing a relaxed-fit light-colored linen summer shirt in a bright warm tone such as light blue, sand, white or terracotta, no jacket, bright light summer clothing, natural everyday build, sitting at a table on a rooftop bar terrace in the evening, a cocktail in a rocks glass standing on the table clearly visible in the lower foreground, city skyline and string lights softly blurred behind, warm summer dusk sky, warm evening ambiance, shallow depth of field',
   'w-power-blazer-navy':   '[TRIGGER], professional woman portrait, navy blue tailored blazer, white silk blouse, bright modern office, arms crossed confidently, soft natural light, executive look',
   'w-executive-charcoal':  '[TRIGGER], half body portrait of professional woman, charcoal gray tailored suit, light silk blouse, standing by large floor-to-ceiling office windows with a clear city view behind, modern high-rise office, natural professional lighting, confident executive',
-  'w-ceo-black':           '[TRIGGER], full-length three-quarter shot of woman from head to the knees, standing confidently with hands relaxed or in pockets, black tailored blazer, crisp white blouse, dramatic dark charcoal background with a warm textured photographic studio backdrop, moody cinematic side lighting, powerful executive presence',
+  'w-ceo-black':           '[TRIGGER], full-length three-quarter shot of woman from head to the knees, standing confidently with hands relaxed or in pockets, black tailored blazer, crisp white blouse, isolated against a seamless plain dramatic dark charcoal photographic studio backdrop with subtle warm texture, no furniture and no room visible, moody cinematic side lighting, powerful executive presence',
   'w-pinstripe-pro':       '[TRIGGER], full-length three-quarter shot of woman from head to the knees, standing confidently with hands relaxed or in pockets, the full pinstripe suit clearly visible from shoulders to hips, pinstripe blazer, silk blouse, neutral gray background, soft natural light, sharp sophisticated look',
   'w-sheath-classic':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the fitted black sheath dress fully visible, fitted black sheath dress, light neutral background, soft natural lighting, refined executive style',
   'w-pussybow-elegant':    '[TRIGGER], three-quarter length shot of woman showing head to thighs, the tweed jacket and blouse visible, cream silk blouse with pussy bow detail, tweed jacket, neutral background, soft natural light, classic elegant style',
@@ -411,7 +411,7 @@ export async function POST(request: NextRequest) {
       // Dramatische donkere studio-stijlen: dwing de donkere backdrop af, weer kamer/raam.
       const DARK_BG_STYLES = new Set(['w-ceo-black'])
       if (DARK_BG_STYLES.has(styleId)) {
-        styleNegative += ', bright background, window, visible room, room interior, furniture, plant, hallway, mirror'
+        styleNegative += ', bright background, window, visible room, room interior, furniture, chair, lamp, table, curtains, plant, hallway, mirror, floor visible'
       }
 
       const input = {
