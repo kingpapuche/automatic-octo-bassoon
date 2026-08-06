@@ -130,7 +130,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-power-blazer-navy':   '[TRIGGER], professional woman portrait, navy blue tailored blazer, white silk blouse, bright modern office, arms crossed confidently, soft natural light, executive look',
   'w-executive-charcoal':  '[TRIGGER], half body portrait of professional woman, charcoal gray tailored suit, light silk blouse, standing by large floor-to-ceiling office windows with a clear city view behind, modern high-rise office, natural professional lighting, confident executive',
   'w-ceo-black':           '[TRIGGER], elegant portrait of businesswoman, black tailored blazer, crisp white blouse, dramatic dark charcoal background, moody cinematic side lighting, powerful executive presence',
-  'w-pinstripe-pro':       '[TRIGGER], professional portrait of businesswoman, pinstripe blazer, silk blouse, neutral gray background, soft natural light, sharp sophisticated look',
+  'w-pinstripe-pro':       '[TRIGGER], three-quarter length shot of woman showing head to thighs, the full pinstripe suit clearly visible, pinstripe blazer, silk blouse, neutral gray background, soft natural light, sharp sophisticated look',
   'w-sheath-classic':      '[TRIGGER], elegant portrait of businesswoman, fitted black sheath dress, minimal jewelry, light neutral background, soft natural lighting, refined executive style',
   'w-pussybow-elegant':    '[TRIGGER], professional portrait of woman, cream silk blouse with pussy bow detail, tweed jacket, neutral background, soft natural light, classic elegant style',
   'w-cream-blazer-arms':   '[TRIGGER], half body portrait of professional woman, cream beige blazer, white t-shirt underneath, arms crossed, soft neutral background, natural lighting, modern professional',
