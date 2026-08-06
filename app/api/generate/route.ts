@@ -137,7 +137,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-turtleneck-blazer':   '[TRIGGER], three-quarter length shot of woman showing head to thighs, the full gray tailored blazer visible, black turtleneck under gray tailored blazer, smooth mid-grey editorial studio backdrop, dramatic directional lighting, modern sophisticated',
   'w-silk-blouse-modern':  '[TRIGGER], medium-wide shot of woman showing head to waist, navy silk blouse, bright modern office, soft window light, contemporary professional elegant',
   'w-cardigan-soft':       '[TRIGGER], medium-wide shot of woman showing head to waist, alone by herself with no one else present, soft beige cardigan over a blouse, quiet empty modern professional office interior softly blurred, upscale and uncluttered, soft warm natural light, approachable smart casual professional',
-  'w-knit-twinset':        '[TRIGGER], medium-wide shot of woman showing head to waist, matching knit top with a modest round neckline and cardigan in a soft flattering color such as sage green, dusty blue or blush, warm ambient light, cozy neutral background, refined smart casual',
+  'w-knit-twinset':        '[TRIGGER], medium-wide shot of woman showing head to waist, matching knit top with a modest round neckline and cardigan in a soft flattering color such as sage green, dusty blue or blush, isolated against a clean seamless warm neutral studio backdrop, soft warm lighting, refined smart casual',
   'w-startup-casual':      '[TRIGGER], medium shot portrait of woman, light blue button-down shirt, no blazer, modern coworking space background, natural light, energetic approachable professional',
   'w-red-power-suit':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the entire blazer visible from shoulders to waist, bold red blazer, white t-shirt underneath, modern creative office background, natural light, confident power pose, statement professional',
   'w-emerald-blazer':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the entire blazer visible, emerald green blazer, black top underneath, bright creative studio with a colored backdrop, soft side natural light, bold creative professional',
@@ -420,7 +420,7 @@ export async function POST(request: NextRequest) {
         styleNegative += ', bright background, window, visible room, room interior, furniture, chair, lamp, table, curtains, plant, hallway, mirror, floor visible'
       }
       // Schone lichte studio-stijlen: seamless backdrop afdwingen, weer kamer/kantoor.
-      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-pussybow-elegant'])
+      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-pussybow-elegant', 'w-knit-twinset'])
       if (CLEAN_STUDIO_STYLES.has(styleId)) {
         styleNegative += ', office, desk, glass walls, room interior, home interior, hallway, furniture, chair, lamp, table, curtains, plant, visible room, window, floor visible'
       }
