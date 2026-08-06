@@ -131,7 +131,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-executive-charcoal':  '[TRIGGER], half body portrait of professional woman, charcoal gray tailored suit, light silk blouse, standing by large floor-to-ceiling office windows with a clear city view behind, modern high-rise office, natural professional lighting, confident executive',
   'w-ceo-black':           '[TRIGGER], full-length three-quarter shot of woman from head to the knees, standing confidently with hands relaxed or in pockets, black tailored blazer, crisp white blouse, isolated against a seamless plain dramatic dark charcoal photographic studio backdrop with subtle warm texture, no furniture and no room visible, moody cinematic side lighting, powerful executive presence',
   'w-pinstripe-pro':       '[TRIGGER], full-length three-quarter shot of woman from head to the knees, standing confidently with hands relaxed or in pockets, the full pinstripe suit clearly visible from shoulders to hips, pinstripe blazer, silk blouse, neutral gray background, soft natural light, sharp sophisticated look',
-  'w-sheath-classic':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the fitted black sheath dress fully visible, fitted black sheath dress, standing in a sleek modern corporate office with clean lines and glass walls, softly blurred professional office interior, soft natural light, refined executive style',
+  'w-sheath-classic':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the fitted black sheath dress fully visible, fitted black sheath dress, isolated against a clean seamless light grey studio backdrop, soft even studio lighting, refined executive editorial style',
   'w-pussybow-elegant':    '[TRIGGER], three-quarter length shot of woman showing head to thighs, the tweed jacket and blouse visible, cream silk blouse with pussy bow detail, tweed jacket, neutral background, soft natural light, classic elegant style',
   'w-cream-blazer-arms':   '[TRIGGER], three-quarter length shot of woman showing head to thighs, the full cream beige blazer visible, cream beige blazer, white t-shirt underneath, arms crossed, soft neutral background, natural lighting, modern professional',
   'w-turtleneck-blazer':   '[TRIGGER], three-quarter length shot of woman showing head to thighs, the full gray tailored blazer visible, black turtleneck under gray tailored blazer, minimalist neutral background, soft natural light, modern sophisticated',
@@ -412,6 +412,11 @@ export async function POST(request: NextRequest) {
       const DARK_BG_STYLES = new Set(['w-ceo-black'])
       if (DARK_BG_STYLES.has(styleId)) {
         styleNegative += ', bright background, window, visible room, room interior, furniture, chair, lamp, table, curtains, plant, hallway, mirror, floor visible'
+      }
+      // Schone lichte studio-stijlen: seamless backdrop afdwingen, weer kamer/kantoor.
+      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic'])
+      if (CLEAN_STUDIO_STYLES.has(styleId)) {
+        styleNegative += ', furniture, chair, lamp, table, curtains, room interior, home interior, hallway, plant, visible room, office, desk, window'
       }
 
       const input = {
