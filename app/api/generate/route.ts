@@ -410,9 +410,9 @@ export async function POST(request: NextRequest) {
       if (MORE_BODY_STYLES.has(styleId)) {
         styleNegative += ', close-up, tight crop, cropped at the chest, only head and shoulders, headshot framing, face filling the frame'
       }
-      // Vrouwen (behalve date-night, waar wazige gasten sfeer geven): geen vreemden op de achtergrond.
-      if (isWoman && !ONE_DRINK_STYLES.has(styleId)) {
-        styleNegative += ', other people, another person, background figures, people walking by, second person, strangers in the background, coworkers, colleagues, people at desks, people at tables, people sitting in the background, silhouettes of people, crowd'
+      // Vrouwen: geen vreemden op de achtergrond (ook date-night — zoals de mannen-voorbeelden).
+      if (isWoman) {
+        styleNegative += ', other people, another person, background figures, people walking by, second person, strangers in the background, coworkers, colleagues, people at desks, people at tables, people sitting in the background, other diners, silhouettes of people, crowd'
       }
       // Dramatische donkere studio-stijlen: dwing de donkere backdrop af, weer kamer/raam.
       const DARK_BG_STYLES = new Set(['w-ceo-black'])
