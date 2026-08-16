@@ -182,7 +182,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
       { id: 'w-restaurant-elegant',  label: 'Restaurant Elegant', description: 'Silk blouse, candlelit',    icon: '🕯️' },
       { id: 'w-wine-bar-casual',     label: 'Wine Bar Casual',   description: 'At wine bar, warm light',    icon: '🍷' },
       { id: 'w-cocktail-glamour',    label: 'Cocktail Glamour',  description: 'Cocktail dress, evening',    icon: '✨' },
-      { id: 'w-cafe-date',           label: 'Café Date',         description: 'Charming cafe interior',     icon: '☕' },
+      { id: 'w-cafe-date',           label: 'Coffee Shop Date',  description: 'Coffee shop, ambient',       icon: '☕' },
       { id: 'w-rooftop-bar',         label: 'Rooftop Bar',       description: 'Rooftop bar, city lights',   icon: '🌃' },
       { id: 'w-restaurant-evening',  label: 'Restaurant Evening', description: 'Intimate, candlelight',     icon: '🌙' },
       { id: 'w-bistro-warm',         label: 'Bistro Warm',       description: 'Smart casual, bistro',       icon: '🥂' },
