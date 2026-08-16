@@ -414,10 +414,9 @@ export async function POST(request: NextRequest) {
       if (isWoman) {
         styleNegative += ', other people, another person, background figures, people walking by, second person, strangers in the background, coworkers, colleagues, people at desks, people at tables, people sitting in the background, other diners, silhouettes of people, crowd'
       }
-      // Nette halslijn afdwingen bij avond-/cocktailstijlen (geen diep uitgesneden jurk).
-      const MODEST_STYLES = new Set(['w-cocktail-glamour'])
-      if (MODEST_STYLES.has(styleId)) {
-        styleNegative += ', plunging neckline, deep v-neck, revealing dress, cleavage, low-cut dress, spaghetti straps, bare shoulders'
+      // Nette, brand-safe halslijn bij alle vrouwen-stijlen (enkel de gewaagde extremen geweerd).
+      if (isWoman) {
+        styleNegative += ', plunging neckline, deep v-neck, revealing dress, cleavage, low-cut top, spaghetti straps, bare shoulders'
       }
       // Dramatische donkere studio-stijlen: dwing de donkere backdrop af, weer kamer/raam.
       const DARK_BG_STYLES = new Set(['w-ceo-black'])
