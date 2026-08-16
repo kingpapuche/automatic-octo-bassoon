@@ -160,7 +160,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-equestrian':          '[TRIGGER], portrait of woman, elegant equestrian outfit, standing beside a horse in the countryside, soft natural daylight, graceful confident adventurous vibe',
   'w-restaurant-elegant':  '[TRIGGER], medium-wide shot of woman showing head to waist, smart casual silk blouse in white, blush or a warm tone, not blue, sitting alone at a dining table in a quiet elegant restaurant with no other diners nearby, on the table in the foreground a plate of beautifully plated gourmet food and a single glass of red wine clearly visible, warm candlelit fine-dining ambiance, softly blurred empty restaurant background with shallow depth of field',
   'w-wine-bar-casual':     '[TRIGGER], medium-wide shot of woman showing head to waist, stylish casual top in a warm flattering color such as burgundy, rust or warm neutral, sitting at a cozy wine bar, a single large glass of red wine standing on the table prominently in the foreground, fully visible and not cropped, nobody touching the glass, rows of wine bottles on wooden shelves softly blurred behind, warm intimate lighting, shallow depth of field',
-  'w-cocktail-glamour':    '[TRIGGER], medium-wide shot of woman showing head to waist, an elegant sophisticated cocktail dress with a modest tasteful neckline, sitting at an upscale cocktail bar, on the bar in the foreground an elegant cocktail glass clearly visible, bottles and bar softly blurred behind, ambient evening mood lighting, shallow depth of field',
+  'w-cocktail-glamour':    '[TRIGGER], medium-wide shot of woman showing head to waist, an elegant classy cocktail dress in a rich jewel tone such as emerald green, burgundy or navy, with a flattering yet tasteful neckline, sophisticated and refined, sitting at an upscale cocktail bar, on the bar in the foreground an elegant cocktail glass clearly visible, bottles and bar softly blurred behind, ambient evening mood lighting, shallow depth of field',
   'w-cafe-date':           '[TRIGGER], medium-wide shot of woman showing head to waist, casual sweater in a soft flattering color such as cream, blush or sage, sitting at a table in a charming cafe, holding a warm cup of coffee, the coffee is either a black espresso or a cappuccino with latte art, cozy cafe softly blurred behind, warm casual lighting, relaxed approachable, shallow depth of field',
   'w-rooftop-bar':         '[TRIGGER], medium-wide shot of woman showing head to waist, stylish summer evening outfit in a bright or pastel color, at a table on a rooftop bar terrace in the evening, on the table in the foreground a cocktail glass clearly visible, city skyline and string lights softly blurred behind, warm summer dusk sky, warm evening ambiance, shallow depth of field',
   'w-restaurant-evening':  '[TRIGGER], medium-wide shot of woman showing head to waist, sophisticated evening top, sitting at a candlelit table in an intimate restaurant, on the table in the foreground a plate of beautifully plated food and a single glass of red wine clearly visible, warm romantic ambiance, softly blurred restaurant background with shallow depth of field',
@@ -414,9 +414,12 @@ export async function POST(request: NextRequest) {
       if (isWoman) {
         styleNegative += ', other people, another person, background figures, people walking by, second person, strangers in the background, coworkers, colleagues, people at desks, people at tables, people sitting in the background, other diners, silhouettes of people, crowd'
       }
-      // Nette, brand-safe halslijn bij alle vrouwen-stijlen (enkel de gewaagde extremen geweerd).
-      if (isWoman) {
+      // Nette, brand-safe halslijn. Cocktail mag een elegante matige V (dat hoort bij de stijl),
+      // dus daar weren we enkel de extreme plunge; de andere vrouwen-stijlen strakker.
+      if (isWoman && styleId !== 'w-cocktail-glamour') {
         styleNegative += ', plunging neckline, deep v-neck, revealing dress, cleavage, low-cut top, spaghetti straps, bare shoulders'
+      } else if (styleId === 'w-cocktail-glamour') {
+        styleNegative += ', plunging neckline to the navel, extremely low-cut, barely-there dress, trashy revealing dress'
       }
       // Dramatische donkere studio-stijlen: dwing de donkere backdrop af, weer kamer/raam.
       const DARK_BG_STYLES = new Set(['w-ceo-black'])
