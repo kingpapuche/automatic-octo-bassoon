@@ -21,7 +21,7 @@ const VARIATIONS_PER_STYLE = 4
 
 interface UserCharacteristics {
   gender?: string; ethnicity?: string; eye_color?: string
-  hair_color?: string; is_bald?: boolean; has_glasses?: boolean; has_beard?: boolean; age_range?: string
+  hair_color?: string; hair_length?: string; hair_type?: string; is_bald?: boolean; has_glasses?: boolean; has_beard?: boolean; age_range?: string
 }
 
 const skinToneMap: Record<string, string> = {
@@ -41,6 +41,11 @@ function buildPersonDescription(c: UserCharacteristics): string {
   const parts: string[] = []
   if (c.gender) parts.push(`a ${c.gender}`)
   if (c.is_bald) parts.push('bald')
+  // Haar expliciet vastzetten zodat de app het kapsel van de persoon niet verandert.
+  else if (c.hair_length || c.hair_type) {
+    const hair = [c.hair_length, c.hair_type, c.hair_color, 'hair'].filter(Boolean).join(' ')
+    parts.push(`with ${hair}`)
+  }
   if (c.has_glasses) parts.push('wearing glasses')
   if (c.has_beard) parts.push('with beard')
   return parts.join(', ')
@@ -237,7 +242,8 @@ export async function POST(request: NextRequest) {
 
     const characteristics: UserCharacteristics = {
       gender: charSource.gender as string, ethnicity: charSource.ethnicity as string, eye_color: charSource.eye_color as string,
-      hair_color: charSource.hair_color as string, is_bald: charSource.is_bald as boolean, has_glasses: charSource.has_glasses as boolean,
+      hair_color: charSource.hair_color as string, hair_length: charSource.hair_length as string, hair_type: charSource.hair_type as string,
+      is_bald: charSource.is_bald as boolean, has_glasses: charSource.has_glasses as boolean,
       has_beard: charSource.has_beard as boolean, age_range: charSource.age_range as string,
     }
 

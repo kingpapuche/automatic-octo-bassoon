@@ -41,6 +41,19 @@ const HAIR_COLOR_OPTIONS = [
   { value: 'dark brown', label: 'Dark Brown', color: '#4A235A' },
 ]
 
+const HAIR_LENGTH_OPTIONS = [
+  { value: 'short',  label: 'Short' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'long',   label: 'Long' },
+]
+
+const HAIR_TYPE_OPTIONS = [
+  { value: 'straight', label: 'Straight' },
+  { value: 'wavy',     label: 'Wavy' },
+  { value: 'curly',    label: 'Curly' },
+  { value: 'coily',    label: 'Coily' },
+]
+
 const USE_CASE_OPTIONS = [
   { value: 'website',          label: 'Website / About Us' },
   { value: 'social-media',     label: 'Social Media' },
@@ -58,6 +71,8 @@ interface UserCharacteristics {
   ethnicity:   string
   eye_color:   string
   hair_color:  string
+  hair_length: string
+  hair_type:   string
   is_bald:     boolean
   has_glasses: boolean
   has_beard:   boolean
@@ -88,7 +103,7 @@ export default function UploadPage() {
 
   const [characteristics, setCharacteristics] = useState<UserCharacteristics>({
     full_name: '', gender: '', ethnicity: '', eye_color: '',
-    hair_color: '', is_bald: false, has_glasses: false, has_beard: false,
+    hair_color: '', hair_length: '', hair_type: '', is_bald: false, has_glasses: false, has_beard: false,
     use_cases: [],
   })
 
@@ -107,6 +122,8 @@ export default function UploadPage() {
             ethnicity:   userData.ethnicity   || '',
             eye_color:   userData.eye_color   || '',
             hair_color:  userData.hair_color  || '',
+            hair_length: userData.hair_length || '',
+            hair_type:   userData.hair_type   || '',
             is_bald:     userData.is_bald     || false,
             has_glasses: userData.has_glasses || false,
             has_beard:   userData.has_beard   || false,
@@ -121,7 +138,7 @@ export default function UploadPage() {
   const updateChar = (key: keyof UserCharacteristics, value: any) => {
     setCharacteristics(prev => {
       const next = { ...prev, [key]: value }
-      if (key === 'is_bald' && value === true) next.hair_color = ''
+      if (key === 'is_bald' && value === true) { next.hair_color = ''; next.hair_length = ''; next.hair_type = '' }
       return next
     })
   }
@@ -140,7 +157,7 @@ export default function UploadPage() {
     characteristics.gender !== '' &&
     characteristics.ethnicity !== '' &&
     characteristics.eye_color !== '' &&
-    (characteristics.is_bald || characteristics.hair_color !== '')
+    (characteristics.is_bald || (characteristics.hair_color !== '' && characteristics.hair_length !== '' && characteristics.hair_type !== ''))
 
   const handleStep1Submit = async () => {
     if (!isStep1Valid() || !user) return
@@ -156,6 +173,8 @@ export default function UploadPage() {
           ethnicity:         characteristics.ethnicity,
           eye_color:         characteristics.eye_color,
           hair_color:        characteristics.hair_color,
+          hair_length:       characteristics.hair_length,
+          hair_type:         characteristics.hair_type,
           is_bald:           characteristics.is_bald,
           has_glasses:       characteristics.has_glasses,
           has_beard:         characteristics.has_beard,
@@ -430,18 +449,42 @@ export default function UploadPage() {
               </div>
 
               {!characteristics.is_bald && (
-                <div>
-                  <label className="block text-white font-semibold mb-2 text-sm">Hair Color *</label>
-                  <div className="flex flex-wrap gap-2">
-                    {HAIR_COLOR_OPTIONS.map(o => (
-                      <button key={o.value} onClick={() => updateChar('hair_color', o.value)}
-                        className={`${pillBase} flex items-center gap-2 ${characteristics.hair_color === o.value ? pillActive : pillInactive}`}>
-                        <div className="w-3.5 h-3.5 rounded-full border border-white/30 shrink-0" style={{ backgroundColor: o.color }} />
-                        {o.label}
-                      </button>
-                    ))}
+                <>
+                  <div>
+                    <label className="block text-white font-semibold mb-2 text-sm">Hair Color *</label>
+                    <div className="flex flex-wrap gap-2">
+                      {HAIR_COLOR_OPTIONS.map(o => (
+                        <button key={o.value} onClick={() => updateChar('hair_color', o.value)}
+                          className={`${pillBase} flex items-center gap-2 ${characteristics.hair_color === o.value ? pillActive : pillInactive}`}>
+                          <div className="w-3.5 h-3.5 rounded-full border border-white/30 shrink-0" style={{ backgroundColor: o.color }} />
+                          {o.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                  <div>
+                    <label className="block text-white font-semibold mb-2 text-sm">Hair Length *</label>
+                    <div className="flex flex-wrap gap-2">
+                      {HAIR_LENGTH_OPTIONS.map(o => (
+                        <button key={o.value} onClick={() => updateChar('hair_length', o.value)}
+                          className={`${pillBase} ${characteristics.hair_length === o.value ? pillActive : pillInactive}`}>
+                          {o.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-white font-semibold mb-2 text-sm">Hair Type *</label>
+                    <div className="flex flex-wrap gap-2">
+                      {HAIR_TYPE_OPTIONS.map(o => (
+                        <button key={o.value} onClick={() => updateChar('hair_type', o.value)}
+                          className={`${pillBase} ${characteristics.hair_type === o.value ? pillActive : pillInactive}`}>
+                          {o.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
 
               <div>

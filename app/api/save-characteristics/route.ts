@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
       use_cases,
       age_range,
       allow_photo_usage,
+      hair_length,
+      hair_type,
     } = body
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
@@ -35,6 +37,8 @@ export async function POST(request: NextRequest) {
         use_cases,
         age_range,
         allow_photo_usage,
+        hair_length,
+        hair_type,
       })
       .eq('id', userId)
     if (error) {
