@@ -159,8 +159,6 @@ export async function POST(request: NextRequest) {
         ethnicity: c.ethnicity ?? null,
         eye_color: c.eye_color ?? null,
         hair_color: c.hair_color ?? null,
-        hair_length: c.hair_length ?? null,
-        hair_type: c.hair_type ?? null,
         is_bald: c.is_bald ?? null,
         has_glasses: c.has_glasses ?? null,
         has_beard: c.has_beard ?? null,
