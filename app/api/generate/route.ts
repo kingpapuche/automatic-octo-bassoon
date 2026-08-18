@@ -427,9 +427,9 @@ export async function POST(request: NextRequest) {
         styleNegative += ', bright background, window, visible room, room interior, furniture, chair, lamp, table, curtains, plant, hallway, mirror, floor visible'
       }
       // Schone lichte studio-stijlen: seamless backdrop afdwingen, weer kamer/kantoor.
-      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-knit-twinset'])
+      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-knit-twinset', 'w-red-power-suit', 'w-emerald-blazer', 'w-mustard-creative', 'w-statement-coral', 'w-jewel-purple'])
       if (CLEAN_STUDIO_STYLES.has(styleId)) {
-        styleNegative += ', office, desk, glass walls, room interior, home interior, hallway, furniture, chair, lamp, table, curtains, plant, visible room, window, floor visible'
+        styleNegative += ', office, desk, glass walls, room interior, home interior, hallway, bathroom, sink, mirror, bedroom, living room, furniture, chair, lamp, table, curtains, plant, visible room, window, floor visible'
       }
       // Pussybow: dwing de strik af, weer open kraag/ketting die ermee concurreren.
       if (styleId === 'w-pussybow-elegant') {
