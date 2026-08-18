@@ -194,10 +194,10 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     icon: '🌈',
     gender: 'female',
     styles: [
-      { id: 'w-red-power-suit',      label: 'Red Power Suit',    description: 'Red blazer, statement',      icon: '🔴' },
+      { id: 'w-red-power-suit',      label: 'Red Power Suit',    description: 'Red suit, statement',        icon: '🔴' },
       { id: 'w-emerald-blazer',      label: 'Emerald Blazer',    description: 'Green blazer, bold',         icon: '💚' },
-      { id: 'w-mustard-creative',    label: 'Mustard Creative',  description: 'Mustard silk, artistic',     icon: '🟡' },
-      { id: 'w-statement-coral',     label: 'Statement Coral',   description: 'Coral blazer, vibrant',      icon: '🪸' },
+      { id: 'w-mustard-creative',    label: 'Burgundy Silk',     description: 'Deep burgundy silk, bold',   icon: '🍷' },
+      { id: 'w-statement-coral',     label: 'Cobalt Blazer',     description: 'Cobalt blue, statement',     icon: '🔵' },
       { id: 'w-jewel-purple',        label: 'Jewel Purple',      description: 'Deep purple, expressive',    icon: '🟣' },
     ],
   },
