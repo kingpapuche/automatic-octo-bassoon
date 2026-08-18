@@ -140,9 +140,9 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-knit-twinset':        '[TRIGGER], medium-wide shot of woman showing head to waist, an elegant refined matching knit twinset, a fine-gauge knit cardigan worn over a matching knit top with a modest round neckline, in a soft flattering color such as sage green, dusty blue or blush, polished and stylish smart casual, isolated against a clean seamless warm neutral studio backdrop, soft warm lighting',
   'w-startup-casual':      '[TRIGGER], medium-wide shot of woman showing head to waist, light blue button-down shirt, no blazer, alone by herself with no one else present, standing against a bright clean modern office wall with a glass partition and soft daylight, minimal and uncluttered, no open floor with desks, natural light, energetic approachable professional',
   'w-red-power-suit':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, wearing a matching bold red power suit, the entire softly tailored relaxed-fit red blazer visible from shoulders to waist with matching red trousers, white t-shirt underneath, isolated against a clean bright seamless studio backdrop, soft even studio lighting, confident power pose, statement professional',
-  'w-emerald-blazer':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the entire blazer visible, a softly tailored relaxed-fit emerald green blazer with a modern longer cut, black top underneath, isolated against a clean seamless colored studio backdrop, soft even studio lighting, bold creative professional',
-  'w-mustard-creative':    '[TRIGGER], medium-wide shot of woman showing head to waist, an elegant deep burgundy merlot silk blouse, isolated against a clean seamless warm rich colored studio backdrop, soft even studio lighting, bold expressive creative professional',
-  'w-statement-coral':     '[TRIGGER], three-quarter length shot of woman showing head to thighs, the entire blazer visible, a softly tailored relaxed-fit cobalt blue blazer with a modern cut, white top underneath, isolated against a clean bright seamless studio backdrop, soft even studio lighting, bold confident creative professional',
+  'w-emerald-blazer':      '[TRIGGER], three-quarter length shot of woman showing head to thighs, the entire blazer visible, a softly tailored relaxed-fit emerald green blazer with a modern longer cut, black top underneath, standing outdoors in front of modern architecture, a softly blurred contemporary building facade with soft greenery, bright natural daylight, bold editorial creative professional',
+  'w-mustard-creative':    '[TRIGGER], medium-wide shot of woman showing head to waist, an elegant deep burgundy merlot silk blouse, isolated against a warm richly colored textured studio backdrop with subtle tactile texture, soft even studio lighting, bold expressive creative professional',
+  'w-statement-coral':     '[TRIGGER], three-quarter length shot of woman showing head to thighs, the entire blazer visible, a softly tailored relaxed-fit cobalt blue blazer with a modern cut, white top underneath, standing against an industrial textured concrete wall in a modern urban setting, softly blurred background, natural directional daylight, bold confident creative professional',
   'w-jewel-purple':        '[TRIGGER], medium-wide shot of woman showing head to waist, deep purple silk top, isolated against a clean seamless jewel-tone studio backdrop, soft even studio lighting, jewel-tone creative professional, expressive',
   'w-white-tee-natural':   '[TRIGGER], medium-wide shot of woman showing head to waist, clean white t-shirt, blurred green nature background, outdoor natural daylight, fresh approachable, genuine smile',
   'w-cream-sweater-window': '[TRIGGER], medium-wide shot of woman showing head to waist, soft cream knit sweater, soft warm neutral background softly blurred, warm natural light, relaxed approachable',
@@ -427,9 +427,14 @@ export async function POST(request: NextRequest) {
         styleNegative += ', bright background, window, visible room, room interior, furniture, chair, lamp, table, curtains, plant, hallway, mirror, floor visible'
       }
       // Schone lichte studio-stijlen: seamless backdrop afdwingen, weer kamer/kantoor.
-      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-knit-twinset', 'w-red-power-suit', 'w-emerald-blazer', 'w-mustard-creative', 'w-statement-coral', 'w-jewel-purple'])
+      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-knit-twinset', 'w-red-power-suit', 'w-mustard-creative', 'w-jewel-purple'])
       if (CLEAN_STUDIO_STYLES.has(styleId)) {
         styleNegative += ', office, desk, glass walls, room interior, home interior, hallway, bathroom, sink, mirror, bedroom, living room, furniture, chair, lamp, table, curtains, plant, visible room, window, floor visible'
+      }
+      // Emerald (outdoor architectuur) + Cobalt (urban betonmuur): weer thuis/meubels, maar laat outdoor/beton toe.
+      const URBAN_OUTDOOR_STYLES = new Set(['w-emerald-blazer', 'w-statement-coral'])
+      if (URBAN_OUTDOOR_STYLES.has(styleId)) {
+        styleNegative += ', home interior, living room, bedroom, kitchen, dining room, domestic interior, cozy home setting, sofa, couch, bed, home decor, indoor room, restaurant'
       }
       // Pussybow: dwing de strik af, weer open kraag/ketting die ermee concurreren.
       if (styleId === 'w-pussybow-elegant') {
