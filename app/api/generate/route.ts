@@ -146,7 +146,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-jewel-purple':        '[TRIGGER], medium-wide shot of woman showing head to waist, an elegant deep purple silk blouse, isolated against a clean seamless plain deep purple studio backdrop, no room and no furniture visible, soft even studio lighting, jewel-tone creative professional, expressive',
   'w-white-tee-natural':   '[TRIGGER], medium-wide shot of woman showing head to waist, clean white t-shirt, blurred green nature background, outdoor natural daylight, fresh approachable, genuine smile',
   'w-cream-sweater-window': '[TRIGGER], medium-wide shot of woman showing head to waist, a cozy relaxed-fit knit sweater in a soft warm neutral such as cream, warm oat or soft caramel, with a modest crew or soft funnel neckline and soft draping, in soft natural window light against a clean minimal wall, uncluttered with no furniture visible, warm soft light, relaxed approachable',
-  'w-denim-shirt-fresh':   '[TRIGGER], medium-wide shot of woman showing head to waist, light chambray denim shirt, clean white background, natural daylight, casual approachable professional, friendly',
+  'w-denim-shirt-fresh':   '[TRIGGER], medium-wide shot of woman showing head to waist, light chambray denim shirt, isolated against a clean bright seamless soft white studio backdrop, soft even natural daylight, casual approachable professional, friendly',
   'w-coffee-shop-warm':    '[TRIGGER], medium-wide shot of woman showing head to waist, casual smart sweater, in a modern coffee shop, espresso machine, coffee cups and a cafe counter visible behind, warm casual daytime lighting, relaxed approachable',
   'w-park-outdoor':        '[TRIGGER], half body portrait of woman, light casual blouse, blurred green park background, soft natural daylight, fresh outdoor relaxed',
   'w-rooftop-golden':      '[TRIGGER], medium shot of woman, smart casual blouse, rooftop setting, city panorama background, warm golden hour lighting, lifestyle professional',
@@ -427,7 +427,7 @@ export async function POST(request: NextRequest) {
         styleNegative += ', bright background, window, visible room, room interior, furniture, chair, lamp, table, curtains, plant, hallway, mirror, floor visible'
       }
       // Schone lichte studio-stijlen: seamless backdrop afdwingen, weer kamer/kantoor.
-      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-knit-twinset', 'w-red-power-suit', 'w-mustard-creative', 'w-jewel-purple'])
+      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-knit-twinset', 'w-red-power-suit', 'w-mustard-creative', 'w-jewel-purple', 'w-denim-shirt-fresh'])
       if (CLEAN_STUDIO_STYLES.has(styleId)) {
         styleNegative += ', office, desk, glass walls, room interior, home interior, hallway, bathroom, sink, mirror, bedroom, living room, furniture, chair, lamp, table, curtains, plant, visible room, window, floor visible'
       }
