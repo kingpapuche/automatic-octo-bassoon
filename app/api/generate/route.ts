@@ -150,7 +150,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-coffee-shop-warm':    '[TRIGGER], medium-wide shot of woman showing head to waist, a cozy relaxed-fit knit sweater in a soft neutral such as cream, oat, soft caramel or sage, with a modest crew or soft funnel neckline, in a modern coffee shop, espresso machine, coffee cups and a cafe counter softly blurred behind, warm casual daytime lighting, relaxed approachable',
   'w-park-outdoor':        '[TRIGGER], half body portrait of woman, light casual blouse, blurred green park background, soft natural daylight, fresh outdoor relaxed',
   'w-rooftop-golden':      '[TRIGGER], medium-wide shot of woman showing head to waist, a well-fitted solid blouse in a flattering warm mid-tone such as camel, warm terracotta, olive or soft navy, rooftop setting, city panorama background, warm golden hour lighting, lifestyle professional',
-  'w-architectural':       '[TRIGGER], half body portrait of woman, modern fitted top, modern architecture background, clean lines, natural light, contemporary',
+  'w-architectural':       '[TRIGGER], half body portrait of woman, a sleek modern fitted top, standing outdoors in front of striking modern architecture, a bold minimalist concrete and glass building facade with strong clean geometric lines, softly blurred, natural daylight, contemporary editorial',
   'w-city-walk':           '[TRIGGER], medium shot of woman walking, casual jacket and smart top, urban city street background, natural daylight, dynamic lifestyle',
   'w-beach-professional':  '[TRIGGER], medium shot of woman, crisp white linen blouse, wearing stylish sunglasses, relaxed at a tropical beach with palm trees and turquoise ocean in the background, bright sunny natural daylight, warm relaxed vacation vibe',
   'w-mountain-snow':       '[TRIGGER], portrait of woman, warm stylish winter jacket and scarf, standing in snowy mountains with snow-capped peaks in the background, crisp bright natural daylight, adventurous relaxed vibe',
@@ -432,7 +432,7 @@ export async function POST(request: NextRequest) {
         styleNegative += ', office, desk, glass walls, room interior, home interior, hallway, bathroom, sink, mirror, bedroom, living room, furniture, chair, lamp, table, curtains, plant, visible room, window, floor visible'
       }
       // Emerald (outdoor architectuur) + Cobalt (urban betonmuur): weer thuis/meubels, maar laat outdoor/beton toe.
-      const URBAN_OUTDOOR_STYLES = new Set(['w-emerald-blazer', 'w-statement-coral'])
+      const URBAN_OUTDOOR_STYLES = new Set(['w-emerald-blazer', 'w-statement-coral', 'w-architectural'])
       if (URBAN_OUTDOOR_STYLES.has(styleId)) {
         styleNegative += ', home interior, living room, bedroom, kitchen, dining room, domestic interior, cozy home setting, sofa, couch, bed, home decor, indoor room, restaurant'
       }
