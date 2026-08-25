@@ -440,6 +440,10 @@ export async function POST(request: NextRequest) {
       if (styleId === 'w-pussybow-elegant') {
         styleNegative += ', necklace, open collar without a bow, plain collar, no bow at the neck'
       }
+      // Leaning: dwing de leunende pose af, weer rechtop staan.
+      if (styleId === 'w-leaning-elegant') {
+        styleNegative += ', standing upright, standing straight, upright posture, facing the camera straight on, standing away from the wall, not leaning, not touching the wall'
+      }
 
       const input = {
         prompt: fullPrompt,
