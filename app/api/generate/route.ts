@@ -167,7 +167,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-bistro-warm':         '[TRIGGER], medium-wide shot of woman showing head to waist, an effortlessly chic modern parisian outfit such as a navy-and-cream breton striped top or a fine-gauge knit sweater in a neutral tone like cream, camel or navy, understated and stylish, sitting at a table in a charming french bistro, on the table in the lower foreground a glass of wine and a small dish clearly visible, bistro interior with a chalkboard menu softly blurred behind, warm cozy lighting, shallow depth of field',
   'w-leather-jacket-edge': '[TRIGGER], a three-quarter length fashion shot photographed from a distance, framing the woman from head down to mid-thigh with the entire jacket completely visible in frame from the shoulders all the way to its bottom hem, a fitted black leather moto biker jacket with a structured silhouette, dark top underneath, city street background, natural evening light, edgy sophisticated',
   'w-evening-rooftop':     '[TRIGGER], half body portrait of woman, an elegant satin evening blouse in classic black, navy or champagne with long sleeves and a high boat or cowl neckline that fully covers the chest and shoulders, sophisticated and glamorous, statement gold earrings, rooftop background with city lights, warm evening lighting, glamorous nighttime',
-  'w-night-city-glamour':  '[TRIGGER], medium-wide shot of woman showing head to waist, a glamorous evening top with a luminous satin or subtle metallic sheen in a rich tone like emerald, champagne, metallic silver or black, with an elegant modest neckline like a cowl or boat neck that covers the décolletage, statement gold earrings, glamorous and polished, at an elegant upscale evening cocktail lounge party, sophisticated interior with warm ambient mood lighting and soft glowing bokeh, large windows revealing softly blurred city lights behind, refined glamorous décor, cinematic shallow depth of field, elegant nighttime glamour',
+  'w-night-city-glamour':  '[TRIGGER], medium-wide shot of woman showing head to waist, wearing an elegant floor-length formal gala evening gown in a rich tone like black, emerald, sapphire, deep red or champagne, in satin or velvet with a refined elegant modest neckline, simple tasteful jewelry, at a glamorous black-tie gala in an elegant ballroom, warm ambient lighting and soft glowing bokeh from chandeliers, refined opulent décor softly blurred behind, cinematic shallow depth of field, sophisticated formal elegance',
 
   // ===== SPECIALTY POSES (man) =====
   'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark tailored suit, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative confident pose',
@@ -448,9 +448,9 @@ export async function POST(request: NextRequest) {
       if (styleId === 'w-evening-rooftop') {
         styleNegative += ', plunging neckline, deep v-neck, plunging to the navel, cleavage, low-cut top, spaghetti straps, thin straps, sleeveless, bare shoulders, slip dress, camisole, revealing top'
       }
-      // Night city glamour: blazer over top -> weer diepe plunge/bloot onder blazer.
+      // Gala gown: elegant maar modest, weer plunge/strapless/bloot.
       if (styleId === 'w-night-city-glamour') {
-        styleNegative += ', plunging neckline, deep v-neck, cleavage, low-cut top, bare chest under blazer, no top under the blazer, revealing top'
+        styleNegative += ', plunging neckline, deep v-neck, cleavage, low-cut, strapless, bare shoulders, spaghetti straps, revealing dress'
       }
 
       const input = {

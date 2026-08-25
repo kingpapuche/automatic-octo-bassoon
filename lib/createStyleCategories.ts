@@ -262,7 +262,7 @@ export const STYLE_CATEGORIES: StyleCategory[] = [
     styles: [
       { id: 'w-leather-jacket-edge', label: 'Leather Jacket',    description: 'Black leather, edgy',        icon: '🧥' },
       { id: 'w-evening-rooftop',     label: 'Evening Rooftop',   description: 'Black evening top, lights',  icon: '🌃' },
-      { id: 'w-night-city-glamour',  label: 'Night City Glamour', description: 'City nightlife, glamorous', icon: '💫' },
+      { id: 'w-night-city-glamour',  label: 'Gala',              description: 'Elegant gown, black-tie gala', icon: '💎' },
     ],
   },
 ]
