@@ -184,7 +184,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-leaning-elegant':    '[TRIGGER], portrait of woman clearly leaning sideways with her shoulder and upper back resting against a clean modern building exterior wall outdoors, visibly resting her weight on the wall in a relaxed leaning pose, not standing upright away from the wall, body tilted at an angle, one hand in pocket, a relaxed casual top such as a fine-gauge knit top or a soft casual blouse with a flattering modest neckline like a crew or notched neck and short or long sleeves that fully cover the shoulders, minimalist and intentional, no blazer, soft natural daylight, approachable relaxed confidence',
   'w-leaning-office':     '[TRIGGER], portrait of woman clearly leaning sideways with her shoulder against a wall in a modern corporate office, alone by herself with no one else present, body relaxed and tilted at an angle resting her weight on the wall, one hand in pocket, tailored business blazer, a quiet empty modern office softly blurred behind her with glass-walled meeting rooms and a city view through large windows, uncluttered with no other people, soft natural light, confident professional presence',
   'w-hands-relaxed':      '[TRIGGER], three-quarter length shot from head to thighs of woman, standing relaxed with both hands clearly tucked into her trouser pockets, the hands in pockets clearly visible, a tailored camel or warm beige blazer over a white tee, urban background, soft natural light, casual confidence',
-  'w-thoughtful-pose':    '[TRIGGER], three-quarter length shot of woman, standing relaxed with one hand resting gently on the chin while looking away to the side in contemplation, natural thinking pose, professional attire, soft neutral background, soft natural light, intelligent elegant reflective look, not a tight close-up',
+  'w-thoughtful-pose':    '[TRIGGER], three-quarter length shot of woman, standing relaxed with one hand resting gently on the chin while looking away to the side in contemplation, natural thinking pose, professional attire, isolated against a clean seamless neutral studio backdrop, soft even studio lighting, intelligent elegant reflective look, not a tight close-up',
   'w-holding-tablet':     '[TRIGGER], three-quarter length shot from head to thighs of woman, holding a tablet device with both hands in front of her, the tablet clearly and fully visible in frame, business casual attire, modern office, soft natural light, tech-savvy professional',
 }
 
@@ -427,7 +427,7 @@ export async function POST(request: NextRequest) {
         styleNegative += ', bright background, window, visible room, room interior, furniture, chair, lamp, table, curtains, plant, hallway, mirror, floor visible'
       }
       // Schone lichte studio-stijlen: seamless backdrop afdwingen, weer kamer/kantoor.
-      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-knit-twinset', 'w-red-power-suit', 'w-mustard-creative', 'w-jewel-purple', 'w-denim-shirt-fresh'])
+      const CLEAN_STUDIO_STYLES = new Set(['w-sheath-classic', 'w-knit-twinset', 'w-red-power-suit', 'w-mustard-creative', 'w-jewel-purple', 'w-denim-shirt-fresh', 'w-thoughtful-pose'])
       if (CLEAN_STUDIO_STYLES.has(styleId)) {
         styleNegative += ', office, desk, glass walls, room interior, home interior, hallway, bathroom, sink, mirror, bedroom, living room, furniture, chair, lamp, table, curtains, plant, visible room, window, floor visible'
       }
