@@ -167,7 +167,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-bistro-warm':         '[TRIGGER], medium-wide shot of woman showing head to waist, an effortlessly chic modern parisian outfit such as a navy-and-cream breton striped top or a fine-gauge knit sweater in a neutral tone like cream, camel or navy, understated and stylish, sitting at a table in a charming french bistro, on the table in the lower foreground a glass of wine and a small dish clearly visible, bistro interior with a chalkboard menu softly blurred behind, warm cozy lighting, shallow depth of field',
   'w-leather-jacket-edge': '[TRIGGER], a three-quarter length fashion shot photographed from a distance, framing the woman from head down to mid-thigh with the entire jacket completely visible in frame from the shoulders all the way to its bottom hem, a fitted black leather moto biker jacket with a structured silhouette, dark top underneath, city street background, natural evening light, edgy sophisticated',
   'w-evening-rooftop':     '[TRIGGER], half body portrait of woman, an elegant satin evening blouse in classic black, navy or champagne with long sleeves and a high boat or cowl neckline that fully covers the chest and shoulders, sophisticated and glamorous, statement gold earrings, rooftop background with city lights, warm evening lighting, glamorous nighttime',
-  'w-night-city-glamour':  '[TRIGGER], medium-wide shot of woman showing head to waist, wearing an elegant floor-length formal gala evening gown in a rich tone like black, emerald, sapphire, deep red or champagne, in satin or velvet with a refined elegant modest neckline, simple tasteful jewelry, at a glamorous black-tie gala in an elegant ballroom, warm ambient lighting and soft glowing bokeh from chandeliers, refined opulent décor softly blurred behind, cinematic shallow depth of field, sophisticated formal elegance',
+  'w-gala':                '[TRIGGER], medium-wide shot of woman showing head to waist, wearing an elegant floor-length formal gala evening gown in a rich tone like black, emerald, sapphire, deep red or champagne, in satin or velvet with an elegant sophisticated gala neckline such as a tasteful V-neck, draped cowl or halter, simple tasteful jewelry, at a glamorous black-tie gala in an elegant ballroom, warm ambient lighting and soft glowing bokeh from chandeliers, refined opulent décor softly blurred behind, cinematic shallow depth of field, sophisticated formal elegance',
 
   // ===== SPECIALTY POSES (man) =====
   'arms-crossed-power':  '[TRIGGER], half body portrait, arms crossed powerfully, dark tailored suit, deep blue-grey gunmetal studio backdrop, dramatic directional side lighting, authoritative confident pose',
@@ -320,7 +320,7 @@ export async function POST(request: NextRequest) {
 
       // Expressie per stijl-groep: formeel/dramatisch = serieus/zelfverzekerd;
       // casual/lifestyle/date = warme oprechte glimlach; overige = subtiel vriendelijk.
-      const SERIOUS_STYLES = new Set(['corporate-classic','executive-navy','ceo-black','boardroom-charcoal','pinstripe-pro','three-piece','formal-black-drama','wall-street-power','all-black-minimal','creative-director','leather-jacket-urban','arms-crossed-power','w-power-blazer-navy','w-executive-charcoal','w-ceo-black','w-pinstripe-pro','w-sheath-classic','w-leather-jacket-edge','w-evening-rooftop','w-night-city-glamour','w-arms-crossed-power'])
+      const SERIOUS_STYLES = new Set(['corporate-classic','executive-navy','ceo-black','boardroom-charcoal','pinstripe-pro','three-piece','formal-black-drama','wall-street-power','all-black-minimal','creative-director','leather-jacket-urban','arms-crossed-power','w-power-blazer-navy','w-executive-charcoal','w-ceo-black','w-pinstripe-pro','w-sheath-classic','w-leather-jacket-edge','w-evening-rooftop','w-gala','w-arms-crossed-power'])
       const SMILE_STYLES = new Set(['white-tee-clean','black-tee-clean','navy-polo','henley-relaxed','plaid-friendly','white-button-down','light-blue-oxford','denim-shirt-fresh','golden-hour','park-natural','rooftop-city','city-walk','beach-professional','mountain-snow','poolside-resort','autumn-forest','mountain-lake','knit-cozy','sitting-confident','leaning-elegant','leaning-office','restaurant-elegant','wine-bar-relaxed','coffee-shop-date','rooftop-bar-evening','w-white-tee-natural','w-denim-shirt-fresh','w-coffee-shop-warm','w-park-outdoor','w-rooftop-golden','w-city-walk','w-beach-professional','w-mountain-snow','w-poolside-resort','w-autumn-forest','w-mountain-lake','w-equestrian','w-startup-casual','w-cardigan-soft','w-sitting-confident','w-leaning-elegant','w-leaning-office','w-cafe-date','w-bistro-warm','w-restaurant-elegant','w-restaurant-evening','w-wine-bar-casual','w-rooftop-bar','w-cocktail-glamour'])
       const expression = SMILE_STYLES.has(styleId)
         ? ', warm genuine smile, friendly approachable expression'
@@ -416,9 +416,9 @@ export async function POST(request: NextRequest) {
       }
       // Nette, brand-safe halslijn. Cocktail mag een elegante matige V (dat hoort bij de stijl),
       // dus daar weren we enkel de extreme plunge; de andere vrouwen-stijlen strakker.
-      if (isWoman && styleId !== 'w-cocktail-glamour') {
+      if (isWoman && styleId !== 'w-cocktail-glamour' && styleId !== 'w-gala') {
         styleNegative += ', plunging neckline, deep v-neck, revealing dress, cleavage, low-cut top, spaghetti straps, bare shoulders'
-      } else if (styleId === 'w-cocktail-glamour') {
+      } else if (styleId === 'w-cocktail-glamour' || styleId === 'w-gala') {
         styleNegative += ', plunging neckline to the navel, extremely low-cut, barely-there dress, trashy revealing dress'
       }
       // Dramatische donkere studio-stijlen: dwing de donkere backdrop af, weer kamer/raam.
@@ -447,10 +447,6 @@ export async function POST(request: NextRequest) {
       // Evening rooftop: satin top biast sterk naar plunge -> forceer bedekt.
       if (styleId === 'w-evening-rooftop') {
         styleNegative += ', plunging neckline, deep v-neck, plunging to the navel, cleavage, low-cut top, spaghetti straps, thin straps, sleeveless, bare shoulders, slip dress, camisole, revealing top'
-      }
-      // Gala gown: elegant maar modest, weer plunge/strapless/bloot.
-      if (styleId === 'w-night-city-glamour') {
-        styleNegative += ', plunging neckline, deep v-neck, cleavage, low-cut, strapless, bare shoulders, spaghetti straps, revealing dress'
       }
 
       const input = {
