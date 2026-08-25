@@ -166,7 +166,7 @@ const STYLE_PROMPTS: Record<string, string> = {
   'w-restaurant-evening':  '[TRIGGER], medium-wide shot of woman showing head to waist, an elegant refined evening blouse with a modest higher neckline that fully covers the décolletage, alone by herself with no one else present, seated at a private candlelit corner table in an intimate restaurant, on the table in the lower foreground both a plate of beautifully plated gourmet food and a single glass of red wine prominently and clearly visible together, fully in frame and not cropped, warm romantic ambiance, the rest of the restaurant behind her very dark and thrown far out of focus into deep shadow, extremely shallow depth of field',
   'w-bistro-warm':         '[TRIGGER], medium-wide shot of woman showing head to waist, an effortlessly chic modern parisian outfit such as a navy-and-cream breton striped top or a fine-gauge knit sweater in a neutral tone like cream, camel or navy, understated and stylish, sitting at a table in a charming french bistro, on the table in the lower foreground a glass of wine and a small dish clearly visible, bistro interior with a chalkboard menu softly blurred behind, warm cozy lighting, shallow depth of field',
   'w-leather-jacket-edge': '[TRIGGER], a three-quarter length fashion shot photographed from a distance, framing the woman from head down to mid-thigh with the entire jacket completely visible in frame from the shoulders all the way to its bottom hem, a fitted black leather moto biker jacket with a structured silhouette, dark top underneath, city street background, natural evening light, edgy sophisticated',
-  'w-evening-rooftop':     '[TRIGGER], half body portrait of woman, an elegant satin evening top in classic black, navy or champagne with an elegant modest neckline like a cowl or boat neck that fully covers the décolletage, sophisticated and glamorous, statement gold earrings, rooftop background with city lights, warm evening lighting, glamorous nighttime',
+  'w-evening-rooftop':     '[TRIGGER], half body portrait of woman, an elegant satin evening blouse in classic black, navy or champagne with long sleeves and a high boat or cowl neckline that fully covers the chest and shoulders, sophisticated and glamorous, statement gold earrings, rooftop background with city lights, warm evening lighting, glamorous nighttime',
   'w-night-city-glamour':  '[TRIGGER], medium-wide shot of woman showing head to waist, a chic sophisticated evening outfit such as a sleek satin top or a tailored dark blazer in black, navy or emerald, glamorous and polished, on a city street at night, bright city lights and neon signs bokeh behind, urban nighttime glamour',
 
   // ===== SPECIALTY POSES (man) =====
@@ -443,6 +443,10 @@ export async function POST(request: NextRequest) {
       // Leaning: dwing de leunende pose af, weer rechtop staan.
       if (styleId === 'w-leaning-elegant') {
         styleNegative += ', standing upright, standing straight, upright posture, facing the camera straight on, standing away from the wall, not leaning, not touching the wall, sleeveless, tank top, off-shoulder, cold-shoulder top, bare shoulders, spaghetti straps'
+      }
+      // Evening rooftop: satin top biast sterk naar plunge -> forceer bedekt.
+      if (styleId === 'w-evening-rooftop') {
+        styleNegative += ', plunging neckline, deep v-neck, plunging to the navel, cleavage, low-cut top, spaghetti straps, thin straps, sleeveless, bare shoulders, slip dress, camisole, revealing top'
       }
 
       const input = {
