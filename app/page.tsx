@@ -40,6 +40,7 @@ export default function HomePage() {
           </Link>
 
           <div className="hidden md:flex items-center gap-10">
+            <Link href="/styles" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Browse Styles</Link>
             <Link href="#features" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Why Us</Link>
             <Link href="#pricing" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Plans</Link>
             <Link href="#how-it-works" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">How It Works</Link>
@@ -68,6 +69,7 @@ export default function HomePage() {
 
         {mobileMenuOpen && (
           <div className="md:hidden bg-[#FAFAF9] border-t border-[#E8E6E0] px-8 py-6 flex flex-col gap-5">
+            <Link href="/styles" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Browse Styles</Link>
             <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Why Us</Link>
             <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Plans</Link>
             <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">How It Works</Link>
