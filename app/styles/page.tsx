@@ -22,6 +22,12 @@ export default function StylesPage() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Voorselecteer het gender uit de URL (?gender=male|female) — komt van de hero-knoppen.
+  useEffect(() => {
+    const g = new URLSearchParams(window.location.search).get('gender')
+    if (g === 'male' || g === 'female') setGender(g)
+  }, [])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setLightbox(null) }
     window.addEventListener('keydown', onKey)

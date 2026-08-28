@@ -115,6 +115,20 @@ export default function HomePage() {
                   View Pricing
                 </Link>
               </div>
+
+              {/* Laagdrempelige verken-ingang: gender-first naar de publieke stijlen-showcase (geen login) */}
+              <div className="mb-10">
+                <p className="text-[#6B6B6B] text-sm mb-3">✨ Curious? Take a look around — no signup needed</p>
+                <div className="flex flex-col sm:flex-row gap-3 max-w-md">
+                  <Link href="/styles?gender=female" className="flex-1 text-center bg-[#F0EEF8] hover:bg-[#5B4E9D] text-[#5B4E9D] hover:text-white px-6 py-3.5 rounded-full font-semibold transition border border-[#5B4E9D]/20">
+                    See women&apos;s styles →
+                  </Link>
+                  <Link href="/styles?gender=male" className="flex-1 text-center bg-[#F0EEF8] hover:bg-[#5B4E9D] text-[#5B4E9D] hover:text-white px-6 py-3.5 rounded-full font-semibold transition border border-[#5B4E9D]/20">
+                    See men&apos;s styles →
+                  </Link>
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-6">
                 {['Ready in 30 minutes', 'Profile-Worthy Guarantee', '100% private & secure'].map((item) => (
                   <div key={item} className="flex items-center gap-2">
