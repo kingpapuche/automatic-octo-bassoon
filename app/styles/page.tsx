@@ -4,12 +4,43 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
-import StyleThumb from '@/components/StyleThumb'
 import { Sparkles, X } from 'lucide-react'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 
 type Gender = 'male' | 'female'
+
+// Full-bleed stijl-tegel: de foto vult de hele tegel, label als subtiele gradient-overlay
+// (image-first presentatie — de gecureerde foto's zijn de hero, geen witte omkadering).
+function StyleTile({ styleId, icon, label, description, onClick }: {
+  styleId: string; icon: string; label: string; description: string; onClick: () => void
+}) {
+  const [ok, setOk] = useState(true)
+  const url = `${SUPABASE_URL}/storage/v1/object/public/headshots/style-examples/${styleId}.webp`
+  return (
+    <button
+      onClick={onClick}
+      className="group relative block w-full aspect-[3/4] rounded-2xl overflow-hidden bg-[#EDEBE6] shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+    >
+      {ok ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url}
+          alt={label}
+          loading="lazy"
+          onError={() => setOk(false)}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center text-4xl">{icon}</span>
+      )}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent p-3 pt-10 text-left pointer-events-none">
+        <span className="block text-white text-sm font-semibold leading-tight">{label}</span>
+        <span className="block text-white/70 text-xs leading-tight mt-0.5">{description}</span>
+      </div>
+    </button>
+  )
+}
 
 export default function StylesPage() {
   const [loggedIn, setLoggedIn] = useState(false)
@@ -101,15 +132,14 @@ export default function StylesPage() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {cat.styles.map((style) => (
-                <button
+                <StyleTile
                   key={style.id}
+                  styleId={style.id}
+                  icon={style.icon}
+                  label={style.label}
+                  description={style.description}
                   onClick={() => setLightbox({ styleId: style.id, label: style.label, description: style.description })}
-                  className="group text-left bg-white border border-[#E8E6E0] rounded-2xl p-2.5 transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-[#5B4E9D]/30"
-                >
-                  <StyleThumb styleId={style.id} icon={style.icon} label={style.label} />
-                  <span className="block text-[#2D2D2D] text-sm font-semibold px-1">{style.label}</span>
-                  <span className="block text-[#9B9B9B] text-xs px-1 leading-tight">{style.description}</span>
-                </button>
+                />
               ))}
             </div>
           </section>
