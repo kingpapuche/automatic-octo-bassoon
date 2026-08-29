@@ -89,7 +89,7 @@ export default function DashboardPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Welcome Back!</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Welcome Back!</h2>
               <p className="text-gray-600">{user?.email}</p>
             </div>
           </div>
