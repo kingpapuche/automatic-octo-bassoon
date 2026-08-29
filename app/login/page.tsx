@@ -50,7 +50,7 @@ export default function LoginPage() {
             </svg>
           </div>
           
-          <h1 className="text-2xl font-bold mb-2">Check your email to continue</h1>
+          <h1 className="text-2xl font-bold mb-2 text-gray-900">Check your email to continue</h1>
           <p className="text-gray-600 mb-6">
             We&apos;ve sent a magic link to <span className="font-semibold">{email}</span>
           </p>
@@ -105,7 +105,7 @@ export default function LoginPage() {
               <span className="font-serif text-2xl text-[#2D2D2D] tracking-tight">Nova <em>Imago</em></span>
             </div>
             
-            <h1 className="text-2xl font-bold mb-1">Transform Selfies into Professional Photos</h1>
+            <h1 className="text-2xl font-bold mb-1 text-gray-900">Transform Selfies into Professional Photos</h1>
             <p className="text-gray-600 mb-6">Sign up to create your photos</p>
             
             {error && (
@@ -118,7 +118,7 @@ export default function LoginPage() {
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 py-3 rounded-lg font-medium transition disabled:opacity-50 mb-4"
+              className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 py-3 rounded-lg font-medium transition disabled:opacity-50 mb-4 text-gray-900"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -144,7 +144,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5B4E9D] focus:border-transparent outline-none transition"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5B4E9D] focus:border-transparent outline-none transition text-gray-900 placeholder-gray-500"
                   required
                 />
               </div>
