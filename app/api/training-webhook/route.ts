@@ -70,18 +70,11 @@ export async function POST(request: NextRequest) {
         .update({ status: 'completed', ...(fullRef ? { training_id: fullRef } : {}) })
         .eq('training_id', payload.id)
 
-      // Ruim trainingsdata op: ruwe uploads + ZIP zijn na de training nutteloos
-      // (het getrainde model staat op Replicate). Bespaart opslag + privacy-winst.
-      // LET OP: dit raakt de 'generated/' foto's NIET aan — die blijven staan.
+      // Ruim enkel de trainings-ZIP op (nutteloos archief na de training).
+      // LET OP: de ruwe uploads worden VOORLOPIG BEHOUDEN — nodig voor 'voor/na'-
+      // voorbeelden tot we er genoeg van hebben. Generated foto's blijven ook staan.
+      // TODO: uploads-verwijdering weer aanzetten zodra er genoeg voor/na-voorbeelden zijn.
       try {
-        const { data: uploadFiles } = await supabase.storage
-          .from('headshots')
-          .list(`uploads/${userId}`, { limit: 1000 })
-        if (uploadFiles && uploadFiles.length) {
-          await supabase.storage
-            .from('headshots')
-            .remove(uploadFiles.map((f) => `uploads/${userId}/${f.name}`))
-        }
         const { data: zipFiles } = await supabase.storage
           .from('headshots')
           .list('training-zips', { limit: 1000 })
@@ -91,9 +84,9 @@ export async function POST(request: NextRequest) {
             .from('headshots')
             .remove(userZips.map((f) => `training-zips/${f.name}`))
         }
-        console.log(`🧹 Cleaned training uploads + ZIP for user ${userId} (generated photos kept)`)
+        console.log(`🧹 Cleaned training ZIP for user ${userId} (uploads + generated kept)`)
       } catch (cleanupErr) {
-        console.error('Training-data cleanup failed (non-fatal):', cleanupErr)
+        console.error('ZIP cleanup failed (non-fatal):', cleanupErr)
       }
 
       if (userData?.email) {
