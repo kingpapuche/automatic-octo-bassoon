@@ -139,6 +139,14 @@ export default function GalleryPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Your Headshots</h1>
           <p className="text-white/50 mt-1">{allImages.length} photos generated</p>
+
+          {/* Bewaartermijn-melding */}
+          <div className="mt-4 flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm rounded-xl px-4 py-3">
+            <span className="text-base leading-none mt-0.5">⏳</span>
+            <span>
+              Your headshots stay in your gallery for <strong className="font-semibold">3 months</strong> — download the ones you want to keep. After that, they&apos;re automatically removed.
+            </span>
+          </div>
         </div>
 
         {/* Gallery Grid */}
