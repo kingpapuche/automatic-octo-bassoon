@@ -41,6 +41,7 @@ interface Analytics {
   timeline: { label: string; generations: number; revenue: number }[]
   traffic: { available: boolean; visits: number; uniqueVisitors: number; visitsDelta: number | null; visitorsDelta: number | null; sources: { name: string; count: number }[]; topPages: { name: string; count: number }[] }
   funnel: { visitors: number; signups: number; orders: number; visitorToSignup: number | null; signupToOrder: number | null }
+  photoConsent: { id: string; email: string | null; name: string | null; since: string }[]
 }
 
 function Delta({ v }: { v: number | null }) {
@@ -267,6 +268,34 @@ export default function AdminPage() {
                 </div>
               </>
             )}
+
+            {/* Foto-toestemming: klanten wiens foto's je als voorbeeld mag gebruiken (all-time) */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-5 mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-white font-semibold">
+                  📸 Foto-toestemming <span className="text-white/40 font-normal text-sm">— hun foto&apos;s mag je als voorbeeld gebruiken</span>
+                </h3>
+                <span className="text-white/60 text-sm font-medium">{(data.photoConsent?.length || 0)} klanten</span>
+              </div>
+              {(!data.photoConsent || data.photoConsent.length === 0) ? (
+                <div className="text-white/40 text-sm">Nog niemand heeft toestemming gegeven.</div>
+              ) : (
+                <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
+                  {data.photoConsent.map((c) => (
+                    <div key={c.id} className="flex items-center justify-between py-2 text-sm gap-3">
+                      <div className="min-w-0">
+                        <div className="text-white/90 truncate">
+                          {c.email || '—'}{c.name && <span className="text-white/40"> · {c.name}</span>}
+                        </div>
+                        <div className="text-white/30 text-xs font-mono truncate">{c.id}</div>
+                      </div>
+                      <span className="text-white/40 text-xs whitespace-nowrap">{new Date(c.since).toLocaleDateString('nl-BE')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-white/30 text-xs mt-3">Hun gegenereerde foto&apos;s staan in Supabase onder <code>generated/&lt;id&gt;/</code></p>
+            </div>
           </>
         )}
       </div>

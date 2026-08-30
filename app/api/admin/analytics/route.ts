@@ -110,17 +110,31 @@ export async function POST(request: NextRequest) {
     let pvQ = supabaseAdmin.from('page_views').select('visitor_id, source, path, created_at')
     if (fetchIso) pvQ = pvQ.gte('created_at', fetchIso)
 
-    const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions, { data: pvRaw, error: pvErr }] = await Promise.all([
+    const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions, { data: pvRaw, error: pvErr }, { data: consentRaw }] = await Promise.all([
       genQ,
       usrQ,
       fetchStripeSessions(fetchSince ? Math.floor(fetchSince.getTime() / 1000) : null),
       pvQ,
+      // Klanten die toestemming gaven om hun foto's als voorbeeld te gebruiken (all-time, niet periode-gebonden)
+      supabaseAdmin
+        .from('users')
+        .select('id, email, full_name, created_at')
+        .eq('allow_photo_usage', true)
+        .order('created_at', { ascending: false }),
     ])
     if (gErr) return NextResponse.json({ error: gErr.message }, { status: 500 })
     if (uErr) return NextResponse.json({ error: uErr.message }, { status: 500 })
 
     const allGens = (gensRaw || []) as Gen[]
     const allUsers = (usrRaw || []) as Usr[]
+
+    // Toestemming-lijst: klanten wiens foto's als voorbeeld gebruikt mogen worden (all-time)
+    const photoConsent = (consentRaw || []).map((u: { id: string; email: string | null; full_name: string | null; created_at: string }) => ({
+      id: u.id,
+      email: u.email,
+      name: u.full_name || null,
+      since: u.created_at,
+    }))
 
     // 3) Splitsen in huidige vs vorige periode
     const curGens = allGens.filter(g => new Date(g.created_at).getTime() >= startMs)
@@ -241,6 +255,7 @@ export async function POST(request: NextRequest) {
       timeline,
       traffic,
       funnel,
+      photoConsent,
     })
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : 'Error' }, { status: 500 })
