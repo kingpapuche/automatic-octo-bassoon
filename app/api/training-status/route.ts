@@ -57,17 +57,30 @@ async function getStatusForUser(userId: string) {
   }
 
   // Anders: het is een training_id, check status op Replicate
-  const training = await replicate.trainings.get(userData.trained_model_id)
-  const { message, estimatedMinutes } = getStatusMessage(training.status, training.started_at ?? undefined)
+  try {
+    const training = await replicate.trainings.get(userData.trained_model_id)
+    const { message, estimatedMinutes } = getStatusMessage(training.status, training.started_at ?? undefined)
 
-  return {
-    success: true,
-    status: training.status,
-    message,
-    estimatedMinutes,
-    startedAt: training.started_at,
-    completedAt: training.completed_at,
-    error: training.error,
+    return {
+      success: true,
+      status: training.status,
+      message,
+      estimatedMinutes,
+      startedAt: training.started_at,
+      completedAt: training.completed_at,
+      error: training.error,
+    }
+  } catch (err) {
+    // Replicate tijdelijk onbereikbaar (netwerk/rate-limit). We weten dat er een training
+    // loopt (er is een training_id), dus geven we 'processing' terug i.p.v. een fout —
+    // anders verdwijnt de voortgangsbalk in de UI terwijl de training gewoon doorloopt.
+    console.error('Replicate trainings.get failed, falling back to processing:', err)
+    return {
+      success: true,
+      status: 'processing',
+      message: 'In progress. Takes 20-30 minutes.',
+      estimatedMinutes: 25,
+    }
   }
 }
 

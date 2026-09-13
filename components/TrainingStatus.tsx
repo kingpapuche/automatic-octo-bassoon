@@ -28,9 +28,15 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
         const res = await fetch(`/api/training-status?userId=${userId}`)
         const data = await res.json()
 
+        // Transiënte fout (bv. Replicate hikt): geen geldige status -> huidige status
+        // behouden, balk NIET verbergen. Alleen updaten bij een geldig antwoord.
+        if (!res.ok || !data || !('status' in data)) {
+          console.warn('training-status: transient response, keeping current status')
+          return
+        }
+
         setStatus(data.status)
         setMessage(data.message)
-        // FIX: correcte field name (was 'estimatedMinutesRemaining' wat niet bestond in API)
         if (typeof data.estimatedMinutes === 'number') {
           setEstimatedMinutes(data.estimatedMinutes)
         }
@@ -39,6 +45,7 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
         }
       } catch (error) {
         console.error('Failed to check status:', error)
+        // Netwerkfout -> huidige status behouden (balk blijft staan)
       }
     }
 
