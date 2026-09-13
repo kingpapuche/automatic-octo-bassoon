@@ -20,8 +20,13 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
   const [startedAt, setStartedAt] = useState<string | null>(null)
   const [estimatedMinutes, setEstimatedMinutes] = useState<number>(EXPECTED_TOTAL_MINUTES)
   const [progress, setProgress] = useState<number>(2)
-  // Onthoudt of we de training ooit actief zagen -> balk blijft dan sticky staan tot 'ie echt klaar is
-  const [everActive, setEverActive] = useState<boolean>(false)
+  // Onthoudt of we de training ooit actief zagen -> balk blijft sticky staan tot 'ie echt klaar is.
+  // Ook in sessionStorage zodat een (re)mount van de component (bv. door een auth-refresh die
+  // {user && ...} even opnieuw evalueert) de balk NIET doet flikkeren.
+  const [everActive, setEverActive] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    return sessionStorage.getItem(`training_active_${userId}`) === '1'
+  })
 
   // Status ophalen elke 30 sec
   useEffect(() => {
@@ -39,7 +44,14 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
 
         setStatus(data.status)
         setMessage(data.message)
-        if (data.status === 'starting' || data.status === 'processing') setEverActive(true)
+        // Persisteer 'actief' zodat een remount de balk niet doet verdwijnen; wis bij einde.
+        if (data.status === 'starting' || data.status === 'processing') {
+          setEverActive(true)
+          try { sessionStorage.setItem(`training_active_${userId}`, '1') } catch {}
+        } else if (data.status === 'succeeded' || data.status === 'failed' || data.status === 'canceled') {
+          setEverActive(false)
+          try { sessionStorage.removeItem(`training_active_${userId}`) } catch {}
+        }
         if (typeof data.estimatedMinutes === 'number') {
           setEstimatedMinutes(data.estimatedMinutes)
         }
