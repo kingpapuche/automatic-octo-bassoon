@@ -20,6 +20,8 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
   const [startedAt, setStartedAt] = useState<string | null>(null)
   const [estimatedMinutes, setEstimatedMinutes] = useState<number>(EXPECTED_TOTAL_MINUTES)
   const [progress, setProgress] = useState<number>(2)
+  // Onthoudt of we de training ooit actief zagen -> balk blijft dan sticky staan tot 'ie echt klaar is
+  const [everActive, setEverActive] = useState<boolean>(false)
 
   // Status ophalen elke 30 sec
   useEffect(() => {
@@ -37,6 +39,7 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
 
         setStatus(data.status)
         setMessage(data.message)
+        if (data.status === 'starting' || data.status === 'processing') setEverActive(true)
         if (typeof data.estimatedMinutes === 'number') {
           setEstimatedMinutes(data.estimatedMinutes)
         }
@@ -92,9 +95,12 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
     return () => clearInterval(tick)
   }, [status, startedAt, estimatedMinutes])
 
-  if (status === 'no_model') return null
+  // Sticky: eens de training actief gezien is, blijft de balk staan tot 'ie definitief
+  // klaar/mislukt/geannuleerd is — een tussentijdse hik of onbekende status verbergt de balk niet meer.
+  const isEnded = status === 'succeeded' || status === 'failed' || status === 'canceled'
+  const showTraining = status === 'starting' || status === 'processing' || (everActive && !isEnded)
 
-  if (status === 'starting' || status === 'processing') {
+  if (showTraining) {
     return (
       <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-2xl p-8 mb-6">
         {/* Header */}
