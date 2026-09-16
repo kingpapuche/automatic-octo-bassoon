@@ -439,12 +439,15 @@ export default function HomePage() {
       <footer className="bg-[#2D2D2D] text-white py-16 px-8">
         <div className="max-w-[1320px] mx-auto">
           <div className="grid md:grid-cols-4 gap-12 mb-14">
-            <div><h4 className="font-bold mb-5 text-lg">Product</h4><ul className="space-y-3">{['Features', 'Pricing', 'How It Works', 'FAQ'].map(i => <li key={i}><Link href={`#${i.toLowerCase().replace(' ', '-')}`} className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
-            <div><h4 className="font-bold mb-5 text-lg">Company</h4><ul className="space-y-3">{['About', 'Blog', 'Contact'].map(i => <li key={i}><Link href="#" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
-            <div><h4 className="font-bold mb-5 text-lg">Use Cases</h4><ul className="space-y-3">{['LinkedIn Headshots', 'Resume Photos', 'Dating Profile', 'Business Portraits'].map(i => <li key={i}><Link href="#" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Product</h4><ul className="space-y-3">{[{label: 'Features', href: '#features'}, {label: 'Pricing', href: '#pricing'}, {label: 'How It Works', href: '#how-it-works'}, {label: 'FAQ', href: '#faq'}].map(i => <li key={i.label}><Link href={i.href} className="text-white/70 hover:text-white transition">{i.label}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Company</h4><ul className="space-y-3">
+              <li><Link href="/about" className="text-white/70 hover:text-white transition">About</Link></li>
+              <li><a href="mailto:support@novaimago.ai" className="text-white/70 hover:text-white transition">Contact</a></li>
+            </ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">Use Cases</h4><ul className="space-y-3">{['LinkedIn Headshots', 'Resume Photos', 'Dating Profile', 'Business Portraits'].map(i => <li key={i}><Link href="/styles" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
             <div><h4 className="font-bold mb-5 text-lg">Legal</h4><ul className="space-y-3">{[{label: 'Terms of Service', href: '/terms-of-service'}, {label: 'Privacy Policy', href: '/privacy-policy'}, {label: 'Refund Policy', href: '/refund-policy'}, {label: 'Cookie Policy', href: '/cookie-policy'}].map(i => <li key={i.label}><Link href={i.href} className="text-white/70 hover:text-white transition">{i.label}</Link></li>)}</ul></div>
           </div>
-          <div className="pt-8 border-t border-white/10 text-center text-white/60">© 2025 Nova Imago • All rights reserved</div>
+          <div className="pt-8 border-t border-white/10 text-center text-white/60">© 2026 Nova Imago • All rights reserved</div>
         </div>
       </footer>
 
