@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
 
     const cur = currency === 'USD' ? 'USD' : 'EUR'
     const plan = priceId as keyof typeof CREDITS
+    // Land van de klant (Vercel geo-header) -> in metadata voor "aankopen per land"
+    const country = request.headers.get('x-vercel-ip-country') || ''
 
     if (!plan || !PRICE_IDS[cur][plan]) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
         plan:       plan,
         credits:    planCredits.toString(),
         currency:   cur,
+        country:    country,
         isBusiness: isBusiness ? 'true' : 'false',
       },
     }

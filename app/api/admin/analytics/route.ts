@@ -18,7 +18,7 @@ for (const cat of STYLE_CATEGORIES) {
 }
 
 // amount = genormaliseerd naar EUR (voor alle hoofdcijfers); rawAmount = origineel bedrag in de eigen munt
-type Sess = { amount: number; rawAmount: number; currency: string; created: number; plan: string }
+type Sess = { amount: number; rawAmount: number; currency: string; country: string; created: number; plan: string }
 
 // Vaste omrekenkoers voor rapportage (geen live FX). ~1 EUR = 1,15 USD -> 1 USD ≈ 0,87 EUR.
 // Pas aan als de koers structureel wijzigt.
@@ -53,7 +53,8 @@ async function fetchStripeSessions(sinceSec: number | null): Promise<Sess[]> {
         const cur = (s.currency || 'eur').toLowerCase()
         const raw = s.amount_total / 100
         const eur = cur === 'usd' ? raw * USD_TO_EUR : raw
-        out.push({ amount: eur, rawAmount: raw, currency: cur, created: s.created, plan: s.metadata?.plan || 'onbekend' })
+        const country = (s.metadata?.country || s.customer_details?.address?.country || '').toUpperCase() || 'onbekend'
+        out.push({ amount: eur, rawAmount: raw, currency: cur, country, created: s.created, plan: s.metadata?.plan || 'onbekend' })
       }
     }
     if (!page.has_more || page.data.length === 0) break
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
     if (fetchIso) genQ = genQ.gte('created_at', fetchIso)
     let usrQ = supabaseAdmin.from('users').select('use_cases, gender, age_range, created_at')
     if (fetchIso) usrQ = usrQ.gte('created_at', fetchIso)
-    let pvQ = supabaseAdmin.from('page_views').select('visitor_id, source, path, created_at')
+    let pvQ = supabaseAdmin.from('page_views').select('*')
     if (fetchIso) pvQ = pvQ.gte('created_at', fetchIso)
 
     const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions, { data: pvRaw, error: pvErr }, { data: consentRaw }, { data: reviewsRaw }] = await Promise.all([
@@ -232,7 +233,7 @@ export async function POST(request: NextRequest) {
     const timeline = allKeys.map(label => ({ label, generations: genBuckets[label] || 0, revenue: revBuckets[label] || 0 }))
 
     // 6) Verkeer & bezoekers (first-party page_views)
-    interface Pv { visitor_id: string; source: string | null; path: string | null; created_at: string }
+    interface Pv { visitor_id: string; source: string | null; path: string | null; created_at: string; country?: string | null }
     const trafficAvailable = !pvErr
     const allPv = (pvRaw || []) as Pv[]
     const curPv = allPv.filter(p => new Date(p.created_at).getTime() >= startMs)
@@ -240,14 +241,21 @@ export async function POST(request: NextRequest) {
     const uniq = (arr: Pv[]) => new Set(arr.map(p => p.visitor_id)).size
     const sourceCounts: Record<string, number> = {}
     const pageCounts: Record<string, number> = {}
+    // Unieke bezoekers per land (op basis van visitor_id, zodat 1 persoon = 1 telling)
+    const countryVisitors: Record<string, Set<string>> = {}
     for (const p of curPv) {
       const src = p.source || 'direct'
       sourceCounts[src] = (sourceCounts[src] || 0) + 1
       const pg = p.path || '/'
       pageCounts[pg] = (pageCounts[pg] || 0) + 1
+      const cc = (p.country || 'onbekend').toUpperCase()
+      ;(countryVisitors[cc] ||= new Set()).add(p.visitor_id)
     }
     const curVisitors = uniq(curPv)
     const prevVisitors = uniq(prevPv)
+    const visitorsByCountry = Object.entries(countryVisitors)
+      .map(([country, set]) => ({ country, visitors: set.size }))
+      .sort((a, b) => b.visitors - a.visitors)
     const traffic = {
       available: trafficAvailable,
       visits: curPv.length,
@@ -257,6 +265,17 @@ export async function POST(request: NextRequest) {
       sources: Object.entries(sourceCounts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
       topPages: Object.entries(pageCounts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 10),
     }
+
+    // Aankopen + omzet per land (EUR-equivalent), huidige periode
+    const byCountry: Record<string, { revenue: number; orders: number }> = {}
+    for (const s of curSess) {
+      const cc = (s.country || 'onbekend').toUpperCase()
+      const r = byCountry[cc] || { revenue: 0, orders: 0 }
+      r.revenue += s.amount; r.orders += 1; byCountry[cc] = r
+    }
+    const purchasesByCountry = Object.entries(byCountry)
+      .map(([country, v]) => ({ country, revenue: v.revenue, orders: v.orders }))
+      .sort((a, b) => b.orders - a.orders)
     // Funnel: unieke bezoekers -> signups -> betaalde orders
     const funnel = {
       visitors: curVisitors,
@@ -278,6 +297,8 @@ export async function POST(request: NextRequest) {
       useCases,
       planBreakdown,
       revenueByCurrency,
+      visitorsByCountry,
+      purchasesByCountry,
       audience: { gender: audienceGender, ageRanges },
       styleGender,
       timeline,

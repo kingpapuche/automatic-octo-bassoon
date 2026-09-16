@@ -32,13 +32,20 @@ export async function POST(request: NextRequest) {
     // Eigen host niet als verkeersbron tellen (interne navigatie = direct)
     const self = request.headers.get('host') || ''
     const ref = referrer && self && !referrer.includes(self) ? referrer : ''
+    const country = (request.headers.get('x-vercel-ip-country') || '').toUpperCase().slice(0, 2)
 
-    const { error } = await supabaseAdmin.from('page_views').insert({
+    const base = {
       visitor_id: String(visitorId).slice(0, 64),
       path: String(path || '/').slice(0, 300),
       referrer: String(ref).slice(0, 300),
       source: sourceFrom(ref, utmSource || null),
-    })
+    }
+
+    let { error } = await supabaseAdmin.from('page_views').insert({ ...base, country: country || null })
+    // 'country'-kolom bestaat nog niet? Val terug op insert zonder land, zodat tracking nooit breekt.
+    if (error && /country/i.test(error.message)) {
+      ({ error } = await supabaseAdmin.from('page_views').insert(base))
+    }
     // Tabel bestaat nog niet? Stil negeren zodat de site nooit breekt.
     if (error && !/relation .*page_views.* does not exist/i.test(error.message)) {
       console.error('track insert error:', error.message)

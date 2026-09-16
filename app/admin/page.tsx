@@ -28,6 +28,17 @@ const USE_CASE_LABELS: Record<string, string> = {
 const eur = (n: number) => new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(n || 0)
 const num = (n: number) => new Intl.NumberFormat('nl-BE').format(n || 0)
 
+// ISO-landcode -> vlag-emoji + leesbare naam
+const REGION = typeof Intl !== 'undefined' && 'DisplayNames' in Intl ? new Intl.DisplayNames(['nl'], { type: 'region' }) : null
+function flag(cc: string) {
+  if (!/^[A-Z]{2}$/.test(cc)) return '🌐'
+  return String.fromCodePoint(...[...cc].map(c => 127397 + c.charCodeAt(0)))
+}
+function countryName(cc: string) {
+  if (!/^[A-Z]{2}$/.test(cc)) return 'Onbekend'
+  try { return REGION?.of(cc) || cc } catch { return cc }
+}
+
 interface Analytics {
   stripeConnected: boolean
   kpis: { revenue: number; orders: number; avgOrder: number; signups: number; generations: number; completed: number; activeUsers: number; conversion: number }
@@ -42,6 +53,8 @@ interface Analytics {
   timeline: { label: string; generations: number; revenue: number }[]
   traffic: { available: boolean; visits: number; uniqueVisitors: number; visitsDelta: number | null; visitorsDelta: number | null; sources: { name: string; count: number }[]; topPages: { name: string; count: number }[] }
   funnel: { visitors: number; signups: number; orders: number; visitorToSignup: number | null; signupToOrder: number | null }
+  visitorsByCountry?: { country: string; visitors: number }[]
+  purchasesByCountry?: { country: string; revenue: number; orders: number }[]
   photoConsent: { id: string; email: string | null; name: string | null; since: string }[]
   reviews: { id: string; user_id: string; email: string | null; name: string | null; rating: number; review: string | null; allow_public: boolean; created_at: string }[]
 }
@@ -280,6 +293,48 @@ export default function AdminPage() {
                       <div className="text-lg font-bold text-white">{num(data.funnel.orders)}</div><div className="text-white/50 text-xs">betaald</div>
                     </div>
                   </div>
+                </div>
+
+                {/* Landen: waar bezoekers vandaan komen én waar ze kopen */}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-5 mt-4">
+                  <h3 className="text-white font-semibold mb-1">🌍 Landen <span className="text-white/40 font-normal text-sm">— waar bezoekers vandaan komen én waar ze kopen</span></h3>
+                  <p className="text-white/30 text-xs mb-3">Op basis van IP-locatie. VPN&apos;s kunnen dit vertekenen.</p>
+                  {(() => {
+                    const m = new Map<string, { visitors: number; orders: number; revenue: number }>()
+                    for (const v of data.visitorsByCountry || []) m.set(v.country, { visitors: v.visitors, orders: 0, revenue: 0 })
+                    for (const p of data.purchasesByCountry || []) {
+                      const e = m.get(p.country) || { visitors: 0, orders: 0, revenue: 0 }
+                      e.orders = p.orders; e.revenue = p.revenue; m.set(p.country, e)
+                    }
+                    const rows = [...m.entries()].map(([country, v]) => ({ country, ...v })).sort((a, b) => b.visitors - a.visitors || b.orders - a.orders)
+                    if (rows.length === 0) return <div className="text-white/40 text-sm">Nog geen landdata in deze periode.</div>
+                    return (
+                      <div className="max-h-80 overflow-y-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="text-white/40 text-xs uppercase tracking-wide text-left">
+                              <th className="py-1 font-medium">Land</th>
+                              <th className="py-1 font-medium text-right">Bezoekers</th>
+                              <th className="py-1 font-medium text-right">Aankopen</th>
+                              <th className="py-1 font-medium text-right">Omzet</th>
+                              <th className="py-1 font-medium text-right">Conv.</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-white/5">
+                            {rows.map((r) => (
+                              <tr key={r.country} className="text-white/90">
+                                <td className="py-2">{flag(r.country)} {countryName(r.country)}</td>
+                                <td className="py-2 text-right">{num(r.visitors)}</td>
+                                <td className="py-2 text-right">{r.orders ? num(r.orders) : <span className="text-white/25">0</span>}</td>
+                                <td className="py-2 text-right">{r.revenue ? eur(r.revenue) : <span className="text-white/25">—</span>}</td>
+                                <td className="py-2 text-right">{r.visitors ? <span className={r.orders ? 'text-emerald-400' : 'text-white/25'}>{((r.orders / r.visitors) * 100).toFixed(1)}%</span> : '—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )
+                  })()}
                 </div>
               </>
             )}
