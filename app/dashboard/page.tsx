@@ -8,6 +8,46 @@ import { CreditCard, Upload, Sparkles, Play, Wand2, Images } from 'lucide-react'
 import TrainingStatus from '@/components/TrainingStatus'
 import Link from 'next/link'
 
+// Stappen worden op 2 plekken hergebruikt: inline (nieuwe klant) + in de modal (terugkerende klant)
+const HOW_STEPS = [
+  { icon: Upload, title: '1. Upload your photos', desc: 'Add 10-20 clear selfies. Different angles, expressions and lighting give the best results.' },
+  { icon: Wand2, title: '2. We train your AI model', desc: 'Your personal model trains in about 25-35 minutes. You can leave the page — we’ll let you know when it’s ready.' },
+  { icon: Sparkles, title: '3. Choose your styles', desc: 'Pick from 45+ hand-curated styles. Each style generates 4 unique variations.' },
+  { icon: Images, title: '4. Download your headshots', desc: 'Browse your gallery and download the professional headshots you love.' },
+]
+
+// Video-placeholder + tekst-stappen (DRY: zelfde body inline én in de modal).
+// VERVANG het video-placeholderblok door de YouTube-embed zodra de link er is:
+// <div className="relative aspect-video ..."><iframe src="https://www.youtube.com/embed/VIDEO_ID" ... /></div>
+function HowItWorksBody() {
+  return (
+    <>
+      <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-slate-950 to-black border border-white/10 flex items-center justify-center mb-6">
+        <div className="text-center text-white/60 px-6">
+          <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+            <Play className="w-6 h-6 text-white ml-0.5" />
+          </div>
+          <p className="text-sm font-medium">See how it works in 90 seconds</p>
+          <p className="text-xs text-white/40 mt-1">Video coming soon</p>
+        </div>
+      </div>
+      <div className="space-y-4">
+        {HOW_STEPS.map((s, i) => (
+          <div key={i} className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+              <s.icon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="text-white font-semibold">{s.title}</h4>
+              <p className="text-gray-400 text-sm">{s.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
@@ -186,26 +226,41 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* How it Works */}
-        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-white/10">
-          <div className="flex items-start gap-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <Play className="w-8 h-8 text-white ml-1" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold text-white mb-2">How it Works</h3>
-              <p className="text-gray-400 mb-4">
-                Learn how to create professional AI headshots in under 60 seconds
-              </p>
-              <button
-                onClick={() => setShowHowItWorks(true)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition"
-              >
-                Watch Tutorial →
-              </button>
+        {/* How it Works — nieuwe klant (nog geen model): alles direct zichtbaar = max activatie.
+            Terugkerende klant (heeft model): compacte kaart + popup zodat het dashboard rustig blijft. */}
+        {!hasModel ? (
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 sm:p-8 border border-white/10">
+            <h3 className="text-2xl font-bold text-white mb-1">How it Works</h3>
+            <p className="text-gray-400 mb-6">Your professional headshots in a few simple steps</p>
+            <HowItWorksBody />
+            <Link
+              href="/upload"
+              className="inline-block mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition"
+            >
+              Get Started →
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-white/10">
+            <div className="flex items-start gap-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <Play className="w-8 h-8 text-white ml-1" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-white mb-2">How it Works</h3>
+                <p className="text-gray-400 mb-4">
+                  Learn how to create professional AI headshots in under 60 seconds
+                </p>
+                <button
+                  onClick={() => setShowHowItWorks(true)}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition"
+                >
+                  Watch Tutorial →
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
       </div>
 
@@ -231,37 +286,7 @@ export default function DashboardPage() {
             <h3 className="text-2xl font-bold text-white mb-1">How it Works</h3>
             <p className="text-gray-400 mb-6">Your professional headshots in a few simple steps</p>
 
-            {/* Video — VERVANG dit placeholder-blok door de YouTube-embed zodra de link er is:
-                <div className="relative aspect-video ..."><iframe src="https://www.youtube.com/embed/VIDEO_ID" ... /></div> */}
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-950 border border-white/10 flex items-center justify-center mb-6">
-              <div className="text-center text-white/60 px-6">
-                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                  <Play className="w-6 h-6 text-white ml-0.5" />
-                </div>
-                <p className="text-sm font-medium">See how it works in 90 seconds</p>
-                <p className="text-xs text-white/40 mt-1">Video coming soon</p>
-              </div>
-            </div>
-
-            {/* Tekst-stappen */}
-            <div className="space-y-4">
-              {[
-                { icon: Upload, title: '1. Upload your photos', desc: 'Add 10-20 clear selfies. Different angles, expressions and lighting give the best results.' },
-                { icon: Wand2, title: '2. We train your AI model', desc: 'Your personal model trains in about 25-35 minutes. You can leave the page — we’ll let you know when it’s ready.' },
-                { icon: Sparkles, title: '3. Choose your styles', desc: 'Pick from 45+ hand-curated styles. Each style generates 4 unique variations.' },
-                { icon: Images, title: '4. Download your headshots', desc: 'Browse your gallery and download the professional headshots you love.' },
-              ].map((s, i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-                    <s.icon className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-semibold">{s.title}</h4>
-                    <p className="text-gray-400 text-sm">{s.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <HowItWorksBody />
 
             <Link
               href="/upload"
