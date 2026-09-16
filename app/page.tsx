@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import BeforeAfterSlider from '@/components/beforeafterslider'
 import { supabase } from '@/lib/supabase'
+import { type Currency, CURRENCY_SYMBOL, TIER_PRICE, TIER_ANCHOR, readCurrencyClient } from '@/lib/currency'
 import {
   Zap, Palette, Gem, Lock, BadgeDollarSign, ShieldCheck,
   Upload, SlidersHorizontal, Download,
@@ -14,6 +15,7 @@ import {
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
+  const [currency, setCurrency] = useState<Currency>('EUR')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setLoggedIn(!!session))
@@ -21,8 +23,16 @@ export default function HomePage() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Munt op basis van locatie (cookie gezet door middleware); default EUR
+  useEffect(() => { setCurrency(readCurrencyClient()) }, [])
+
   // Ingelogd -> naar dashboard; anders naar login. Houdt alle CTA's consistent.
   const ctaHref = loggedIn ? '/dashboard' : '/login'
+
+  // Munt-afhankelijke weergave
+  const sym = CURRENCY_SYMBOL[currency]
+  const price = TIER_PRICE[currency]
+  const anchor = TIER_ANCHOR[currency]
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] overflow-x-hidden">
@@ -159,7 +169,7 @@ export default function HomePage() {
         <div className="max-w-[1320px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
           <div><h3 className="font-serif text-5xl mb-2">30 min</h3><p className="opacity-90">Average delivery time</p></div>
           <div><h3 className="font-serif text-5xl mb-2">45+</h3><p className="opacity-90">Unique styles available</p></div>
-          <div><h3 className="font-serif text-5xl mb-2">$29</h3><p className="opacity-90">Starting price</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">{sym}{price.starter}</h3><p className="opacity-90">Starting price</p></div>
           <div><h3 className="font-serif text-5xl mb-2">🛡️</h3><p className="opacity-90">Profile-Worthy Guarantee</p></div>
         </div>
       </section>
@@ -267,7 +277,7 @@ export default function HomePage() {
               { icon: Palette, title: '45+ Curated Styles', desc: 'Corporate executive, smart casual, creative, outdoor, restaurant, and date night — hand-tuned for consistent quality. Each style produces 4 unique variations.' },
               { icon: Gem, title: 'Powered by FLUX AI', desc: 'We use the most advanced AI model available, specifically fine-tuned on your photos for maximum realism.' },
               { icon: Lock, title: 'Your Photos Stay Private', desc: 'Your photos are encrypted, never shared or sold, and automatically deleted after your order is complete.' },
-              { icon: BadgeDollarSign, title: 'Save $200–$500', desc: 'A professional photographer charges $300–700 for one session. Get unlimited variations starting at just $29.' },
+              { icon: BadgeDollarSign, title: `Save ${sym}200–${sym}500`, desc: `A professional photographer charges ${sym}300–${sym}700 for one session. Get unlimited variations starting at just ${sym}${price.starter}.` },
               { icon: ShieldCheck, title: 'Profile-Worthy Guarantee', desc: 'We guarantee at least 1 profile-worthy headshot in every order — or your money back within 7 days. No questions asked.' },
             ].map((feature) => (
               <div key={feature.title} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300">
@@ -300,9 +310,9 @@ export default function HomePage() {
               <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Starter</h3>
               <p className="text-[#9B9B9B] text-sm mb-4">40 headshots • 10 styles</p>
               <div className="mb-1">
-                <span className="text-[#9B9B9B] line-through text-lg">$39</span>
+                <span className="text-[#9B9B9B] line-through text-lg">{sym}{anchor.starter}</span>
               </div>
-              <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>29</div>
+              <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">{sym}</span>{price.starter}</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
                 {['1 AI model training', '40 HD headshots', 'Choose 10 styles × 4 variations', '45+ styles to choose from', 'HD quality', 'Ready in 30 minutes'].map((f) => (
@@ -324,9 +334,9 @@ export default function HomePage() {
               <h3 className="text-[1.5rem] font-bold mb-2">Pro</h3>
               <p className="text-white/60 text-sm mb-4">80 headshots • 20 styles</p>
               <div className="mb-1">
-                <span className="text-white/50 line-through text-lg">$55</span>
+                <span className="text-white/50 line-through text-lg">{sym}{anchor.pro}</span>
               </div>
-              <div className="font-serif text-5xl mb-1"><span className="text-2xl font-sans">$</span>39</div>
+              <div className="font-serif text-5xl mb-1"><span className="text-2xl font-sans">{sym}</span>{price.pro}</div>
               <p className="text-white/60 mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
                 {['1 AI model training', '80 HD headshots', 'Choose 20 styles × 4 variations', '45+ styles to choose from', 'HD quality', 'Ready in 30 minutes'].map((f) => (
@@ -347,9 +357,9 @@ export default function HomePage() {
               <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Premium</h3>
               <p className="text-[#9B9B9B] text-sm mb-4">120 headshots • 30 styles</p>
               <div className="mb-1">
-                <span className="text-[#9B9B9B] line-through text-lg">$69</span>
+                <span className="text-[#9B9B9B] line-through text-lg">{sym}{anchor.premium}</span>
               </div>
-              <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">$</span>49</div>
+              <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">{sym}</span>{price.premium}</div>
               <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
               <ul className="space-y-3 mb-8">
                 {['2 AI model trainings', '120 HD headshots', 'Choose 30 styles × 4 variations', '45+ styles to choose from', 'HD quality', 'Ready in 30 minutes'].map((f) => (
@@ -416,7 +426,7 @@ export default function HomePage() {
           <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] mb-7">Your Best Photo Is One Upload Away</h2>
           <p className="text-[1.375rem] mb-12 opacity-95">No photographer. No studio. No awkward posing. Just upload your selfies and let the AI do the work.</p>
           <Link href={ctaHref} className="inline-block bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] px-10 py-4 rounded-full font-bold text-lg transition shadow-xl hover:scale-105">
-            Get Started — From $29 →
+            Get Started — From {sym}{price.starter} →
           </Link>
           <div className="mt-10 inline-flex items-center gap-3 bg-white/15 backdrop-blur-sm px-7 py-4 rounded-full">
             <ShieldCheck className="w-6 h-6" />

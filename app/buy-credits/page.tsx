@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { type Currency, type TierId, CURRENCY_SYMBOL, TIER_PRICE, readCurrencyClient } from '@/lib/currency'
 
 interface PricingTier {
   id: string
@@ -27,7 +28,7 @@ const PRICING_TIERS: PricingTier[] = [
     features: [
       'Create 1 AI Model',
       '40 headshots',
-      'Choose Outfits & Styles',
+      'Choose 10 styles (4 variations each)',
       'High Resolution 2K Images',
     ],
   },
@@ -43,7 +44,7 @@ const PRICING_TIERS: PricingTier[] = [
       'Create 1 AI Model',
       '80 headshots',
       'High Resolution 4K Images',
-      'Choose Outfits & Styles',
+      'Choose 20 styles (4 variations each)',
       'Premium Styles',
       'Priority Generation',
     ],
@@ -59,7 +60,7 @@ const PRICING_TIERS: PricingTier[] = [
       'Create 2 AI Models',
       '120 headshots',
       'High Resolution 4K Images',
-      'Choose Outfits & Styles',
+      'Choose 30 styles (4 variations each)',
       'Premium Styles',
       'Priority Support',
       'Early Access to New Features',
@@ -76,6 +77,10 @@ export default function BuyCreditsPage() {
   // Business: alleen een vinkje. Stripe verzamelt zelf (gevalideerd) BTW + adres
   // bij de checkout, en de Billit-app maakt de Peppol-factuur.
   const [isBusiness, setIsBusiness] = useState(false)
+
+  // Munt op basis van locatie (cookie gezet door middleware); default EUR
+  const [currency, setCurrency] = useState<Currency>('EUR')
+  useEffect(() => { setCurrency(readCurrencyClient()) }, [])
 
   useEffect(() => {
     async function fetchUser() {
@@ -112,6 +117,7 @@ export default function BuyCreditsPage() {
           userId: user.id,
           priceId: tier.id,
           isBusiness,
+          currency,
         }),
       })
 
@@ -180,6 +186,9 @@ export default function BuyCreditsPage() {
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
               One-time payment. No subscription. Generate professional AI headshots in minutes.
             </p>
+            <p className="text-base text-violet-300/90 max-w-2xl mx-auto mt-4">
+              ✨ Every style gives you <strong>4 variations</strong> — so you can pick the one you like best.
+            </p>
           </div>
 
           {/* Pricing Cards */}
@@ -206,7 +215,7 @@ export default function BuyCreditsPage() {
                 <p className="text-gray-400 text-sm mb-6">{tier.credits} credits</p>
 
                 <div className="mb-8">
-                  <span className="text-5xl font-bold text-white">${tier.price}</span>
+                  <span className="text-5xl font-bold text-white">{CURRENCY_SYMBOL[currency]}{TIER_PRICE[currency][tier.id as TierId]}</span>
                 </div>
 
                 <ul className="space-y-3 mb-8">

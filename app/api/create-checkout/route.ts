@@ -5,13 +5,21 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-01-28.clover',
 })
 
-// Prijs-ID's via env (zodat sandbox/test en live makkelijk wisselen).
-// Geen env gezet -> fallback naar de live prijs-ID's, dus productie blijft werken.
+// Prijs-ID's per munt via env (zodat test en live makkelijk wisselen).
+// Fallback = de huidige TEST-prijs-ID's (EUR 29/39/59, USD 35/45/69).
+// LIVE: zet STRIPE_PRICE_<EUR|USD>_<TIER> env vars naar de live prijs-ID's.
 const PRICE_IDS = {
-  starter: process.env.STRIPE_PRICE_STARTER || 'price_1TGJ250eDPd7Y2qZBWIVAwp2',
-  pro:     process.env.STRIPE_PRICE_PRO     || 'price_1TGJ4D0eDPd7Y2qZnAeyri3K',
-  premium: process.env.STRIPE_PRICE_PREMIUM || 'price_1TGJ6Y0eDPd7Y2qZB97lhNIm',
-}
+  EUR: {
+    starter: process.env.STRIPE_PRICE_EUR_STARTER || 'price_1UGKrO1mfNQUAnELrErXiMLP',
+    pro:     process.env.STRIPE_PRICE_EUR_PRO     || 'price_1UGKrP1mfNQUAnELWygkIAfo',
+    premium: process.env.STRIPE_PRICE_EUR_PREMIUM || 'price_1UGKrP1mfNQUAnELWiiuMr5s',
+  },
+  USD: {
+    starter: process.env.STRIPE_PRICE_USD_STARTER || 'price_1UGKrO1mfNQUAnELZzpQxyzQ',
+    pro:     process.env.STRIPE_PRICE_USD_PRO     || 'price_1UGKrP1mfNQUAnELSjGI3ohi',
+    premium: process.env.STRIPE_PRICE_USD_PREMIUM || 'price_1UGKrP1mfNQUAnELpUbXgCDW',
+  },
+} as const
 
 const CREDITS = {
   starter: 40,
@@ -21,18 +29,21 @@ const CREDITS = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, priceId, isBusiness } = await request.json()
+    const { userId, priceId, isBusiness, currency } = await request.json()
 
     if (!userId) {
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 })
     }
 
-    if (!priceId || !PRICE_IDS[priceId as keyof typeof PRICE_IDS]) {
+    const cur = currency === 'USD' ? 'USD' : 'EUR'
+    const plan = priceId as keyof typeof CREDITS
+
+    if (!plan || !PRICE_IDS[cur][plan]) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
     }
 
-    const stripePriceId = PRICE_IDS[priceId as keyof typeof PRICE_IDS]
-    const planCredits = CREDITS[priceId as keyof typeof CREDITS]
+    const stripePriceId = PRICE_IDS[cur][plan]
+    const planCredits = CREDITS[plan]
 
     const params: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ['card'],
@@ -42,8 +53,9 @@ export async function POST(request: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/buy-credits`,
       metadata: {
         userId:     userId,
-        plan:       priceId,
+        plan:       plan,
         credits:    planCredits.toString(),
+        currency:   cur,
         isBusiness: isBusiness ? 'true' : 'false',
       },
     }
