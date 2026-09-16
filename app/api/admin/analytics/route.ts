@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     let pvQ = supabaseAdmin.from('page_views').select('visitor_id, source, path, created_at')
     if (fetchIso) pvQ = pvQ.gte('created_at', fetchIso)
 
-    const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions, { data: pvRaw, error: pvErr }, { data: consentRaw }] = await Promise.all([
+    const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions, { data: pvRaw, error: pvErr }, { data: consentRaw }, { data: reviewsRaw }] = await Promise.all([
       genQ,
       usrQ,
       fetchStripeSessions(fetchSince ? Math.floor(fetchSince.getTime() / 1000) : null),
@@ -120,6 +120,11 @@ export async function POST(request: NextRequest) {
         .from('users')
         .select('id, email, full_name, created_at')
         .eq('allow_photo_usage', true)
+        .order('created_at', { ascending: false }),
+      // Privé klant-reviews (all-time). Faalt stil als de tabel nog niet bestaat -> reviews = []
+      supabaseAdmin
+        .from('reviews')
+        .select('id, user_id, email, name, rating, review, allow_public, created_at')
         .order('created_at', { ascending: false }),
     ])
     if (gErr) return NextResponse.json({ error: gErr.message }, { status: 500 })
@@ -135,6 +140,9 @@ export async function POST(request: NextRequest) {
       name: u.full_name || null,
       since: u.created_at,
     }))
+
+    // Privé klant-reviews (all-time)
+    const reviews = (reviewsRaw || []) as { id: string; user_id: string; email: string | null; name: string | null; rating: number; review: string | null; allow_public: boolean; created_at: string }[]
 
     // 3) Splitsen in huidige vs vorige periode
     const curGens = allGens.filter(g => new Date(g.created_at).getTime() >= startMs)
@@ -256,6 +264,7 @@ export async function POST(request: NextRequest) {
       traffic,
       funnel,
       photoConsent,
+      reviews,
     })
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : 'Error' }, { status: 500 })

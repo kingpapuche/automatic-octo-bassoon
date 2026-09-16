@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Sparkles } from 'lucide-react'
+import ReviewCard from '@/components/ReviewCard'
 
 interface Generation {
   id: string
@@ -148,6 +149,9 @@ export default function GalleryPage() {
             </span>
           </div>
         </div>
+
+        {/* Review-kaartje op het piekmoment: klant heeft net z'n headshots gezien */}
+        {allImages.length > 0 && user?.id && <ReviewCard userId={user.id} />}
 
         {/* Gallery Grid */}
         {allImages.length === 0 ? (

@@ -42,6 +42,7 @@ interface Analytics {
   traffic: { available: boolean; visits: number; uniqueVisitors: number; visitsDelta: number | null; visitorsDelta: number | null; sources: { name: string; count: number }[]; topPages: { name: string; count: number }[] }
   funnel: { visitors: number; signups: number; orders: number; visitorToSignup: number | null; signupToOrder: number | null }
   photoConsent: { id: string; email: string | null; name: string | null; since: string }[]
+  reviews: { id: string; user_id: string; email: string | null; name: string | null; rating: number; review: string | null; allow_public: boolean; created_at: string }[]
 }
 
 function Delta({ v }: { v: number | null }) {
@@ -295,6 +296,41 @@ export default function AdminPage() {
                 </div>
               )}
               <p className="text-white/30 text-xs mt-3">Hun gegenereerde foto&apos;s staan in Supabase onder <code>generated/&lt;id&gt;/</code></p>
+            </div>
+
+            {/* Privé klant-reviews: enkel jij ziet deze. Toestemming = of je 'm als voorbeeld mag gebruiken */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-5 mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-white font-semibold">
+                  ⭐ Reviews <span className="text-white/40 font-normal text-sm">— privé, enkel jij ziet deze</span>
+                </h3>
+                <span className="text-white/60 text-sm font-medium">{(data.reviews?.length || 0)} reviews</span>
+              </div>
+              {(!data.reviews || data.reviews.length === 0) ? (
+                <div className="text-white/40 text-sm">Nog geen reviews ontvangen.</div>
+              ) : (
+                <div className="max-h-96 overflow-y-auto divide-y divide-white/5">
+                  {data.reviews.map((r) => (
+                    <div key={r.id} className="py-3 text-sm">
+                      <div className="flex items-center justify-between gap-3 mb-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-yellow-400 whitespace-nowrap">{'★'.repeat(r.rating)}<span className="text-white/15">{'★'.repeat(5 - r.rating)}</span></span>
+                          {r.allow_public
+                            ? <span className="text-emerald-400/80 text-xs whitespace-nowrap">✓ mag als voorbeeld</span>
+                            : <span className="text-white/30 text-xs whitespace-nowrap">✗ enkel privé</span>}
+                        </div>
+                        <span className="text-white/40 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString('nl-BE')}</span>
+                      </div>
+                      {r.review && <p className="text-white/80 mb-1">&ldquo;{r.review}&rdquo;</p>}
+                      <div className="text-white/40 text-xs truncate">
+                        {r.email || '—'}{r.name && <span> · {r.name}</span>}
+                        <span className="text-white/25 font-mono"> · {r.user_id}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-white/30 text-xs mt-3">Leg de review naast de voor/na-foto&apos;s van dezelfde <code>user_id</code>.</p>
             </div>
           </>
         )}
