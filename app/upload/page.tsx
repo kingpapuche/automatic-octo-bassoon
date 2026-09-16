@@ -667,7 +667,7 @@ export default function UploadPage() {
             </button>
 
             <p className="text-center mt-4 text-gray-600 text-sm">
-              Training takes about 25–35 minutes. You'll be notified when it's ready.
+              Training takes about 25–35 minutes. Stay on this page to watch the progress, or leave — we&apos;ll email you the moment your model is ready. Don&apos;t see the email? Please check your spam folder.
             </p>
           </>
         )}

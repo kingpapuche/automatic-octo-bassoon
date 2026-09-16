@@ -159,8 +159,8 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
           </Link>
         </div>
 
-        <p className="text-white/50 text-xs mt-4">
-          You can leave this page - we&apos;ll notify you when it&apos;s ready!
+        <p className="text-white/70 text-sm mt-4">
+          📧 Stay on this page to watch the progress, or leave — <strong>we&apos;ll email you the moment it&apos;s ready</strong>. Don&apos;t see the email? Please check your spam folder.
         </p>
       </div>
     )
