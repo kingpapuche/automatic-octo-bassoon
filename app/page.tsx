@@ -264,7 +264,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { icon: Zap, title: 'Results in 30 Minutes', desc: 'Upload your selfies and receive professional headshots in under 30 minutes. No waiting days for a photographer.' },
-              { icon: Palette, title: '90+ Curated Styles', desc: 'Corporate executive, smart casual, creative, outdoor, restaurant, and date night — hand-tuned for consistent quality. Each style produces 4 unique variations.' },
+              { icon: Palette, title: '45+ Curated Styles', desc: 'Corporate executive, smart casual, creative, outdoor, restaurant, and date night — hand-tuned for consistent quality. Each style produces 4 unique variations.' },
               { icon: Gem, title: 'Powered by FLUX AI', desc: 'We use the most advanced AI model available, specifically fine-tuned on your photos for maximum realism.' },
               { icon: Lock, title: 'Your Photos Stay Private', desc: 'Your photos are encrypted, never shared or sold, and automatically deleted after your order is complete.' },
               { icon: BadgeDollarSign, title: 'Save $200–$500', desc: 'A professional photographer charges $300–700 for one session. Get unlimited variations starting at just $29.' },
