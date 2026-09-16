@@ -92,7 +92,8 @@ export async function POST(request: NextRequest) {
       if (userData?.email) {
         try {
           await resend.emails.send({
-            from: 'Nova Imago <onboarding@resend.dev>',
+            from: 'Nova Imago <noreply@novaimago.ai>',
+            replyTo: 'novaimagosupport@gmail.com',
             to: userData.email,
             subject: '🎉 Your AI model is ready!',
             html: `<h2>Hi ${userData.full_name || 'there'}!</h2>
@@ -135,7 +136,8 @@ export async function POST(request: NextRequest) {
       if (userData?.email) {
         try {
           await resend.emails.send({
-            from: 'Nova Imago <onboarding@resend.dev>',
+            from: 'Nova Imago <noreply@novaimago.ai>',
+            replyTo: 'novaimagosupport@gmail.com',
             to: userData.email,
             subject: 'Training issue — let us help',
             html: `<h2>Hi ${userData.full_name || 'there'},</h2>
