@@ -17,7 +17,12 @@ for (const cat of STYLE_CATEGORIES) {
   }
 }
 
-type Sess = { amount: number; created: number; plan: string }
+// amount = genormaliseerd naar EUR (voor alle hoofdcijfers); rawAmount = origineel bedrag in de eigen munt
+type Sess = { amount: number; rawAmount: number; currency: string; created: number; plan: string }
+
+// Vaste omrekenkoers voor rapportage (geen live FX). ~1 EUR = 1,15 USD -> 1 USD ≈ 0,87 EUR.
+// Pas aan als de koers structureel wijzigt.
+const USD_TO_EUR = 0.87
 
 function startDateFor(period: string, now: Date): Date | null {
   const d = new Date(now)
@@ -45,7 +50,10 @@ async function fetchStripeSessions(sinceSec: number | null): Promise<Sess[]> {
     for (const s of page.data) {
       const paid = s.payment_status === 'paid' || s.status === 'complete'
       if (paid && s.amount_total) {
-        out.push({ amount: s.amount_total / 100, created: s.created, plan: s.metadata?.plan || 'onbekend' })
+        const cur = (s.currency || 'eur').toLowerCase()
+        const raw = s.amount_total / 100
+        const eur = cur === 'usd' ? raw * USD_TO_EUR : raw
+        out.push({ amount: eur, rawAmount: raw, currency: cur, created: s.created, plan: s.metadata?.plan || 'onbekend' })
       }
     }
     if (!page.has_more || page.data.length === 0) break
@@ -197,6 +205,17 @@ export async function POST(request: NextRequest) {
       .map(([plan, v]) => ({ plan, revenue: v.revenue, orders: v.orders }))
       .sort((a, b) => b.revenue - a.revenue)
 
+    // Omzet per munt (ruwe bedragen in de eigen munt, niet omgerekend) voor transparantie
+    const byCur: Record<string, { revenue: number; orders: number }> = {}
+    for (const s of curSess) {
+      const c = s.currency.toUpperCase()
+      const r = byCur[c] || { revenue: 0, orders: 0 }
+      r.revenue += s.rawAmount; r.orders += 1; byCur[c] = r
+    }
+    const revenueByCurrency = Object.entries(byCur)
+      .map(([currency, v]) => ({ currency, revenue: v.revenue, orders: v.orders }))
+      .sort((a, b) => b.orders - a.orders)
+
     // 5) Volume + omzet over tijd (dag-buckets, of maand voor jaar/alles)
     const byMonth = period === 'year' || period === 'all'
     const keyOf = (ms: number) => {
@@ -258,6 +277,7 @@ export async function POST(request: NextRequest) {
       categories,
       useCases,
       planBreakdown,
+      revenueByCurrency,
       audience: { gender: audienceGender, ageRanges },
       styleGender,
       timeline,

@@ -36,6 +36,7 @@ interface Analytics {
   categories: { name: string; count: number }[]
   useCases: { name: string; count: number }[]
   planBreakdown: { plan: string; revenue: number; orders: number }[]
+  revenueByCurrency?: { currency: string; revenue: number; orders: number }[]
   audience: { gender: Record<string, number>; ageRanges: Record<string, number> }
   styleGender: Record<string, number>
   timeline: { label: string; generations: number; revenue: number }[]
@@ -169,7 +170,7 @@ export default function AdminPage() {
 
             {/* KPI's */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-              <Kpi label="Omzet" value={eur(k.revenue)} delta={d.revenue} />
+              <Kpi label="Omzet" value={eur(k.revenue)} delta={d.revenue} hint="EUR-equivalent (USD omgerekend)" />
               <Kpi label="Orders" value={num(k.orders)} delta={d.orders} />
               <Kpi label="Gem. orderwaarde" value={eur(k.avgOrder)} delta={d.avgOrder} />
               <Kpi label="Nieuwe signups" value={num(k.signups)} delta={d.signups} />
@@ -180,6 +181,19 @@ export default function AdminPage() {
               <Kpi label="Actieve klanten" value={num(k.activeUsers)} delta={d.activeUsers} hint="genereerden deze periode" />
               <Kpi label="Betaald / plan" value={num(data.planBreakdown.reduce((s, p) => s + p.orders, 0))} hint={`${data.planBreakdown.length} plannen`} />
             </div>
+
+            {/* Omzet per munt (ruwe bedragen in de eigen munt, niet omgerekend) */}
+            {data.revenueByCurrency && data.revenueByCurrency.length > 0 && (
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 flex flex-wrap items-center gap-x-6 gap-y-1">
+                <span className="text-white/50 text-xs uppercase tracking-wide">Omzet per munt (ruw)</span>
+                {data.revenueByCurrency.map((c) => (
+                  <span key={c.currency} className="text-white/90 text-sm">
+                    {new Intl.NumberFormat('nl-BE', { style: 'currency', currency: c.currency }).format(c.revenue)}
+                    <span className="text-white/40"> · {c.orders} {c.orders === 1 ? 'order' : 'orders'}</span>
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Timeline */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-6">
