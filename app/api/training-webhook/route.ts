@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import Replicate from 'replicate'
 import { Resend } from 'resend'
+import { brandedEmail } from '@/lib/email-template'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -91,15 +92,22 @@ export async function POST(request: NextRequest) {
 
       if (userData?.email) {
         try {
+          const readyEmail = brandedEmail({
+            previewText: 'Your AI model is trained and ready — time to create your headshots.',
+            heading: `You're all set, ${userData.full_name || 'there'}!`,
+            paragraphs: [
+              'Great news — your personal AI model is trained and ready to generate professional headshots.',
+              'Head to your dashboard to choose your styles and create your first set. Each style gives you 4 unique variations.',
+            ],
+            button: { label: 'Create my headshots', url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard` },
+          })
           await resend.emails.send({
             from: 'Nova Imago <noreply@novaimago.ai>',
             replyTo: 'novaimagosupport@gmail.com',
             to: userData.email,
-            subject: '🎉 Your AI model is ready!',
-            html: `<h2>Hi ${userData.full_name || 'there'}!</h2>
-              <p>Your personal AI model is ready to generate professional headshots.</p>
-              <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="background:#000;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;">Go to dashboard</a></p>
-              <p>— Nova Imago</p>`,
+            subject: 'Your AI model is ready',
+            html: readyEmail.html,
+            text: readyEmail.text,
           })
         } catch (emailError) {
           console.error('Email failed:', emailError)
@@ -135,14 +143,23 @@ export async function POST(request: NextRequest) {
 
       if (userData?.email) {
         try {
+          const issueEmail = brandedEmail({
+            previewText: "Your training didn't complete — your credit is safe, let's try again.",
+            heading: `Let's get that sorted, ${userData.full_name || 'there'}`,
+            paragraphs: [
+              "Your training didn't complete successfully — but don't worry, your credit hasn't been used.",
+              'Please try again with a fresh set of photos. Clear, well-lit selfies from different angles give the best results.',
+              "Still stuck? Just reply to this email and we'll help you personally.",
+            ],
+            button: { label: 'Try again', url: `${process.env.NEXT_PUBLIC_APP_URL}/upload` },
+          })
           await resend.emails.send({
             from: 'Nova Imago <noreply@novaimago.ai>',
             replyTo: 'novaimagosupport@gmail.com',
             to: userData.email,
             subject: 'Training issue — let us help',
-            html: `<h2>Hi ${userData.full_name || 'there'},</h2>
-              <p>Your training didn't complete successfully. Your credit hasn't been used. Please try again with different photos, or reply to this email.</p>
-              <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">Back to dashboard</a></p>`,
+            html: issueEmail.html,
+            text: issueEmail.text,
           })
         } catch (emailError) {
           console.error('Email failed:', emailError)
