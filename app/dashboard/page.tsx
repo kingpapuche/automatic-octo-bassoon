@@ -8,45 +8,13 @@ import { CreditCard, Upload, Sparkles, Play, Wand2, Images } from 'lucide-react'
 import TrainingStatus from '@/components/TrainingStatus'
 import Link from 'next/link'
 
-// Stappen worden op 2 plekken hergebruikt: inline (nieuwe klant) + in de modal (terugkerende klant)
+// Stappen naast de video in de How it Works kaart
 const HOW_STEPS = [
   { icon: Upload, title: '1. Upload your photos', desc: 'Add 10-20 clear selfies. Different angles, expressions and lighting give the best results.' },
-  { icon: Wand2, title: '2. We train your AI model', desc: 'Your personal model trains in about 25-35 minutes. You can leave the page — we’ll let you know when it’s ready.' },
+  { icon: Wand2, title: '2. We train your AI model', desc: 'Your personal model trains in about 25-35 minutes — we’ll let you know when it’s ready.' },
   { icon: Sparkles, title: '3. Choose your styles', desc: 'Pick from 45+ hand-curated styles. Each style generates 4 unique variations.' },
   { icon: Images, title: '4. Download your headshots', desc: 'Browse your gallery and download the professional headshots you love.' },
 ]
-
-// Video-placeholder + tekst-stappen (DRY: zelfde body inline én in de modal).
-// VERVANG het video-placeholderblok door de YouTube-embed zodra de link er is:
-// <div className="relative aspect-video ..."><iframe src="https://www.youtube.com/embed/VIDEO_ID" ... /></div>
-function HowItWorksBody() {
-  return (
-    <>
-      <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-slate-950 to-black border border-white/10 flex items-center justify-center mb-6">
-        <div className="text-center text-white/60 px-6">
-          <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-            <Play className="w-6 h-6 text-white ml-0.5" />
-          </div>
-          <p className="text-sm font-medium">See how it works in 90 seconds</p>
-          <p className="text-xs text-white/40 mt-1">Video coming soon</p>
-        </div>
-      </div>
-      <div className="space-y-4">
-        {HOW_STEPS.map((s, i) => (
-          <div key={i} className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <s.icon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h4 className="text-white font-semibold">{s.title}</h4>
-              <p className="text-gray-400 text-sm">{s.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
-  )
-}
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth()
@@ -54,7 +22,6 @@ export default function DashboardPage() {
   const [credits, setCredits] = useState(0)
   const [trainedModelId, setTrainedModelId] = useState<string | null>(null)
   const [loadingCredits, setLoadingCredits] = useState(true)
-  const [showHowItWorks, setShowHowItWorks] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -226,63 +193,48 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* How it Works — blauwe knop altijd zichtbaar; klant kan altijd video + tekst bekijken via de popup */}
-        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-white/10">
-          <div className="flex items-start gap-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <Play className="w-8 h-8 text-white ml-1" />
+        {/* How it Works — video inline naast de stappen (best practice: informatieve content, geen klik-barrière, vult de ruimte).
+            VERVANG het video-placeholderblok hieronder door de YouTube-embed zodra de link er is:
+            <iframe className="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/VIDEO_ID" title="How it Works" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> */}
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 sm:p-8 border border-white/10">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            {/* Links: titel + stappen */}
+            <div>
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Play className="w-6 h-6 text-white ml-0.5" />
+                </div>
+                <h3 className="text-2xl font-bold text-white">How it Works</h3>
+              </div>
+              <div className="space-y-4">
+                {HOW_STEPS.map((s, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                      <s.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold">{s.title}</h4>
+                      <p className="text-gray-400 text-sm">{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold text-white mb-2">How it Works</h3>
-              <p className="text-gray-400 mb-4">
-                Learn how to create professional AI headshots in under 60 seconds
-              </p>
-              <button
-                onClick={() => setShowHowItWorks(true)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition"
-              >
-                Watch Tutorial →
-              </button>
+
+            {/* Rechts: video (placeholder tot de YouTube-link er is) */}
+            <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-slate-950 to-black border border-white/10 flex items-center justify-center">
+              <div className="text-center text-white/60 px-6">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                  <Play className="w-7 h-7 text-white ml-0.5" />
+                </div>
+                <p className="text-sm font-medium">See how it works in 90 seconds</p>
+                <p className="text-xs text-white/40 mt-1">Video coming soon</p>
+              </div>
             </div>
           </div>
         </div>
 
       </div>
-
-      {/* How it Works — Modal (video + tekst-stappen, blijft in context) */}
-      {showHowItWorks && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-          onClick={() => setShowHowItWorks(false)}
-        >
-          <div
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-900 rounded-2xl border border-white/10 p-6 sm:p-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close */}
-            <button
-              onClick={() => setShowHowItWorks(false)}
-              aria-label="Close"
-              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
-            >
-              ✕
-            </button>
-
-            <h3 className="text-2xl font-bold text-white mb-1">How it Works</h3>
-            <p className="text-gray-400 mb-6">Your professional headshots in a few simple steps</p>
-
-            <HowItWorksBody />
-
-            <Link
-              href="/upload"
-              onClick={() => setShowHowItWorks(false)}
-              className="inline-block mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition"
-            >
-              Get Started →
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
