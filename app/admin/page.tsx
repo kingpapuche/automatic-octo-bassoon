@@ -57,6 +57,7 @@ interface Analytics {
   purchasesByCountry?: { country: string; revenue: number; orders: number }[]
   photoConsent: { id: string; email: string | null; name: string | null; since: string }[]
   reviews: { id: string; user_id: string; email: string | null; name: string | null; rating: number; review: string | null; allow_public: boolean; created_at: string }[]
+  downloadsByUser?: { id: string; email: string | null; name: string | null; count: number; lastAt: string }[]
 }
 
 function Delta({ v }: { v: number | null }) {
@@ -110,6 +111,7 @@ export default function AdminPage() {
   const [data, setData] = useState<Analytics | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [dlSearch, setDlSearch] = useState('')
 
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL
 
@@ -400,6 +402,45 @@ export default function AdminPage() {
                 </div>
               )}
               <p className="text-white/30 text-xs mt-3">Leg de review naast de voor/na-foto&apos;s van dezelfde <code>user_id</code>.</p>
+            </div>
+
+            {/* Refund-check: heeft een klant al gedownload? (all-time). Zoek op e-mail bij een refund-verzoek. */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-5 mt-6">
+              <div className="flex items-center justify-between mb-1 gap-3 flex-wrap">
+                <h3 className="text-white font-semibold">
+                  📥 Refund-check <span className="text-white/40 font-normal text-sm">— downloads per klant (al gedownload = geen refund)</span>
+                </h3>
+                <input
+                  type="text"
+                  value={dlSearch}
+                  onChange={(e) => setDlSearch(e.target.value)}
+                  placeholder="Zoek op e-mail…"
+                  className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 w-52"
+                />
+              </div>
+              <p className="text-white/30 text-xs mb-3">Vraagt een klant een refund? Zoek z&apos;n e-mail hier. Downloads &gt; 0 = de foto&apos;s zijn al opgehaald.</p>
+              {(() => {
+                const all = data.downloadsByUser || []
+                const q = dlSearch.trim().toLowerCase()
+                const rows = q ? all.filter(u => (u.email || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q)) : all
+                if (all.length === 0) return <div className="text-white/40 text-sm">Nog geen downloads geregistreerd.</div>
+                if (rows.length === 0) return <div className="text-white/40 text-sm">Geen klant gevonden voor &ldquo;{dlSearch}&rdquo;.</div>
+                return (
+                  <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
+                    {rows.map((u) => (
+                      <div key={u.id} className="flex items-center justify-between py-2 text-sm gap-3">
+                        <div className="min-w-0">
+                          <div className="text-white/90 truncate">
+                            {u.email || '—'}{u.name && <span className="text-white/40"> · {u.name}</span>}
+                          </div>
+                          <div className="text-white/30 text-xs">Laatste download: {new Date(u.lastAt).toLocaleDateString('nl-BE')}</div>
+                        </div>
+                        <span className="text-amber-300 font-semibold whitespace-nowrap">{u.count} {u.count === 1 ? 'download' : 'downloads'}</span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
             </div>
           </>
         )}

@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     let pvQ = supabaseAdmin.from('page_views').select('*')
     if (fetchIso) pvQ = pvQ.gte('created_at', fetchIso)
 
-    const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions, { data: pvRaw, error: pvErr }, { data: consentRaw }, { data: reviewsRaw }] = await Promise.all([
+    const [{ data: gensRaw, error: gErr }, { data: usrRaw, error: uErr }, allSessions, { data: pvRaw, error: pvErr }, { data: consentRaw }, { data: reviewsRaw }, { data: dlRaw }] = await Promise.all([
       genQ,
       usrQ,
       fetchStripeSessions(fetchSince ? Math.floor(fetchSince.getTime() / 1000) : null),
@@ -135,6 +135,10 @@ export async function POST(request: NextRequest) {
         .from('reviews')
         .select('id, user_id, email, name, rating, review, allow_public, created_at')
         .order('created_at', { ascending: false }),
+      // Downloads (all-time) voor de refund-check
+      supabaseAdmin
+        .from('downloads')
+        .select('user_id, created_at'),
     ])
     if (gErr) return NextResponse.json({ error: gErr.message }, { status: 500 })
     if (uErr) return NextResponse.json({ error: uErr.message }, { status: 500 })
@@ -152,6 +156,26 @@ export async function POST(request: NextRequest) {
 
     // Privé klant-reviews (all-time)
     const reviews = (reviewsRaw || []) as { id: string; user_id: string; email: string | null; name: string | null; rating: number; review: string | null; allow_public: boolean; created_at: string }[]
+
+    // Downloads per klant (all-time) — refund-check: heeft de klant al gedownload, hoeveel en wanneer?
+    const dlAgg: Record<string, { count: number; last: string }> = {}
+    for (const d of (dlRaw || []) as { user_id: string | null; created_at: string }[]) {
+      if (!d.user_id) continue
+      const a = dlAgg[d.user_id] || { count: 0, last: d.created_at }
+      a.count += 1
+      if (d.created_at > a.last) a.last = d.created_at
+      dlAgg[d.user_id] = a
+    }
+    const dlIds = Object.keys(dlAgg)
+    let downloadsByUser: { id: string; email: string | null; name: string | null; count: number; lastAt: string }[] = []
+    if (dlIds.length) {
+      const { data: dlUsers } = await supabaseAdmin.from('users').select('id, email, full_name').in('id', dlIds)
+      downloadsByUser = (dlUsers || [])
+        .map((u: { id: string; email: string | null; full_name: string | null }) => ({
+          id: u.id, email: u.email, name: u.full_name, count: dlAgg[u.id].count, lastAt: dlAgg[u.id].last,
+        }))
+        .sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1))
+    }
 
     // 3) Splitsen in huidige vs vorige periode
     const curGens = allGens.filter(g => new Date(g.created_at).getTime() >= startMs)
@@ -306,6 +330,7 @@ export async function POST(request: NextRequest) {
       funnel,
       photoConsent,
       reviews,
+      downloadsByUser,
     })
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : 'Error' }, { status: 500 })
