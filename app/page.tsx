@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 import {
   Zap, Palette, Gem, Lock, BadgeDollarSign, ShieldCheck,
   Upload, SlidersHorizontal, Download,
-  Camera, Star, Sparkles, Check, Menu, X
+  Camera, Star, Sparkles, Check, Menu, X, Play
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -158,7 +158,7 @@ export default function HomePage() {
       <section className="py-16 px-8 bg-gradient-to-r from-[#5B4E9D] to-[#483A7C] text-white">
         <div className="max-w-[1320px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
           <div><h3 className="font-serif text-5xl mb-2">30 min</h3><p className="opacity-90">Average delivery time</p></div>
-          <div><h3 className="font-serif text-5xl mb-2">90+</h3><p className="opacity-90">Unique styles available</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">45+</h3><p className="opacity-90">Unique styles available</p></div>
           <div><h3 className="font-serif text-5xl mb-2">$29</h3><p className="opacity-90">Starting price</p></div>
           <div><h3 className="font-serif text-5xl mb-2">🛡️</h3><p className="opacity-90">Profile-Worthy Guarantee</p></div>
         </div>
@@ -171,10 +171,25 @@ export default function HomePage() {
             <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">How It Works</h2>
             <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">Three simple steps to your perfect headshot</p>
           </div>
+
+          {/* Video — VERVANG dit placeholder-blok door de YouTube-embed zodra de link er is:
+              <div className="relative aspect-video ..."><iframe src="https://www.youtube.com/embed/VIDEO_ID" ... /></div> */}
+          <div className="max-w-3xl mx-auto mb-16">
+            <div className="relative aspect-video rounded-3xl overflow-hidden bg-gradient-to-br from-[#2D2D2D] to-[#1a1a1a] border border-[#E8E6E0] shadow-xl flex items-center justify-center">
+              <div className="text-center text-white/70 px-6">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                  <Play className="w-7 h-7 text-white ml-0.5" />
+                </div>
+                <p className="text-sm font-medium">See how it works in 90 seconds</p>
+                <p className="text-xs text-white/40 mt-1">Video coming soon</p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { step: '01', icon: Upload, title: 'Upload Your Photos', desc: 'Upload 8–15 selfies from different angles and lighting conditions. No professional equipment needed.' },
-              { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 90+ hand-curated styles — corporate, casual, creative, outdoor, restaurant, and more. Each style generates 4 unique variations.' },
+              { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 45+ hand-curated styles — corporate, casual, creative, outdoor, restaurant, and more. Each style generates 4 unique variations.' },
               { step: '03', icon: Download, title: 'Receive Your Headshots', desc: 'Your AI-generated headshots are ready in under 30 minutes. Download and use them anywhere.' },
             ].map((item) => (
               <div key={item.step} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300 relative">

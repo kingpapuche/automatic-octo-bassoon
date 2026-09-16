@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [credits, setCredits] = useState(0)
   const [trainedModelId, setTrainedModelId] = useState<string | null>(null)
   const [loadingCredits, setLoadingCredits] = useState(true)
+  const [showHowItWorks, setShowHowItWorks] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -196,7 +197,10 @@ export default function DashboardPage() {
               <p className="text-gray-400 mb-4">
                 Learn how to create professional AI headshots in under 60 seconds
               </p>
-              <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition">
+              <button
+                onClick={() => setShowHowItWorks(true)}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition"
+              >
                 Watch Tutorial →
               </button>
             </div>
@@ -204,6 +208,71 @@ export default function DashboardPage() {
         </div>
 
       </div>
+
+      {/* How it Works — Modal (video + tekst-stappen, blijft in context) */}
+      {showHowItWorks && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setShowHowItWorks(false)}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-900 rounded-2xl border border-white/10 p-6 sm:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setShowHowItWorks(false)}
+              aria-label="Close"
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-2xl font-bold text-white mb-1">How it Works</h3>
+            <p className="text-gray-400 mb-6">Your professional headshots in a few simple steps</p>
+
+            {/* Video — VERVANG dit placeholder-blok door de YouTube-embed zodra de link er is:
+                <div className="relative aspect-video ..."><iframe src="https://www.youtube.com/embed/VIDEO_ID" ... /></div> */}
+            <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-950 border border-white/10 flex items-center justify-center mb-6">
+              <div className="text-center text-white/60 px-6">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                  <Play className="w-6 h-6 text-white ml-0.5" />
+                </div>
+                <p className="text-sm font-medium">See how it works in 90 seconds</p>
+                <p className="text-xs text-white/40 mt-1">Video coming soon</p>
+              </div>
+            </div>
+
+            {/* Tekst-stappen */}
+            <div className="space-y-4">
+              {[
+                { icon: Upload, title: '1. Upload your photos', desc: 'Add 10-20 clear selfies. Different angles, expressions and lighting give the best results.' },
+                { icon: Wand2, title: '2. We train your AI model', desc: 'Your personal model trains in about 25-35 minutes. You can leave the page — we’ll let you know when it’s ready.' },
+                { icon: Sparkles, title: '3. Choose your styles', desc: 'Pick from 45+ hand-curated styles. Each style generates 4 unique variations.' },
+                { icon: Images, title: '4. Download your headshots', desc: 'Browse your gallery and download the professional headshots you love.' },
+              ].map((s, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                    <s.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-semibold">{s.title}</h4>
+                    <p className="text-gray-400 text-sm">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href="/upload"
+              onClick={() => setShowHowItWorks(false)}
+              className="inline-block mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg font-semibold transition"
+            >
+              Get Started →
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
