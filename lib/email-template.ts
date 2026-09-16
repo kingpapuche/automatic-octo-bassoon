@@ -21,7 +21,7 @@ const BG = '#F4F4F5'
 const CARD = '#FFFFFF'
 const BORDER = '#E8E6E0'
 const SITE_URL = 'https://novaimago.ai'
-const SUPPORT = 'novaimagosupport@gmail.com'
+const SUPPORT = 'support@novaimago.ai'
 
 function escapeHtml(s: string): string {
   return s

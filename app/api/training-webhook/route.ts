@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
           })
           await resend.emails.send({
             from: 'Nova Imago <noreply@novaimago.ai>',
-            replyTo: 'novaimagosupport@gmail.com',
+            replyTo: 'support@novaimago.ai',
             to: userData.email,
             subject: 'Your AI model is ready',
             html: readyEmail.html,
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
           })
           await resend.emails.send({
             from: 'Nova Imago <noreply@novaimago.ai>',
-            replyTo: 'novaimagosupport@gmail.com',
+            replyTo: 'support@novaimago.ai',
             to: userData.email,
             subject: 'Training issue — let us help',
             html: issueEmail.html,
