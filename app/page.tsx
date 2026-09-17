@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import BeforeAfterSlider from '@/components/beforeafterslider'
+import HeroCarousel, { type HeroExample } from '@/components/HeroCarousel'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { supabase } from '@/lib/supabase'
 import { type Currency, CURRENCY_SYMBOL, TIER_PRICE, TIER_ANCHOR, readCurrencyClient } from '@/lib/currency'
@@ -50,8 +50,15 @@ export default function HomePage() {
     { name: 'Roy',    before: '/images/roy-before.jpg',    after: '/images/roy-after.webp' },
     { name: 'Mims',   before: '/images/mims-before.jpeg',  after: '/images/mims-after.webp' },
     { name: 'Alja',   before: '/images/alja-before.jpg',   after: '/images/alja-after.webp' },
-    { name: 'Stijn',  before: '/images/stijn-before.jpg',  after: '/images/stijn-after.jpg' },
+    { name: 'Nathalie', before: '/images/nathalie-before.jpg', after: '/images/nathalie-after.webp' },
+  ]
+
+  // Hero-carrousel: meerdere voor/na-voorbeelden met thumbnails (BetterPic-stijl)
+  const heroExamples: HeroExample[] = [
     { name: 'Renata', before: '/images/renata-before.jpg', after: '/images/renata-after.jpg' },
+    { name: 'Stijn', before: '/images/stijn-before.jpg', after: '/images/stijn-after.jpg' },
+    { name: 'Britt', before: '/images/britt-before.jpg', after: '/images/britt-after.webp' },
+    { name: 'featured', before: '/images/before.jpeg', after: '/images/headshot-42.webp' },
   ]
 
   const navLinks = [
@@ -178,9 +185,8 @@ export default function HomePage() {
             </div>
             <div className="flex justify-center items-center w-full overflow-hidden">
               <div className="w-full max-w-[360px]">
-                <BeforeAfterSlider
-                  beforeImage="/images/before.jpeg"
-                  afterImage="/images/headshot-42.webp"
+                <HeroCarousel
+                  examples={heroExamples}
                   beforeLabel={t.hero.sliderBefore}
                   afterLabel={t.hero.sliderAfter}
                 />
