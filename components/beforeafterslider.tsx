@@ -105,7 +105,7 @@ export default function BeforeAfterSlider({
             src={beforeImage}
             alt="Before"
             className="h-full object-cover"
-            style={{ width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '285px' }}
+            style={{ width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '285px', objectPosition: '50% 18%' }}
             draggable={false}
           />
           <div className="absolute top-3 left-3 bg-[#6B6B6B] text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
