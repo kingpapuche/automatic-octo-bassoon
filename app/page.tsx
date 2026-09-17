@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import BeforeAfterSlider from '@/components/beforeafterslider'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { supabase } from '@/lib/supabase'
 import { type Currency, CURRENCY_SYMBOL, TIER_PRICE, TIER_ANCHOR, readCurrencyClient } from '@/lib/currency'
+import { type Locale, readLocaleClient } from '@/lib/i18n'
+import { LANDING } from '@/lib/messages/landing'
 import {
   Zap, Palette, Gem, Lock, BadgeDollarSign, ShieldCheck,
   Upload, SlidersHorizontal, Download,
@@ -16,6 +19,7 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
   const [currency, setCurrency] = useState<Currency>('EUR')
+  const [locale, setLocale] = useState<Locale>('en')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setLoggedIn(!!session))
@@ -23,16 +27,40 @@ export default function HomePage() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Munt op basis van locatie (cookie gezet door middleware); default EUR
-  useEffect(() => { setCurrency(readCurrencyClient()) }, [])
+  // Munt + taal op basis van cookies (gezet door middleware); default EUR / EN
+  useEffect(() => { setCurrency(readCurrencyClient()); setLocale(readLocaleClient()) }, [])
 
-  // Ingelogd -> naar dashboard; anders naar login. Houdt alle CTA's consistent.
   const ctaHref = loggedIn ? '/dashboard' : '/login'
 
-  // Munt-afhankelijke weergave
   const sym = CURRENCY_SYMBOL[currency]
   const price = TIER_PRICE[currency]
   const anchor = TIER_ANCHOR[currency]
+  const anchors = [anchor.starter, anchor.pro, anchor.premium]
+  const prices = [price.starter, price.pro, price.premium]
+
+  const t = LANDING[locale]
+  const fill = (s: string) => s.replace(/\{sym\}/g, sym).replace(/\{p0\}/g, String(price.starter))
+
+  const stepIcons = [Upload, SlidersHorizontal, Download]
+  const featureIcons = [Zap, Palette, Gem, Lock, BadgeDollarSign, ShieldCheck]
+  const tierIcons = [Camera, Star, Sparkles]
+
+  const testimonials = [
+    { name: 'Leen',   before: '/images/leen-before.jpg',   after: '/images/leen-after.webp' },
+    { name: 'Roy',    before: '/images/roy-before.jpg',    after: '/images/roy-after.webp' },
+    { name: 'Mims',   before: '/images/mims-before.jpeg',  after: '/images/mims-after.webp' },
+    { name: 'Lina',   before: '/images/lina-before.jpg',   after: '/images/lina-after.webp' },
+    { name: 'Stijn',  before: '/images/stijn-before.jpg',  after: '/images/stijn-after.jpg' },
+    { name: 'Renata', before: '/images/renata-before.jpg', after: '/images/renata-after.jpg' },
+  ]
+
+  const navLinks = [
+    { href: '/styles', label: t.nav.browseStyles },
+    { href: '#features', label: t.nav.whyUs },
+    { href: '#pricing', label: t.nav.plans },
+    { href: '#how-it-works', label: t.nav.howItWorks },
+    { href: '#faq', label: t.nav.help },
+  ]
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] overflow-x-hidden">
@@ -49,21 +77,20 @@ export default function HomePage() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-10">
-            <Link href="/styles" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Browse Styles</Link>
-            <Link href="#features" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Why Us</Link>
-            <Link href="#pricing" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Plans</Link>
-            <Link href="#how-it-works" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">How It Works</Link>
-            <Link href="#faq" className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Help</Link>
+          <div className="hidden md:flex items-center gap-8">
+            {navLinks.map((l) => (
+              <Link key={l.href} href={l.href} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">{l.label}</Link>
+            ))}
+            <LanguageSwitcher locale={locale} onChange={setLocale} />
             {loggedIn ? (
               <Link href="/dashboard" className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:scale-105">
-                Dashboard →
+                {t.nav.dashboard}
               </Link>
             ) : (
               <>
-                <Link href={ctaHref} className="text-[#5B4E9D] hover:text-[#483A7C] font-semibold transition">Login</Link>
+                <Link href={ctaHref} className="text-[#5B4E9D] hover:text-[#483A7C] font-semibold transition">{t.nav.login}</Link>
                 <Link href={ctaHref} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:scale-105">
-                  Get Started →
+                  {t.nav.getStarted}
                 </Link>
               </>
             )}
@@ -79,20 +106,19 @@ export default function HomePage() {
 
         {mobileMenuOpen && (
           <div className="md:hidden bg-[#FAFAF9] border-t border-[#E8E6E0] px-8 py-6 flex flex-col gap-5">
-            <Link href="/styles" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Browse Styles</Link>
-            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Why Us</Link>
-            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Plans</Link>
-            <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">How It Works</Link>
-            <Link href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">Help</Link>
+            {navLinks.map((l) => (
+              <Link key={l.href} href={l.href} onClick={() => setMobileMenuOpen(false)} className="text-[#6B6B6B] hover:text-[#5B4E9D] font-medium text-lg transition">{l.label}</Link>
+            ))}
+            <LanguageSwitcher locale={locale} onChange={(l) => { setLocale(l); setMobileMenuOpen(false) }} />
             {loggedIn ? (
               <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold text-center transition shadow-md">
-                Dashboard →
+                {t.nav.dashboard}
               </Link>
             ) : (
               <>
-                <Link href={ctaHref} onClick={() => setMobileMenuOpen(false)} className="text-[#5B4E9D] font-semibold text-lg transition">Login</Link>
+                <Link href={ctaHref} onClick={() => setMobileMenuOpen(false)} className="text-[#5B4E9D] font-semibold text-lg transition">{t.nav.login}</Link>
                 <Link href={ctaHref} onClick={() => setMobileMenuOpen(false)} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-7 py-3 rounded-full font-semibold text-center transition shadow-md">
-                  Get Started →
+                  {t.nav.getStarted}
                 </Link>
               </>
             )}
@@ -108,39 +134,39 @@ export default function HomePage() {
             <div className="relative z-10">
               <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] text-white px-5 py-2.5 rounded-full shadow-lg mb-8">
                 <Sparkles className="w-4 h-4" />
-                <span className="text-sm font-semibold">Powered by FLUX AI — the most realistic model available</span>
+                <span className="text-sm font-semibold">{t.hero.badge}</span>
               </div>
               <h1 className="font-serif text-[clamp(2rem,4vw,4.5rem)] leading-[1.15] mb-7 text-[#2D2D2D] font-normal tracking-tight">
-                Turn Your Selfies Into<br />
-                <span className="italic bg-gradient-to-r from-[#7D6FB8] via-[#3A9B8E] to-[#14B8A6] text-transparent bg-clip-text">Professional Headshots</span>
+                {t.hero.title1}<br />
+                <span className="italic bg-gradient-to-r from-[#7D6FB8] via-[#3A9B8E] to-[#14B8A6] text-transparent bg-clip-text">{t.hero.title2}</span>
               </h1>
               <p className="text-[1.25rem] text-[#6B6B6B] mb-10 leading-relaxed">
-                Upload 8–15 photos. Choose your style. Get studio-quality headshots in under 30 minutes — without a photographer, studio, or expensive session.
+                {t.hero.subtitle}
               </p>
               <div className="flex flex-wrap gap-4 mb-10">
                 <Link href={ctaHref} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-105">
-                  Get Your Headshots Now →
+                  {t.hero.ctaPrimary}
                 </Link>
                 <Link href="#pricing" className="bg-white hover:bg-[#5B4E9D] text-[#5B4E9D] hover:text-white px-8 py-4 rounded-full font-semibold text-lg transition border-2 border-[#5B4E9D] hover:-translate-y-1">
-                  View Pricing
+                  {t.hero.ctaSecondary}
                 </Link>
               </div>
 
               {/* Laagdrempelige verken-ingang: gender-first naar de publieke stijlen-showcase (geen login) */}
               <div className="mb-10">
-                <p className="text-[#6B6B6B] text-sm mb-3">✨ Curious? Take a look around — no signup needed</p>
+                <p className="text-[#6B6B6B] text-sm mb-3">{t.hero.curious}</p>
                 <div className="flex flex-col sm:flex-row gap-3 max-w-md">
                   <Link href="/styles?gender=female" className="flex-1 text-center bg-[#F0EEF8] hover:bg-[#5B4E9D] text-[#5B4E9D] hover:text-white px-6 py-3.5 rounded-full font-semibold transition border border-[#5B4E9D]/20">
-                    See women&apos;s styles →
+                    {t.hero.seeWomen}
                   </Link>
                   <Link href="/styles?gender=male" className="flex-1 text-center bg-[#F0EEF8] hover:bg-[#5B4E9D] text-[#5B4E9D] hover:text-white px-6 py-3.5 rounded-full font-semibold transition border border-[#5B4E9D]/20">
-                    See men&apos;s styles →
+                    {t.hero.seeMen}
                   </Link>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-6">
-                {['Ready in 30 minutes', 'Profile-Worthy Guarantee', '100% private & secure'].map((item) => (
+                {t.hero.trust.map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <div className="w-5 h-5 bg-[#0D9488] rounded-full flex items-center justify-center">
                       <Check className="w-3 h-3 text-white stroke-[3]" />
@@ -155,8 +181,8 @@ export default function HomePage() {
                 <BeforeAfterSlider
                   beforeImage="/images/before.jpeg"
                   afterImage="/images/headshot-42.webp"
-                  beforeLabel="Your Selfie"
-                  afterLabel="AI Headshot"
+                  beforeLabel={t.hero.sliderBefore}
+                  afterLabel={t.hero.sliderAfter}
                 />
               </div>
             </div>
@@ -167,10 +193,10 @@ export default function HomePage() {
       {/* Value Bar */}
       <section className="py-16 px-8 bg-gradient-to-r from-[#5B4E9D] to-[#483A7C] text-white">
         <div className="max-w-[1320px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
-          <div><h3 className="font-serif text-5xl mb-2">30 min</h3><p className="opacity-90">Average delivery time</p></div>
-          <div><h3 className="font-serif text-5xl mb-2">45+</h3><p className="opacity-90">Unique styles available</p></div>
-          <div><h3 className="font-serif text-5xl mb-2">{sym}{price.starter}</h3><p className="opacity-90">Starting price</p></div>
-          <div><h3 className="font-serif text-5xl mb-2">🛡️</h3><p className="opacity-90">Profile-Worthy Guarantee</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">30 min</h3><p className="opacity-90">{t.valueBar.delivery}</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">45+</h3><p className="opacity-90">{t.valueBar.styles}</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">{sym}{price.starter}</h3><p className="opacity-90">{t.valueBar.startingPrice}</p></div>
+          <div><h3 className="font-serif text-5xl mb-2">🛡️</h3><p className="opacity-90">{t.valueBar.guarantee}</p></div>
         </div>
       </section>
 
@@ -178,39 +204,37 @@ export default function HomePage() {
       <section id="how-it-works" className="py-24 px-8 bg-[#FAFAF9]">
         <div className="max-w-[1320px] mx-auto">
           <div className="text-center mb-20">
-            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">How It Works</h2>
-            <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">Three simple steps to your perfect headshot</p>
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">{t.how.heading}</h2>
+            <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">{t.how.sub}</p>
           </div>
 
-          {/* Video — VERVANG dit placeholder-blok door de YouTube-embed zodra de link er is:
-              <div className="relative aspect-video ..."><iframe src="https://www.youtube.com/embed/VIDEO_ID" ... /></div> */}
+          {/* Video — VERVANG dit placeholder-blok door de YouTube-embed zodra de link er is */}
           <div className="max-w-3xl mx-auto mb-16">
             <div className="relative aspect-video rounded-3xl overflow-hidden bg-gradient-to-br from-[#2D2D2D] to-[#1a1a1a] border border-[#E8E6E0] shadow-xl flex items-center justify-center">
               <div className="text-center text-white/70 px-6">
                 <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
                   <Play className="w-7 h-7 text-white ml-0.5" />
                 </div>
-                <p className="text-sm font-medium">See how it works in 90 seconds</p>
-                <p className="text-xs text-white/40 mt-1">Video coming soon</p>
+                <p className="text-sm font-medium">{t.how.videoTitle}</p>
+                <p className="text-xs text-white/40 mt-1">{t.how.videoSoon}</p>
               </div>
             </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { step: '01', icon: Upload, title: 'Upload Your Photos', desc: 'Upload 8–15 selfies from different angles and lighting conditions. No professional equipment needed.' },
-              { step: '02', icon: SlidersHorizontal, title: 'Choose Your Styles', desc: 'Pick from 45+ hand-curated styles — corporate, casual, creative, outdoor, restaurant, and more. Each style generates 4 unique variations.' },
-              { step: '03', icon: Download, title: 'Receive Your Headshots', desc: 'Your AI-generated headshots are ready in under 30 minutes. Download and use them anywhere.' },
-            ].map((item) => (
-              <div key={item.step} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300 relative">
-                <div className="absolute top-6 right-8 text-[#E8E6E0] font-serif text-6xl font-bold">{item.step}</div>
-                <div className="w-14 h-14 bg-[#F0EEF8] rounded-2xl flex items-center justify-center mb-6">
-                  <item.icon className="w-7 h-7 text-[#5B4E9D]" />
+            {t.how.steps.map((item, i) => {
+              const Icon = stepIcons[i]
+              return (
+                <div key={i} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300 relative">
+                  <div className="absolute top-6 right-8 text-[#E8E6E0] font-serif text-6xl font-bold">{String(i + 1).padStart(2, '0')}</div>
+                  <div className="w-14 h-14 bg-[#F0EEF8] rounded-2xl flex items-center justify-center mb-6">
+                    <Icon className="w-7 h-7 text-[#5B4E9D]" />
+                  </div>
+                  <h3 className="text-[1.375rem] font-bold text-[#2D2D2D] mb-4">{item.title}</h3>
+                  <p className="text-[#6B6B6B] leading-relaxed">{item.desc}</p>
                 </div>
-                <h3 className="text-[1.375rem] font-bold text-[#2D2D2D] mb-4">{item.title}</h3>
-                <p className="text-[#6B6B6B] leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -219,23 +243,16 @@ export default function HomePage() {
       <section className="py-24 px-8 bg-white">
         <div className="max-w-[1320px] mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">Real People. Real Results.</h2>
-            <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">These headshots were generated by Nova Imago. No photographer. No studio.</p>
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">{t.results.heading}</h2>
+            <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">{t.results.sub}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { name: 'Leen',   before: '/images/leen-before.jpg',   after: '/images/leen-after.webp',   quote: "I couldn't believe how realistic it looks. Using it on LinkedIn right away!" },
-              { name: 'Roy',    before: '/images/roy-before.jpg',    after: '/images/roy-after.webp',    quote: 'Incredible result — looks completely natural and professional.' },
-              { name: 'Mims',   before: '/images/mims-before.jpeg',  after: '/images/mims-after.webp',   quote: 'I was amazed by the quality. Perfect for my professional profile!' },
-              { name: 'Lina',   before: '/images/lina-before.jpg',   after: '/images/lina-after.webp',   quote: 'Absolutely stunning results. Looks just like me but even better!' },
-              { name: 'Stijn',  before: '/images/stijn-before.jpg',  after: '/images/stijn-after.jpg',   quote: 'Amazing quality — I use it on my LinkedIn profile now!' },
-              { name: 'Renata', before: '/images/renata-before.jpg', after: '/images/renata-after.jpg',  quote: 'The results exceeded my expectations. So natural and professional!' },
-            ].map((person) => (
+            {testimonials.map((person, i) => (
               <div key={person.name} className="bg-[#FAFAF9] rounded-3xl border border-[#E8E6E0] overflow-hidden">
                 <div className="grid grid-cols-2">
-                  <div className="bg-black/60 text-white text-xs font-semibold px-3 py-2 text-center">Before</div>
-                  <div className="bg-[#5B4E9D] text-white text-xs font-semibold px-3 py-2 text-center">AI Headshot</div>
+                  <div className="bg-black/60 text-white text-xs font-semibold px-3 py-2 text-center">{t.results.before}</div>
+                  <div className="bg-[#5B4E9D] text-white text-xs font-semibold px-3 py-2 text-center">{t.results.after}</div>
                 </div>
                 <div className="grid grid-cols-2">
                   <div className="relative">
@@ -247,9 +264,9 @@ export default function HomePage() {
                 </div>
                 <div className="p-5">
                   <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />)}
+                    {[...Array(5)].map((_, s) => <Star key={s} className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />)}
                   </div>
-                  <p className="text-[#6B6B6B] text-sm italic">&ldquo;{person.quote}&rdquo;</p>
+                  <p className="text-[#6B6B6B] text-sm italic">&ldquo;{t.results.quotes[i]}&rdquo;</p>
                   <p className="text-[#2D2D2D] font-semibold text-sm mt-2">{person.name}</p>
                 </div>
               </div>
@@ -258,7 +275,7 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Link href={ctaHref} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-105 inline-block">
-              Get Your Headshots Now →
+              {t.results.cta}
             </Link>
           </div>
         </div>
@@ -268,26 +285,22 @@ export default function HomePage() {
       <section id="features" className="py-24 px-8 bg-[#FAFAF9]">
         <div className="max-w-[1320px] mx-auto">
           <div className="text-center mb-20">
-            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">Why Professionals Choose Us</h2>
-            <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">Studio-quality headshots without the studio price tag</p>
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5 font-normal tracking-tight">{t.features.heading}</h2>
+            <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">{t.features.sub}</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { icon: Zap, title: 'Results in 30 Minutes', desc: 'Upload your selfies and receive professional headshots in under 30 minutes. No waiting days for a photographer.' },
-              { icon: Palette, title: '45+ Curated Styles', desc: 'Corporate executive, smart casual, creative, outdoor, restaurant, and date night — hand-tuned for consistent quality. Each style produces 4 unique variations.' },
-              { icon: Gem, title: 'Powered by FLUX AI', desc: 'We use the most advanced AI model available, specifically fine-tuned on your photos for maximum realism.' },
-              { icon: Lock, title: 'Your Photos Stay Private', desc: 'Your photos are encrypted, never shared or sold, and automatically deleted after your order is complete.' },
-              { icon: BadgeDollarSign, title: `Save ${sym}200–${sym}500`, desc: `A professional photographer charges ${sym}300–${sym}700 for one session. Get unlimited variations starting at just ${sym}${price.starter}.` },
-              { icon: ShieldCheck, title: 'Profile-Worthy Guarantee', desc: 'We guarantee at least 1 profile-worthy headshot in every order — or your money back within 7 days. No questions asked.' },
-            ].map((feature) => (
-              <div key={feature.title} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300">
-                <div className="w-14 h-14 bg-[#F0EEF8] rounded-2xl flex items-center justify-center mb-6">
-                  <feature.icon className="w-7 h-7 text-[#5B4E9D]" />
+            {t.features.items.map((feature, i) => {
+              const Icon = featureIcons[i]
+              return (
+                <div key={i} className="bg-white p-10 rounded-3xl border border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-3 hover:shadow-xl transition-all duration-300">
+                  <div className="w-14 h-14 bg-[#F0EEF8] rounded-2xl flex items-center justify-center mb-6">
+                    <Icon className="w-7 h-7 text-[#5B4E9D]" />
+                  </div>
+                  <h3 className="text-[1.375rem] font-bold text-[#2D2D2D] mb-4">{fill(feature.title)}</h3>
+                  <p className="text-[#6B6B6B] leading-relaxed">{fill(feature.desc)}</p>
                 </div>
-                <h3 className="text-[1.375rem] font-bold text-[#2D2D2D] mb-4">{feature.title}</h3>
-                <p className="text-[#6B6B6B] leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -296,92 +309,72 @@ export default function HomePage() {
       <section id="pricing" className="py-24 px-8 bg-white">
         <div className="max-w-[1320px] mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5">Simple, Honest Pricing</h2>
-            <p className="text-xl text-[#6B6B6B]">One-time payment. No subscriptions. No hidden fees.</p>
-            <p className="text-base text-[#9B9B9B] mt-2">Every style generates 4 unique variations.</p>
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D] mb-5">{t.pricing.heading}</h2>
+            <p className="text-xl text-[#6B6B6B]">{t.pricing.sub}</p>
+            <p className="text-base text-[#9B9B9B] mt-2">{t.pricing.note}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-
-            {/* Starter */}
-            <div className="bg-[#FAFAF9] p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
-              <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
-                <Camera className="w-6 h-6 text-[#5B4E9D]" />
-              </div>
-              <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Starter</h3>
-              <p className="text-[#9B9B9B] text-sm mb-4">40 headshots • 10 styles</p>
-              <div className="mb-1">
-                <span className="text-[#9B9B9B] line-through text-lg">{sym}{anchor.starter}</span>
-              </div>
-              <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">{sym}</span>{price.starter}</div>
-              <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
-              <ul className="space-y-3 mb-8">
-                {['1 AI model training', '40 HD headshots', 'Choose 10 styles × 4 variations', '45+ styles to choose from', 'HD quality', 'Ready in 30 minutes'].map((f) => (
-                  <li key={f} className="flex items-start gap-3">
-                    <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
-                    <span className="text-[#6B6B6B] text-sm">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href={ctaHref} className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
-            </div>
-
-            {/* Pro */}
-            <div className="bg-gradient-to-br from-[#5B4E9D] to-[#483A7C] p-8 rounded-[28px] border-2 border-[#D4AF37] text-white relative scale-105 shadow-2xl">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-[#2D2D2D] px-4 py-1.5 rounded-full text-sm font-bold shadow-md">Best Value</div>
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
-                <Star className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-[1.5rem] font-bold mb-2">Pro</h3>
-              <p className="text-white/60 text-sm mb-4">80 headshots • 20 styles</p>
-              <div className="mb-1">
-                <span className="text-white/50 line-through text-lg">{sym}{anchor.pro}</span>
-              </div>
-              <div className="font-serif text-5xl mb-1"><span className="text-2xl font-sans">{sym}</span>{price.pro}</div>
-              <p className="text-white/60 mb-6 text-sm">One-time payment</p>
-              <ul className="space-y-3 mb-8">
-                {['1 AI model training', '80 HD headshots', 'Choose 20 styles × 4 variations', '45+ styles to choose from', 'HD quality', 'Ready in 30 minutes'].map((f) => (
-                  <li key={f} className="flex items-start gap-3">
-                    <Check className="w-4 h-4 text-[#D4AF37] mt-0.5 shrink-0 stroke-[3]" />
-                    <span className="text-white/90 text-sm">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href={ctaHref} className="block w-full bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
-            </div>
-
-            {/* Premium */}
-            <div className="bg-[#FAFAF9] p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
-              <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
-                <Sparkles className="w-6 h-6 text-[#5B4E9D]" />
-              </div>
-              <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">Premium</h3>
-              <p className="text-[#9B9B9B] text-sm mb-4">120 headshots • 30 styles</p>
-              <div className="mb-1">
-                <span className="text-[#9B9B9B] line-through text-lg">{sym}{anchor.premium}</span>
-              </div>
-              <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">{sym}</span>{price.premium}</div>
-              <p className="text-[#9B9B9B] mb-6 text-sm">One-time payment</p>
-              <ul className="space-y-3 mb-8">
-                {['2 AI model trainings', '120 HD headshots', 'Choose 30 styles × 4 variations', '45+ styles to choose from', 'HD quality', 'Ready in 30 minutes'].map((f) => (
-                  <li key={f} className="flex items-start gap-3">
-                    <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
-                    <span className="text-[#6B6B6B] text-sm">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href={ctaHref} className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">Get Started →</Link>
-            </div>
-
+            {t.pricing.tiers.map((tier, i) => {
+              const Icon = tierIcons[i]
+              const highlighted = i === 1
+              if (highlighted) {
+                return (
+                  <div key={i} className="bg-gradient-to-br from-[#5B4E9D] to-[#483A7C] p-8 rounded-[28px] border-2 border-[#D4AF37] text-white relative scale-105 shadow-2xl">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-[#2D2D2D] px-4 py-1.5 rounded-full text-sm font-bold shadow-md">{t.pricing.bestValue}</div>
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-[1.5rem] font-bold mb-2">{tier.name}</h3>
+                    <p className="text-white/60 text-sm mb-4">{tier.line}</p>
+                    <div className="mb-1">
+                      <span className="text-white/50 line-through text-lg">{sym}{anchors[i]}</span>
+                    </div>
+                    <div className="font-serif text-5xl mb-1"><span className="text-2xl font-sans">{sym}</span>{prices[i]}</div>
+                    <p className="text-white/60 mb-6 text-sm">{t.pricing.oneTime}</p>
+                    <ul className="space-y-3 mb-8">
+                      {tier.features.map((f) => (
+                        <li key={f} className="flex items-start gap-3">
+                          <Check className="w-4 h-4 text-[#D4AF37] mt-0.5 shrink-0 stroke-[3]" />
+                          <span className="text-white/90 text-sm">{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href={ctaHref} className="block w-full bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] text-center py-3.5 rounded-full font-semibold transition">{t.pricing.getStarted}</Link>
+                  </div>
+                )
+              }
+              return (
+                <div key={i} className="bg-[#FAFAF9] p-8 rounded-[28px] border-2 border-[#E8E6E0] hover:border-[#7D6FB8] hover:-translate-y-2 hover:shadow-xl transition-all">
+                  <div className="w-12 h-12 bg-[#F0EEF8] rounded-xl flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6 text-[#5B4E9D]" />
+                  </div>
+                  <h3 className="text-[1.5rem] font-bold mb-2 text-[#2D2D2D]">{tier.name}</h3>
+                  <p className="text-[#9B9B9B] text-sm mb-4">{tier.line}</p>
+                  <div className="mb-1">
+                    <span className="text-[#9B9B9B] line-through text-lg">{sym}{anchors[i]}</span>
+                  </div>
+                  <div className="font-serif text-5xl mb-1 text-[#2D2D2D]"><span className="text-2xl font-sans">{sym}</span>{prices[i]}</div>
+                  <p className="text-[#9B9B9B] mb-6 text-sm">{t.pricing.oneTime}</p>
+                  <ul className="space-y-3 mb-8">
+                    {tier.features.map((f) => (
+                      <li key={f} className="flex items-start gap-3">
+                        <Check className="w-4 h-4 text-[#0D9488] mt-0.5 shrink-0 stroke-[3]" />
+                        <span className="text-[#6B6B6B] text-sm">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={ctaHref} className="block w-full bg-[#5B4E9D] hover:bg-[#483A7C] text-white text-center py-3.5 rounded-full font-semibold transition">{t.pricing.getStarted}</Link>
+                </div>
+              )
+            })}
           </div>
 
           <div className="mt-12 bg-white border-2 border-[#0D9488]/30 rounded-3xl p-8 max-w-2xl mx-auto text-center shadow-sm">
             <div className="text-4xl mb-3">🛡️</div>
-            <h3 className="font-serif text-2xl text-[#2D2D2D] font-semibold mb-3">Profile-Worthy Guarantee</h3>
-            <p className="text-[#6B6B6B] leading-relaxed mb-5">
-              Not every photo will be perfect — that&apos;s the nature of AI. But we guarantee you&apos;ll get at least <span className="text-[#2D2D2D] font-semibold">1 profile-worthy headshot</span> in every order. If not, we refund you in full within 7 days. No forms, no hassle.
-            </p>
+            <h3 className="font-serif text-2xl text-[#2D2D2D] font-semibold mb-3">{t.pricing.guarantee.title}</h3>
+            <p className="text-[#6B6B6B] leading-relaxed mb-5">{t.pricing.guarantee.body}</p>
             <div className="flex flex-wrap items-center justify-center gap-6">
-              {['Full refund within 7 days', 'No questions asked', 'No forms or hassle'].map((item) => (
+              {t.pricing.guarantee.items.map((item) => (
                 <div key={item} className="flex items-center gap-2">
                   <div className="w-5 h-5 bg-[#0D9488] rounded-full flex items-center justify-center shrink-0">
                     <Check className="w-3 h-3 text-white stroke-[3]" />
@@ -391,7 +384,7 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-          <p className="text-center text-[#9B9B9B] mt-6 text-sm">One-time payment • No subscription ever</p>
+          <p className="text-center text-[#9B9B9B] mt-6 text-sm">{t.pricing.footnote}</p>
         </div>
       </section>
 
@@ -399,17 +392,10 @@ export default function HomePage() {
       <section id="faq" className="py-24 px-8 bg-[#FAFAF9]">
         <div className="max-w-[880px] mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D]">Common Questions</h2>
+            <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D]">{t.faq.heading}</h2>
           </div>
           <div className="space-y-5">
-            {[
-              { q: 'How realistic are the AI-generated headshots?', a: 'We use FLUX LoRA — the most advanced AI portrait model available. The AI is trained specifically on your photos, which means the results look like you, not a generic AI person.' },
-              { q: 'What kind of photos should I upload?', a: 'Upload 8–15 clear solo photos with good lighting from different angles. Avoid group photos, sunglasses, heavy filters, or blurry images. The more variety, the better the result.' },
-              { q: 'How long does it take?', a: 'Training your personal AI model takes about 20–25 minutes. After that, each style generates 4 variations in about 30 seconds.' },
-              { q: 'Are my photos safe?', a: 'Yes. Your photos are stored securely, never shared with third parties, and deleted automatically after your order is complete.' },
-              { q: 'What if I am not happy with the results?', a: 'We guarantee at least 1 profile-worthy headshot in every order. If not, we refund you in full within 7 days. No forms, no hassle — just contact us.' },
-              { q: 'Can I use these headshots commercially?', a: 'Yes. You own the rights to every headshot we generate for you. Use them on LinkedIn, your website, business cards, or anywhere else.' },
-            ].map((faq) => (
+            {t.faq.items.map((faq) => (
               <div key={faq.q} className="bg-white rounded-2xl p-7 border border-[#E8E6E0] hover:border-[#7D6FB8] transition">
                 <h3 className="font-semibold text-lg text-[#2D2D2D] mb-3">{faq.q}</h3>
                 <p className="text-[#6B6B6B] leading-relaxed">{faq.a}</p>
@@ -423,14 +409,14 @@ export default function HomePage() {
       <section className="py-32 px-8 bg-gradient-to-br from-[#3A2D63] via-[#5B4E9D] to-[#0D9488] text-white text-center relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/10 rounded-full blur-3xl"></div>
         <div className="max-w-[720px] mx-auto relative z-10">
-          <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] mb-7">Your Best Photo Is One Upload Away</h2>
-          <p className="text-[1.375rem] mb-12 opacity-95">No photographer. No studio. No awkward posing. Just upload your selfies and let the AI do the work.</p>
+          <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] mb-7">{t.finalCta.heading}</h2>
+          <p className="text-[1.375rem] mb-12 opacity-95">{t.finalCta.sub}</p>
           <Link href={ctaHref} className="inline-block bg-white hover:bg-[#F5F4F0] text-[#5B4E9D] px-10 py-4 rounded-full font-bold text-lg transition shadow-xl hover:scale-105">
-            Get Started — From {sym}{price.starter} →
+            {fill(t.finalCta.cta)}
           </Link>
           <div className="mt-10 inline-flex items-center gap-3 bg-white/15 backdrop-blur-sm px-7 py-4 rounded-full">
             <ShieldCheck className="w-6 h-6" />
-            <span className="font-semibold">Profile-Worthy Guarantee • Zero Risk</span>
+            <span className="font-semibold">{t.finalCta.badge}</span>
           </div>
         </div>
       </section>
@@ -439,15 +425,15 @@ export default function HomePage() {
       <footer className="bg-[#2D2D2D] text-white py-16 px-8">
         <div className="max-w-[1320px] mx-auto">
           <div className="grid md:grid-cols-4 gap-12 mb-14">
-            <div><h4 className="font-bold mb-5 text-lg">Product</h4><ul className="space-y-3">{[{label: 'Features', href: '#features'}, {label: 'Pricing', href: '#pricing'}, {label: 'How It Works', href: '#how-it-works'}, {label: 'FAQ', href: '#faq'}].map(i => <li key={i.label}><Link href={i.href} className="text-white/70 hover:text-white transition">{i.label}</Link></li>)}</ul></div>
-            <div><h4 className="font-bold mb-5 text-lg">Company</h4><ul className="space-y-3">
-              <li><Link href="/about" className="text-white/70 hover:text-white transition">About</Link></li>
-              <li><a href="mailto:support@novaimago.ai" className="text-white/70 hover:text-white transition">Contact</a></li>
+            <div><h4 className="font-bold mb-5 text-lg">{t.footer.product}</h4><ul className="space-y-3">{['#features', '#pricing', '#how-it-works', '#faq'].map((href, i) => <li key={href}><Link href={href} className="text-white/70 hover:text-white transition">{t.footer.productItems[i]}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">{t.footer.company}</h4><ul className="space-y-3">
+              <li><Link href="/about" className="text-white/70 hover:text-white transition">{t.footer.about}</Link></li>
+              <li><a href="mailto:support@novaimago.ai" className="text-white/70 hover:text-white transition">{t.footer.contact}</a></li>
             </ul></div>
-            <div><h4 className="font-bold mb-5 text-lg">Use Cases</h4><ul className="space-y-3">{['LinkedIn Headshots', 'Resume Photos', 'Dating Profile', 'Business Portraits'].map(i => <li key={i}><Link href="/styles" className="text-white/70 hover:text-white transition">{i}</Link></li>)}</ul></div>
-            <div><h4 className="font-bold mb-5 text-lg">Legal</h4><ul className="space-y-3">{[{label: 'Terms of Service', href: '/terms-of-service'}, {label: 'Privacy Policy', href: '/privacy-policy'}, {label: 'Refund Policy', href: '/refund-policy'}, {label: 'Cookie Policy', href: '/cookie-policy'}].map(i => <li key={i.label}><Link href={i.href} className="text-white/70 hover:text-white transition">{i.label}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">{t.footer.useCases}</h4><ul className="space-y-3">{t.footer.useCaseItems.map((label) => <li key={label}><Link href="/styles" className="text-white/70 hover:text-white transition">{label}</Link></li>)}</ul></div>
+            <div><h4 className="font-bold mb-5 text-lg">{t.footer.legal}</h4><ul className="space-y-3">{['/terms-of-service', '/privacy-policy', '/refund-policy', '/cookie-policy'].map((href, i) => <li key={href}><Link href={href} className="text-white/70 hover:text-white transition">{t.footer.legalItems[i]}</Link></li>)}</ul></div>
           </div>
-          <div className="pt-8 border-t border-white/10 text-center text-white/60">© 2026 Nova Imago • All rights reserved</div>
+          <div className="pt-8 border-t border-white/10 text-center text-white/60">{t.footer.rights}</div>
         </div>
       </footer>
 
