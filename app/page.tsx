@@ -49,7 +49,7 @@ export default function HomePage() {
     { name: 'Leen',   before: '/images/leen-before.jpg',   after: '/images/leen-after.webp' },
     { name: 'Roy',    before: '/images/roy-before.jpg',    after: '/images/roy-after.webp' },
     { name: 'Mims',   before: '/images/mims-before.jpeg',  after: '/images/mims-after.webp' },
-    { name: 'Lina',   before: '/images/lina-before.jpg',   after: '/images/lina-after.webp' },
+    { name: 'Alja',   before: '/images/alja-before.jpg',   after: '/images/alja-after.webp' },
     { name: 'Stijn',  before: '/images/stijn-before.jpg',  after: '/images/stijn-after.jpg' },
     { name: 'Renata', before: '/images/renata-before.jpg', after: '/images/renata-after.jpg' },
   ]
