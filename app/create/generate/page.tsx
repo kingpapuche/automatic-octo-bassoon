@@ -4,17 +4,20 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
+import { useLocale } from '@/lib/useLocale'
+import { GENERATE } from '@/lib/messages/generate'
 
 const VARIATIONS_PER_STYLE = 4
 
-const ASPECT_RATIO_OPTIONS = [
-  { id: '3:4', label: 'Portrait', dimensions: '3:4', description: 'LinkedIn, CV & dating apps', boxW: 60, boxH: 80 },
-  { id: '1:1', label: 'Square', dimensions: '1:1', description: 'Instagram, X & WhatsApp', boxW: 80, boxH: 80 },
-  { id: '4:3', label: 'Landscape', dimensions: '4:3', description: 'Website & iPad', boxW: 80, boxH: 60 },
-]
-
 export default function CreateGeneratePage() {
   const router = useRouter()
+  const t = GENERATE[useLocale()]
+
+  const ASPECT_RATIO_OPTIONS = [
+    { id: '3:4', label: t.fmtPortrait, dimensions: '3:4', description: t.fmtPortraitDesc, boxW: 60, boxH: 80 },
+    { id: '1:1', label: t.fmtSquare, dimensions: '1:1', description: t.fmtSquareDesc, boxW: 80, boxH: 80 },
+    { id: '4:3', label: t.fmtLandscape, dimensions: '4:3', description: t.fmtLandscapeDesc, boxW: 80, boxH: 60 },
+  ]
 
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string>('')
@@ -113,7 +116,7 @@ export default function CreateGeneratePage() {
       }
     } catch (error) {
       console.error('Generation error:', error)
-      alert('Generation failed. Please try again.')
+      alert(t.genFailed)
       setGenerating(false)
     }
   }
@@ -125,7 +128,7 @@ export default function CreateGeneratePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-white text-xl">{t.loading}</div>
       </div>
     )
   }
@@ -140,27 +143,18 @@ export default function CreateGeneratePage() {
             <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-3xl">💳</span>
             </div>
-            <h2 className="text-2xl font-bold text-white text-center mb-2">You Need More Credits</h2>
-            <p className="text-gray-400 text-center mb-6">
-              You selected <span className="text-white font-semibold">{styleIds.length} styles × {VARIATIONS_PER_STYLE} = {totalHeadshots} headshots</span> but only have <span className="text-amber-400 font-semibold">{userCredits} credits</span>.
+            <h2 className="text-2xl font-bold text-white text-center mb-2">{t.creditsTitle}</h2>
+            <p className="text-gray-400 text-center mb-4">
+              {t.creditsBody
+                .replace('{styles}', String(styleIds.length))
+                .replace('{n}', String(VARIATIONS_PER_STYLE))
+                .replace('{total}', String(totalHeadshots))
+                .replace('{credits}', String(userCredits))}
             </p>
-            <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/10">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-400 text-sm">Starter Pack</span>
-                <span className="text-white font-semibold">40 headshots — $29</span>
-              </div>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-400 text-sm">Pro Pack <span className="text-amber-400 text-xs">POPULAR</span></span>
-                <span className="text-white font-semibold">80 headshots — $39</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400 text-sm">Premium Pack</span>
-                <span className="text-white font-semibold">120 headshots — $49</span>
-              </div>
-            </div>
+            <p className="text-gray-500 text-sm text-center mb-6">{t.creditsHint}</p>
             <div className="flex gap-3">
-              <button onClick={() => setShowCreditsPopup(false)} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition">Cancel</button>
-              <button onClick={() => router.push('/buy-credits')} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition shadow-lg">Buy Credits →</button>
+              <button onClick={() => setShowCreditsPopup(false)} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition">{t.cancel}</button>
+              <button onClick={() => router.push('/buy-credits')} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition shadow-lg">{t.buyCredits}</button>
             </div>
           </div>
         </div>
@@ -172,11 +166,11 @@ export default function CreateGeneratePage() {
             <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-3xl">🤖</span>
             </div>
-            <h2 className="text-2xl font-bold text-white text-center mb-2">Train Your AI Model First</h2>
-            <p className="text-gray-400 text-center mb-6">Before generating headshots, you need to train an AI model with your photos.</p>
+            <h2 className="text-2xl font-bold text-white text-center mb-2">{t.modelTitle}</h2>
+            <p className="text-gray-400 text-center mb-6">{t.modelBody}</p>
             <div className="flex gap-3">
-              <button onClick={() => setShowModelPopup(false)} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition">Cancel</button>
-              <button onClick={() => router.push('/upload')} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-500 text-white transition shadow-lg">Upload Photos →</button>
+              <button onClick={() => setShowModelPopup(false)} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition">{t.cancel}</button>
+              <button onClick={() => router.push('/upload')} className="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-500 text-white transition shadow-lg">{t.uploadPhotos}</button>
             </div>
           </div>
         </div>
@@ -187,18 +181,18 @@ export default function CreateGeneratePage() {
       <div className="pt-[140px] pb-[100px] max-w-[700px] mx-auto px-6">
 
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Review & Generate</h1>
-          <p className="text-gray-400 text-lg">Everything looks good? Let&apos;s create your headshots.</p>
+          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">{t.title}</h1>
+          <p className="text-gray-400 text-lg">{t.subtitle}</p>
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-semibold text-lg">Your Selected Styles</h3>
+            <h3 className="text-white font-semibold text-lg">{t.selectedStyles}</h3>
             <button
               onClick={() => router.push('/create/styles')}
               className="text-violet-400 text-sm hover:text-violet-300 transition"
             >
-              Change
+              {t.change}
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -212,15 +206,15 @@ export default function CreateGeneratePage() {
             ))}
           </div>
           <p className="text-gray-500 text-sm mt-4">
-            Each style generates <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique variations</span> with different poses and expressions.
+            {t.eachGenerates.replace('{n}', String(VARIATIONS_PER_STYLE))}
           </p>
         </div>
 
         {modelName && (
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 flex items-center justify-between gap-4">
             <div>
-              <h3 className="text-white font-semibold text-lg">Generating for</h3>
-              <p className="text-gray-500 text-sm">Headshots will be created for this person.</p>
+              <h3 className="text-white font-semibold text-lg">{t.generatingFor}</h3>
+              <p className="text-gray-500 text-sm">{t.generatingForDesc}</p>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-violet-300 font-semibold text-lg">{modelName}</span>
@@ -228,14 +222,14 @@ export default function CreateGeneratePage() {
                 onClick={() => router.push('/create/model-select')}
                 className="text-xs text-white/50 hover:text-white underline"
               >
-                change
+                {t.changeLower}
               </button>
             </div>
           </div>
         )}
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
-          <h3 className="text-white font-semibold text-lg mb-4">Photo Format</h3>
+          <h3 className="text-white font-semibold text-lg mb-4">{t.photoFormat}</h3>
           <div className="flex gap-4 justify-center">
             {ASPECT_RATIO_OPTIONS.map((option) => {
               const isSelected = aspectRatio === option.id
@@ -278,22 +272,22 @@ export default function CreateGeneratePage() {
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
-          <h3 className="text-white font-semibold text-lg mb-4">Generation Settings</h3>
+          <h3 className="text-white font-semibold text-lg mb-4">{t.genSettings}</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-gray-400">Aspect Ratio</span>
+              <span className="text-gray-400">{t.aspectRatio}</span>
               <span className="text-white font-semibold">{aspectRatio} ({ASPECT_RATIO_OPTIONS.find(o => o.id === aspectRatio)?.label})</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-400">Variations per style</span>
+              <span className="text-gray-400">{t.variationsPerStyle}</span>
               <span className="text-white font-semibold">{VARIATIONS_PER_STYLE}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-400">Quality</span>
-              <span className="text-white font-semibold">High (35 steps)</span>
+              <span className="text-gray-400">{t.quality}</span>
+              <span className="text-white font-semibold">{t.qualityValue}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-400">Format</span>
+              <span className="text-gray-400">{t.format}</span>
               <span className="text-white font-semibold">WebP</span>
             </div>
           </div>
@@ -301,26 +295,26 @@ export default function CreateGeneratePage() {
 
         <div className="bg-gradient-to-br from-violet-900/30 to-fuchsia-900/20 border border-violet-500/20 rounded-2xl p-6 mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-gray-300">Styles selected</span>
+            <span className="text-gray-300">{t.stylesSelected}</span>
             <span className="text-white font-semibold">{styleIds.length}×</span>
           </div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-gray-300">Variations per style</span>
+            <span className="text-gray-300">{t.variationsPerStyle}</span>
             <span className="text-white font-semibold">{VARIATIONS_PER_STYLE}</span>
           </div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-gray-300">Total headshots</span>
-            <span className="text-white font-semibold">{totalHeadshots} photos</span>
+            <span className="text-gray-300">{t.totalHeadshots}</span>
+            <span className="text-white font-semibold">{t.photos.replace('{total}', String(totalHeadshots))}</span>
           </div>
           <div className="border-t border-white/10 pt-4">
             <div className="flex items-center justify-between">
-              <span className="text-white font-bold text-lg">Credits needed</span>
+              <span className="text-white font-bold text-lg">{t.creditsNeeded}</span>
               <span className="text-violet-400 font-bold text-2xl">{creditsNeeded}</span>
             </div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-gray-500 text-sm">Your balance</span>
+              <span className="text-gray-500 text-sm">{t.yourBalance}</span>
               <span className={`font-semibold ${hasEnoughCredits ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {userCredits} credits
+                {userCredits} {t.creditsUnit}
                 {hasEnoughCredits && ' ✓'}
               </span>
             </div>
@@ -332,7 +326,7 @@ export default function CreateGeneratePage() {
             onClick={() => router.push('/create/styles')}
             className="py-4 px-8 rounded-2xl font-semibold bg-white/10 text-white hover:bg-white/15 transition"
           >
-            ← Back
+            {t.back}
           </button>
           <button
             onClick={handleGenerateClick}
@@ -349,10 +343,10 @@ export default function CreateGeneratePage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Starting generation...
+                {t.starting}
               </>
             ) : (
-              <><span className="text-xl">✨</span> Generate {totalHeadshots} Headshots</>
+              <><span className="text-xl">✨</span> {t.generateBtn.replace('{total}', String(totalHeadshots))}</>
             )}
           </button>
         </div>
