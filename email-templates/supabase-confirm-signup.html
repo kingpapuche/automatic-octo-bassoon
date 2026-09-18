@@ -4,18 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
-  <title>Welcome to Nova Imago</title>
+  <title>Confirm your email — Nova Imago</title>
 </head>
 <body style="margin:0;padding:0;background:#F4F4F5;">
-  <!-- preheader (verborgen inbox-preview) -->
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Confirm your email to activate your Nova Imago account.</div>
-
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">{{ if eq .Data.locale "nl" }}Bevestig je e-mail om je Nova Imago-account te activeren.{{ else if eq .Data.locale "fr" }}Confirmez votre e-mail pour activer votre compte Nova Imago.{{ else if eq .Data.locale "de" }}Bestätige deine E-Mail, um dein Nova Imago-Konto zu aktivieren.{{ else if eq .Data.locale "es" }}Confirma tu correo para activar tu cuenta de Nova Imago.{{ else if eq .Data.locale "it" }}Conferma la tua e-mail per attivare il tuo account Nova Imago.{{ else if eq .Data.locale "pt" }}Confirme o seu e-mail para ativar a sua conta Nova Imago.{{ else }}Confirm your email to activate your Nova Imago account.{{ end }}</div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F4F5;padding:24px 12px;">
     <tr>
       <td align="center">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;">
-
-          <!-- header / wordmark -->
           <tr>
             <td align="center" style="padding:8px 0 20px;">
               <a href="https://novaimago.ai" target="_blank" style="text-decoration:none;font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#5B4E9D;">
@@ -23,39 +19,32 @@
               </a>
             </td>
           </tr>
-
-          <!-- card -->
           <tr>
             <td style="background:#FFFFFF;border:1px solid #E8E6E0;border-radius:16px;padding:32px 32px 28px;">
-              <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#2D2D2D;font-family:Georgia,'Times New Roman',serif;font-weight:normal;">Welcome to Nova Imago</h1>
-              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#2D2D2D;">You're almost there! Click the button below to confirm your email and activate your account.</p><p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#2D2D2D;">This link expires shortly and can only be used once. If you didn't sign up, you can safely ignore this email.</p>
+              <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#2D2D2D;font-family:Georgia,'Times New Roman',serif;font-weight:normal;">{{ if eq .Data.locale "nl" }}Welkom bij Nova Imago{{ else if eq .Data.locale "fr" }}Bienvenue chez Nova Imago{{ else if eq .Data.locale "de" }}Willkommen bei Nova Imago{{ else if eq .Data.locale "es" }}Te damos la bienvenida a Nova Imago{{ else if eq .Data.locale "it" }}Benvenuto su Nova Imago{{ else if eq .Data.locale "pt" }}Bem-vindo à Nova Imago{{ else }}Welcome to Nova Imago{{ end }}</h1>
+              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#2D2D2D;">{{ if eq .Data.locale "nl" }}Je bent er bijna! Klik op de knop hieronder om je e-mail te bevestigen en je account te activeren.{{ else if eq .Data.locale "fr" }}Vous y êtes presque ! Cliquez sur le bouton ci-dessous pour confirmer votre e-mail et activer votre compte.{{ else if eq .Data.locale "de" }}Fast geschafft! Klicke auf den Button unten, um deine E-Mail zu bestätigen und dein Konto zu aktivieren.{{ else if eq .Data.locale "es" }}¡Ya casi está! Haz clic en el botón de abajo para confirmar tu correo y activar tu cuenta.{{ else if eq .Data.locale "it" }}Ci sei quasi! Clicca sul pulsante qui sotto per confermare la tua e-mail e attivare il tuo account.{{ else if eq .Data.locale "pt" }}Está quase! Clique no botão abaixo para confirmar o seu e-mail e ativar a sua conta.{{ else }}You're almost there! Click the button below to confirm your email and activate your account.{{ end }}</p>
+              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#2D2D2D;">{{ if eq .Data.locale "nl" }}Deze link verloopt binnenkort en kan maar één keer worden gebruikt. Heb je je niet aangemeld, dan kun je deze e-mail veilig negeren.{{ else if eq .Data.locale "fr" }}Ce lien expire bientôt et ne peut être utilisé qu’une seule fois. Si vous ne vous êtes pas inscrit, vous pouvez ignorer cet e-mail en toute sécurité.{{ else if eq .Data.locale "de" }}Dieser Link läuft bald ab und kann nur einmal verwendet werden. Falls du dich nicht registriert hast, kannst du diese E-Mail ignorieren.{{ else if eq .Data.locale "es" }}Este enlace caduca pronto y solo se puede usar una vez. Si no te registraste, puedes ignorar este correo con seguridad.{{ else if eq .Data.locale "it" }}Questo link scade a breve e può essere usato una sola volta. Se non ti sei registrato, puoi ignorare questa e-mail.{{ else if eq .Data.locale "pt" }}Este link expira em breve e só pode ser usado uma vez. Se não se registou, pode ignorar este e-mail em segurança.{{ else }}This link expires shortly and can only be used once. If you didn't sign up, you can safely ignore this email.{{ end }}</p>
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 4px;">
-         <tr>
-           <td align="center" bgcolor="#5B4E9D" style="border-radius:10px;">
-             <a href="{{ .ConfirmationURL }}" target="_blank"
-                style="display:inline-block;padding:14px 30px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background:#5B4E9D;">
-               Confirm my email
-             </a>
-           </td>
-         </tr>
-       </table>
+                <tr>
+                  <td align="center" bgcolor="#5B4E9D" style="border-radius:10px;">
+                    <a href="{{ .ConfirmationURL }}" target="_blank"
+                       style="display:inline-block;padding:14px 30px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background:#5B4E9D;">
+                      {{ if eq .Data.locale "nl" }}Mijn e-mail bevestigen{{ else if eq .Data.locale "fr" }}Confirmer mon e-mail{{ else if eq .Data.locale "de" }}Meine E-Mail bestätigen{{ else if eq .Data.locale "es" }}Confirmar mi correo{{ else if eq .Data.locale "it" }}Conferma la mia e-mail{{ else if eq .Data.locale "pt" }}Confirmar o meu e-mail{{ else }}Confirm my email{{ end }}
+                    </a>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
-
-          <!-- footer -->
           <tr>
             <td style="padding:20px 24px;text-align:center;">
-              <p style="margin:0 0 6px;font-size:13px;line-height:1.5;color:#6B6B6B;">
-                Questions? Just reply to this email or contact
-                <a href="mailto:support@novaimago.ai" style="color:#5B4E9D;text-decoration:none;">support@novaimago.ai</a>.
-              </p>
+              <p style="margin:0 0 6px;font-size:13px;line-height:1.5;color:#6B6B6B;">{{ if eq .Data.locale "nl" }}Vragen? Beantwoord gewoon deze e-mail of neem contact op via <a href="mailto:support@novaimago.ai" style="color:#5B4E9D;text-decoration:none;">support@novaimago.ai</a>.{{ else if eq .Data.locale "fr" }}Des questions ? Répondez simplement à cet e-mail ou contactez <a href="mailto:support@novaimago.ai" style="color:#5B4E9D;text-decoration:none;">support@novaimago.ai</a>.{{ else if eq .Data.locale "de" }}Fragen? Antworte einfach auf diese E-Mail oder kontaktiere <a href="mailto:support@novaimago.ai" style="color:#5B4E9D;text-decoration:none;">support@novaimago.ai</a>.{{ else if eq .Data.locale "es" }}¿Preguntas? Responde a este correo o contacta con <a href="mailto:support@novaimago.ai" style="color:#5B4E9D;text-decoration:none;">support@novaimago.ai</a>.{{ else if eq .Data.locale "it" }}Domande? Rispondi a questa e-mail o contatta <a href="mailto:support@novaimago.ai" style="color:#5B4E9D;text-decoration:none;">support@novaimago.ai</a>.{{ else if eq .Data.locale "pt" }}Dúvidas? Responda a este e-mail ou contacte <a href="mailto:support@novaimago.ai" style="color:#5B4E9D;text-decoration:none;">support@novaimago.ai</a>.{{ else }}Questions? Just reply to this email or contact <a href="mailto:support@novaimago.ai" style="color:#5B4E9D;text-decoration:none;">support@novaimago.ai</a>.{{ end }}</p>
               <p style="margin:0;font-size:12px;line-height:1.5;color:#9A9A9A;">
-                You received this account notification because you have a Nova Imago account.<br>
+                {{ if eq .Data.locale "nl" }}Je ontvangt deze accountmelding omdat je een Nova Imago-account hebt.{{ else if eq .Data.locale "fr" }}Vous recevez cette notification de compte car vous avez un compte Nova Imago.{{ else if eq .Data.locale "de" }}Du erhältst diese Kontobenachrichtigung, weil du ein Nova Imago-Konto hast.{{ else if eq .Data.locale "es" }}Recibes esta notificación de cuenta porque tienes una cuenta de Nova Imago.{{ else if eq .Data.locale "it" }}Ricevi questa notifica dell’account perché hai un account Nova Imago.{{ else if eq .Data.locale "pt" }}Recebe esta notificação de conta porque tem uma conta Nova Imago.{{ else }}You received this account notification because you have a Nova Imago account.{{ end }}<br>
                 <a href="https://novaimago.ai" style="color:#9A9A9A;text-decoration:underline;">novaimago.ai</a>
               </p>
             </td>
           </tr>
-
         </table>
       </td>
     </tr>
