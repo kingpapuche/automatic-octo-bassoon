@@ -1,19 +1,21 @@
 'use client'
 
 import Link from 'next/link'
+import { useLocale } from '@/lib/useLocale'
+import { PICKER } from '@/lib/messages/picker'
 
 interface ProgressBarProps {
   currentStep: number
   userCredits: number
 }
 
-const STEPS = [
-  { num: 1, label: 'Order Details', href: '/create' },
-  { num: 2, label: 'Select Styles', href: '/create/styles' },
-  { num: 3, label: 'Generate', href: '/create/generate' },
-]
-
 export default function CreateProgressBar({ currentStep, userCredits }: ProgressBarProps) {
+  const t = PICKER[useLocale()]
+  const STEPS = [
+    { num: 1, label: t.step1, href: '/create' },
+    { num: 2, label: t.step2, href: '/create/styles' },
+    { num: 3, label: t.step3, href: '/create/generate' },
+  ]
   return (
     <nav className="fixed top-0 left-0 right-0 bg-[#0a0f1a]/95 backdrop-blur-xl border-b border-white/5 z-50">
       <div className="max-w-[1200px] mx-auto px-6 py-4 flex justify-between items-center">
@@ -22,12 +24,12 @@ export default function CreateProgressBar({ currentStep, userCredits }: Progress
           <span className="font-semibold text-xl text-white tracking-tight">Nova Imago</span>
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-gray-400 hover:text-white transition font-medium text-sm">Dashboard</Link>
-          <Link href="/gallery" className="text-gray-400 hover:text-white transition font-medium text-sm">Gallery</Link>
+          <Link href="/dashboard" className="text-gray-400 hover:text-white transition font-medium text-sm">{t.navDashboard}</Link>
+          <Link href="/gallery" className="text-gray-400 hover:text-white transition font-medium text-sm">{t.navGallery}</Link>
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
             <span className="text-violet-400 text-sm">✦</span>
             <span className="text-white font-semibold">{userCredits}</span>
-            <span className="text-gray-400 text-sm">credits</span>
+            <span className="text-gray-400 text-sm">{t.credits}</span>
           </div>
         </div>
       </div>

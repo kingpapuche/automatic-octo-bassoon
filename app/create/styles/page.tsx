@@ -8,6 +8,7 @@ import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
 import StyleThumb from '@/components/StyleThumb'
 import { useLocale } from '@/lib/useLocale'
 import { tr } from '@/lib/messages/styleText'
+import { PICKER } from '@/lib/messages/picker'
 
 const VARIATIONS_PER_STYLE = 4
 const ONBOARDING_KEY = 'novaimago_styles_onboarded'
@@ -16,6 +17,7 @@ const ONBOARDING_KEY = 'novaimago_styles_onboarded'
 export default function CreateStylesPage() {
   const router = useRouter()
   const locale = useLocale()
+  const p = PICKER[locale]
   const [loading, setLoading] = useState(true)
   const [userCredits, setUserCredits] = useState(0)
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
@@ -109,13 +111,13 @@ export default function CreateStylesPage() {
   const toggleStyle = (styleId: string, styleLabel: string) => {
     setSelectedStyles(prev => {
       if (prev.includes(styleId)) {
-        showToast(`Removed ${styleLabel} — −${VARIATIONS_PER_STYLE} photos`, 'remove')
+        showToast(p.tRemove.replace('{label}', styleLabel).replace('{n}', String(VARIATIONS_PER_STYLE)), 'remove')
         return prev.filter(id => id !== styleId)
       }
       if (prev.length >= maxStyles) {
         return prev
       }
-      showToast(`Added ${styleLabel} — +${VARIATIONS_PER_STYLE} photos`, 'add')
+      showToast(p.tAdd.replace('{label}', styleLabel).replace('{n}', String(VARIATIONS_PER_STYLE)), 'add')
       return [...prev, styleId]
     })
   }
@@ -127,7 +129,7 @@ export default function CreateStylesPage() {
     const allSelected = ids.every(id => selectedStyles.includes(id))
     if (allSelected) {
       setSelectedStyles(prev => prev.filter(id => !ids.includes(id)))
-      showToast(`Removed ${ids.length} styles — −${ids.length * VARIATIONS_PER_STYLE} photos`, 'remove')
+      showToast(p.tRemoveMulti.replace('{count}', String(ids.length)).replace('{n}', String(ids.length * VARIATIONS_PER_STYLE)), 'remove')
     } else {
       setSelectedStyles(prev => {
         const merged = [...new Set([...prev, ...ids])]
@@ -135,7 +137,7 @@ export default function CreateStylesPage() {
       })
       const added = Math.min(ids.length, maxStyles - selectedStyles.length)
       if (added > 0) {
-        showToast(`Added ${added} styles — +${added * VARIATIONS_PER_STYLE} photos`, 'add')
+        showToast(p.tAddMulti.replace('{count}', String(added)).replace('{n}', String(added * VARIATIONS_PER_STYLE)), 'add')
       }
     }
   }
@@ -149,7 +151,7 @@ export default function CreateStylesPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-white text-xl">{p.loading}</div>
       </div>
     )
   }
@@ -166,26 +168,26 @@ export default function CreateStylesPage() {
               <span className="text-3xl">✨</span>
             </div>
 
-            <h2 className="text-2xl font-bold text-white text-center mb-3">How It Works</h2>
+            <h2 className="text-2xl font-bold text-white text-center mb-3">{p.onbTitle}</h2>
 
             <p className="text-gray-300 text-center mb-6 leading-relaxed">
-              Pick the looks you want. Each style gives you <span className="text-violet-300 font-semibold">{VARIATIONS_PER_STYLE} unique photos</span> with different poses, angles & lighting.
+              {p.onbBody.replace('{n}', String(VARIATIONS_PER_STYLE))}
             </p>
 
             <div className="bg-violet-600/10 border border-violet-500/30 rounded-2xl p-5 mb-6">
               <div className="flex items-center justify-center gap-3 mb-3 flex-wrap">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white">1</div>
-                  <div className="text-xs text-violet-300 uppercase tracking-wider">Style</div>
+                  <div className="text-xs text-violet-300 uppercase tracking-wider">{p.onbStyle}</div>
                 </div>
                 <span className="text-violet-400 text-2xl font-bold">=</span>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-fuchsia-300">{VARIATIONS_PER_STYLE}</div>
-                  <div className="text-xs text-fuchsia-300 uppercase tracking-wider">Photos</div>
+                  <div className="text-xs text-fuchsia-300 uppercase tracking-wider">{p.onbPhotos}</div>
                 </div>
               </div>
               <p className="text-center text-gray-400 text-sm">
-                You have <span className="text-white font-semibold">{userCredits} credits</span> = up to <span className="text-violet-300 font-semibold">{maxStyles} styles</span> = <span className="text-fuchsia-300 font-semibold">{maxStyles * VARIATIONS_PER_STYLE} total headshots</span>
+                {p.onbQuota.replace('{credits}', String(userCredits)).replace('{maxStyles}', String(maxStyles)).replace('{total}', String(maxStyles * VARIATIONS_PER_STYLE))}
               </p>
             </div>
 
@@ -193,7 +195,7 @@ export default function CreateStylesPage() {
               onClick={dismissOnboarding}
               className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition shadow-lg shadow-violet-500/25"
             >
-              Got it, let's go →
+              {p.onbCta}
             </button>
           </div>
         </div>
@@ -226,9 +228,9 @@ export default function CreateStylesPage() {
       <div className="pt-[140px] pb-[180px] max-w-[900px] mx-auto px-6">
 
         <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Choose Your Styles</h1>
+          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">{p.title}</h1>
           <p className="text-gray-300 text-lg">
-            Pick the looks you want for your headshots
+            {p.subtitle}
           </p>
         </div>
 
@@ -239,45 +241,45 @@ export default function CreateStylesPage() {
               <div className="w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center font-bold text-white text-xl">
                 1
               </div>
-              <span className="text-white font-bold text-lg">style</span>
+              <span className="text-white font-bold text-lg">{p.eqStyle}</span>
             </div>
             <span className="text-violet-300 text-3xl font-bold">=</span>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-fuchsia-600 rounded-xl flex items-center justify-center font-bold text-white text-xl">
                 {VARIATIONS_PER_STYLE}
               </div>
-              <span className="text-white font-bold text-lg">unique photos</span>
+              <span className="text-white font-bold text-lg">{p.eqPhotos}</span>
             </div>
           </div>
           <p className="text-center text-violet-200 text-sm mt-3">
-            Each style you pick generates {VARIATIONS_PER_STYLE} different variations with unique poses, angles & lighting
+            {p.bannerNote.replace('{n}', String(VARIATIONS_PER_STYLE))}
           </p>
         </div>
 
         {/* QUOTA CARD */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-8 flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="text-gray-400 text-sm mb-1">Your plan</p>
+            <p className="text-gray-400 text-sm mb-1">{p.yourPlan}</p>
             <p className="text-white font-semibold">
-              <span className="text-2xl">{userCredits}</span> credits = up to <span className="text-violet-400">{maxStyles} styles</span>
+              {p.planValue.replace('{credits}', String(userCredits)).replace('{maxStyles}', String(maxStyles))}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-gray-400 text-sm mb-1">You'll receive</p>
+            <p className="text-gray-400 text-sm mb-1">{p.youllReceive}</p>
             <p className="text-white font-semibold">
-              <span className="text-2xl text-violet-400">{maxStyles * VARIATIONS_PER_STYLE}</span> total headshots
+              {p.receiveValue.replace('{total}', String(maxStyles * VARIATIONS_PER_STYLE))}
             </p>
           </div>
         </div>
 
         {maxStyles === 0 && (
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 mb-6 text-center">
-            <p className="text-amber-300 font-semibold mb-2">⚠️ You need credits to generate headshots</p>
+            <p className="text-amber-300 font-semibold mb-2">{p.needCredits}</p>
             <button
               onClick={() => router.push('/buy-credits')}
               className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-2 rounded-lg transition"
             >
-              Buy Credits →
+              {p.buyCredits}
             </button>
           </div>
         )}
@@ -302,13 +304,13 @@ export default function CreateStylesPage() {
                     <span className="text-2xl">{category.icon}</span>
                     <div className="text-left">
                       <h3 className="text-white font-semibold text-lg">{tr(category.name, locale)}</h3>
-                      <p className="text-gray-500 text-sm">{category.styles.length} styles</p>
+                      <p className="text-gray-500 text-sm">{p.catStyles.replace('{n}', String(category.styles.length))}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     {selectedCount > 0 && (
                       <span className="bg-violet-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                        {selectedCount} selected
+                        {p.selected.replace('{n}', String(selectedCount))}
                       </span>
                     )}
                     <span className={`text-gray-400 text-xl transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
@@ -325,7 +327,7 @@ export default function CreateStylesPage() {
                           : 'bg-white/5 text-gray-400 hover:bg-white/10'
                       }`}
                     >
-                      {allSelected ? '✓ Deselect All' : 'Select All'}
+                      {allSelected ? p.deselectAll : p.selectAll}
                     </button>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -360,7 +362,7 @@ export default function CreateStylesPage() {
                               </div>
                             ) : popularSet[gender].has(style.id) ? (
                               <div className="absolute top-2 right-2 z-10 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md bg-rose-500 text-white">
-                                Popular
+                                {p.popular}
                               </div>
                             ) : null}
 
@@ -388,21 +390,21 @@ export default function CreateStylesPage() {
 
             <div className="flex items-center gap-3">
               <div className="bg-violet-600/20 border border-violet-500/40 rounded-xl px-4 py-2">
-                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">Styles</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">{p.barStyles}</p>
                 <p className="text-white font-bold text-2xl leading-none">{selectedStyles.length}<span className="text-gray-500 text-base">/{maxStyles}</span></p>
               </div>
 
               <span className="text-violet-400 text-2xl font-bold">×</span>
 
               <div className="bg-fuchsia-600/20 border border-fuchsia-500/40 rounded-xl px-4 py-2">
-                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">Per style</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">{p.barPerStyle}</p>
                 <p className="text-white font-bold text-2xl leading-none">{VARIATIONS_PER_STYLE}</p>
               </div>
 
               <span className="text-violet-400 text-2xl font-bold">=</span>
 
               <div className="bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl px-5 py-2 shadow-lg shadow-violet-500/25">
-                <p className="text-violet-100 text-[10px] uppercase tracking-wider mb-0.5">Total headshots</p>
+                <p className="text-violet-100 text-[10px] uppercase tracking-wider mb-0.5">{p.barTotal}</p>
                 <p className="text-white font-bold text-2xl leading-none">{totalHeadshots}</p>
               </div>
             </div>
@@ -412,7 +414,7 @@ export default function CreateStylesPage() {
                 onClick={() => router.push('/create')}
                 className="py-3 px-6 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/15 transition"
               >
-                ← Back
+                {p.back}
               </button>
               <button
                 onClick={handleContinue}
@@ -423,7 +425,7 @@ export default function CreateStylesPage() {
                     : 'bg-white/10 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                Continue →
+                {p.cont}
               </button>
             </div>
           </div>
