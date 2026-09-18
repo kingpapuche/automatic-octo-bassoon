@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/useLocale'
+import { APP } from '@/lib/messages/app'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -10,6 +12,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   const { signInWithEmail: signInWithMagicLink, signInWithGoogle } = useAuth()
+  const t = APP[useLocale()].auth
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,8 +23,7 @@ export default function SignupPage() {
       await signInWithMagicLink(email)
       setMagicLinkSent(true)
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to send magic link'
-      setError(errorMessage)
+      setError(err instanceof Error ? err.message : t.errLink)
     } finally {
       setLoading(false)
     }
@@ -34,21 +36,16 @@ export default function SignupPage() {
     try {
       await signInWithGoogle()
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to sign in with Google'
-      setError(errorMessage)
+      setError(err instanceof Error ? err.message : t.errGoogle)
       setLoading(false)
     }
   }
 
-  // ===========================================
-  // SUCCESS STATE — magic link verstuurd
-  // ===========================================
   if (magicLinkSent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-4 py-8">
         <div className="w-full max-w-md">
 
-          {/* Terug naar homepage */}
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-white/70 hover:text-white mb-6 transition text-sm font-medium"
@@ -56,7 +53,7 @@ export default function SignupPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to homepage
+            {t.backToHome}
           </Link>
 
           <div className="bg-white p-8 rounded-2xl shadow-xl text-center">
@@ -66,12 +63,12 @@ export default function SignupPage() {
               </svg>
             </div>
 
-            <h1 className="text-2xl font-bold mb-2">Check your email</h1>
+            <h1 className="text-2xl font-bold mb-2">{t.checkEmailSignup}</h1>
             <p className="text-gray-600 mb-2">
-              We&apos;ve sent a magic link to <span className="font-semibold">{email}</span>
+              {t.sentTo} <span className="font-semibold">{email}</span>
             </p>
             <p className="text-gray-500 text-sm mb-6">
-              The link arrives within 1 minute. Tip: also check your spam folder.
+              {t.spamTipSignup}
             </p>
 
             <button
@@ -81,7 +78,7 @@ export default function SignupPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Use a different email
+              {t.useDifferentEmail}
             </button>
           </div>
         </div>
@@ -89,14 +86,10 @@ export default function SignupPage() {
     )
   }
 
-  // ===========================================
-  // MAIN GET STARTED FORM
-  // ===========================================
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-4 py-8">
       <div className="w-full max-w-md">
 
-        {/* Terug naar homepage */}
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-white/70 hover:text-white mb-6 transition text-sm font-medium"
@@ -104,7 +97,7 @@ export default function SignupPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Back to homepage
+          {t.backToHome}
         </Link>
 
         <div className="bg-white p-8 rounded-2xl shadow-xl">
@@ -114,9 +107,9 @@ export default function SignupPage() {
             <span className="font-serif text-2xl text-[#2D2D2D] tracking-tight">Nova <em>Imago</em></span>
           </div>
 
-          <h1 className="text-3xl font-bold text-center mb-2">Get Started</h1>
+          <h1 className="text-3xl font-bold text-center mb-2">{t.signupTitle}</h1>
           <p className="text-gray-600 text-center mb-6">
-            No password needed — sign in with Google or get a magic link
+            {t.signupSubtitle}
           </p>
 
           {error && (
@@ -137,26 +130,26 @@ export default function SignupPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continue with Google
+            {t.continueGoogle}
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="text-gray-400 text-sm">or</span>
+            <span className="text-gray-400 text-sm">{t.or}</span>
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
 
           {/* Magic Link Form */}
           <form onSubmit={handleMagicLink} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.emailLabel}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5B4E9D] focus:border-transparent outline-none transition"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5B4E9D] focus:border-transparent outline-none transition text-gray-900 placeholder-gray-500"
                 required
               />
             </div>
@@ -166,16 +159,16 @@ export default function SignupPage() {
               disabled={loading}
               className="w-full bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] hover:from-[#483A7C] hover:to-[#5B4E9D] text-white py-3 rounded-lg font-semibold disabled:opacity-50 transition shadow-lg"
             >
-              {loading ? 'Sending...' : 'Send Magic Link'}
+              {loading ? t.sending : t.sendMagicLink}
             </button>
           </form>
 
           {/* Footer */}
           <p className="text-center text-gray-500 text-xs mt-6">
-            By signing up, you agree to our{' '}
-            <Link href="/terms" className="underline hover:text-[#5B4E9D]">Terms</Link>
+            {t.agree}{' '}
+            <Link href="/terms" className="underline hover:text-[#5B4E9D]">{t.terms}</Link>
             {' '}&{' '}
-            <Link href="/privacy" className="underline hover:text-[#5B4E9D]">Privacy Policy</Link>
+            <Link href="/privacy" className="underline hover:text-[#5B4E9D]">{t.privacy}</Link>
           </p>
         </div>
       </div>
