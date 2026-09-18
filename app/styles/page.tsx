@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
 import { Sparkles, X } from 'lucide-react'
+import { useLocale } from '@/lib/useLocale'
+import { tr } from '@/lib/messages/styleText'
+import { STYLES } from '@/lib/messages/styles'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 
@@ -43,6 +46,8 @@ function StyleTile({ styleId, icon, label, description, onClick }: {
 }
 
 export default function StylesPage() {
+  const locale = useLocale()
+  const t = STYLES[locale]
   const [loggedIn, setLoggedIn] = useState(false)
   const [gender, setGender] = useState<Gender>('female')
   const [lightbox, setLightbox] = useState<{ styleId: string; label: string; description: string } | null>(null)
@@ -82,10 +87,10 @@ export default function StylesPage() {
             <span className="font-serif text-2xl font-semibold text-[#2D2D2D] tracking-tight">Nova Imago</span>
           </Link>
           <div className="flex items-center gap-6">
-            <Link href="/#how-it-works" className="hidden sm:inline text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">How It Works</Link>
-            <Link href="/#pricing" className="hidden sm:inline text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">Plans</Link>
+            <Link href="/#how-it-works" className="hidden sm:inline text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">{t.howItWorks}</Link>
+            <Link href="/#pricing" className="hidden sm:inline text-[#6B6B6B] hover:text-[#5B4E9D] font-medium transition">{t.plans}</Link>
             <Link href={ctaHref} className="bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-6 py-2.5 rounded-full font-semibold transition shadow-md hover:shadow-lg hover:-translate-y-0.5">
-              {loggedIn ? 'Create →' : 'Get Started →'}
+              {loggedIn ? t.create : t.getStarted}
             </Link>
           </div>
         </div>
@@ -94,13 +99,12 @@ export default function StylesPage() {
       {/* Hero */}
       <section className="pt-32 pb-10 px-6 sm:px-8 text-center max-w-3xl mx-auto">
         <h1 className="font-serif text-[clamp(2.25rem,5vw,3.5rem)] text-[#2D2D2D] font-normal tracking-tight mb-4">
-          Browse every style
+          {t.heroTitle}
         </h1>
         <p className="text-[#6B6B6B] text-lg mb-2">
-          {totalStyles}+ professional looks — from boardroom to gala, studio to outdoor.
-          Pick your favourites and get a full set of AI headshots from a single photo shoot.
+          {t.heroSubtitle.replace('{n}', String(totalStyles))}
         </p>
-        <p className="text-[#9B9B9B] text-sm">Tap any style to see it up close.</p>
+        <p className="text-[#9B9B9B] text-sm">{t.heroHint}</p>
       </section>
 
       {/* Gender toggle */}
@@ -114,7 +118,7 @@ export default function StylesPage() {
                 gender === g ? 'bg-[#5B4E9D] text-white shadow' : 'text-[#6B6B6B] hover:text-[#5B4E9D]'
               }`}
             >
-              {g === 'female' ? 'For Women' : 'For Men'}
+              {g === 'female' ? t.forWomen : t.forMen}
             </button>
           ))}
         </div>
@@ -126,9 +130,9 @@ export default function StylesPage() {
           <section key={cat.id} className="mb-14">
             <div className="flex items-baseline gap-3 mb-5">
               <h2 className="font-serif text-2xl sm:text-3xl text-[#2D2D2D] font-normal tracking-tight">
-                {cat.icon} {cat.name}
+                {cat.icon} {tr(cat.name, locale)}
               </h2>
-              <span className="text-[#9B9B9B] text-sm">{cat.styles.length} styles</span>
+              <span className="text-[#9B9B9B] text-sm">{cat.styles.length} {t.stylesLabel}</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {cat.styles.map((style) => (
@@ -137,8 +141,8 @@ export default function StylesPage() {
                   styleId={style.id}
                   icon={style.icon}
                   label={style.label}
-                  description={style.description}
-                  onClick={() => setLightbox({ styleId: style.id, label: style.label, description: style.description })}
+                  description={tr(style.description, locale)}
+                  onClick={() => setLightbox({ styleId: style.id, label: style.label, description: tr(style.description, locale) })}
                 />
               ))}
             </div>
@@ -149,13 +153,13 @@ export default function StylesPage() {
       {/* Bottom CTA */}
       <section className="bg-white border-t border-[#E8E6E0] py-16 px-6 sm:px-8 text-center">
         <h2 className="font-serif text-[clamp(1.75rem,4vw,2.75rem)] text-[#2D2D2D] font-normal tracking-tight mb-4">
-          Ready to get your headshots?
+          {t.ctaTitle}
         </h2>
         <p className="text-[#6B6B6B] mb-8 max-w-xl mx-auto">
-          Upload a few photos, pick your styles, and get studio-quality headshots in ~30 minutes.
+          {t.ctaBody}
         </p>
         <Link href={ctaHref} className="inline-block bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-9 py-4 rounded-full font-semibold text-lg transition shadow-md hover:shadow-lg hover:-translate-y-0.5">
-          Create your headshots →
+          {t.ctaButton}
         </Link>
       </section>
 
@@ -170,7 +174,7 @@ export default function StylesPage() {
               onClick={() => setLightbox(null)}
               className="absolute -top-11 right-0 text-white/80 hover:text-white flex items-center gap-1 text-sm"
             >
-              Close <X className="w-5 h-5" />
+              {t.close} <X className="w-5 h-5" />
             </button>
             <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -183,9 +187,9 @@ export default function StylesPage() {
                 <h3 className="font-serif text-xl text-[#2D2D2D] mb-1">{lightbox.label}</h3>
                 <p className="text-[#6B6B6B] text-sm mb-4">{lightbox.description}</p>
                 <Link href={ctaHref} className="block text-center bg-[#FF6B4A] hover:bg-[#FF5230] text-white px-6 py-3 rounded-full font-semibold transition">
-                  Create your headshots →
+                  {t.ctaButton}
                 </Link>
-                <p className="text-[#9B9B9B] text-[11px] text-center mt-2">Example — your photos will feature your own face.</p>
+                <p className="text-[#9B9B9B] text-[11px] text-center mt-2">{t.exampleNote}</p>
               </div>
             </div>
           </div>

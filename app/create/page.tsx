@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase'
 import CreateProgressBar from '@/components/CreateProgressBar'
 import { STYLE_CATEGORIES } from '@/lib/createStyleCategories'
 import StyleThumb from '@/components/StyleThumb'
+import { useLocale } from '@/lib/useLocale'
+import { tr } from '@/lib/messages/styleText'
 
 const VARIATIONS_PER_STYLE = 4
 const ONBOARDING_KEY = 'novaimago_styles_onboarded'
@@ -13,6 +15,7 @@ const ONBOARDING_KEY = 'novaimago_styles_onboarded'
 
 export default function CreateStylesPage() {
   const router = useRouter()
+  const locale = useLocale()
   const [loading, setLoading] = useState(true)
   const [userCredits, setUserCredits] = useState(0)
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
@@ -280,7 +283,7 @@ export default function CreateStylesPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{category.icon}</span>
                     <div className="text-left">
-                      <h3 className="text-white font-semibold text-lg">{category.name}</h3>
+                      <h3 className="text-white font-semibold text-lg">{tr(category.name, locale)}</h3>
                       <p className="text-gray-500 text-sm">{category.styles.length} styles</p>
                     </div>
                   </div>
@@ -347,7 +350,7 @@ export default function CreateStylesPage() {
                             <span className={`text-sm font-semibold mb-1 ${isSelected ? 'text-white' : 'text-gray-300'}`}>
                               {style.label}
                             </span>
-                            <span className="text-gray-500 text-xs leading-tight">{style.description}</span>
+                            <span className="text-gray-500 text-xs leading-tight">{tr(style.description, locale)}</span>
                           </button>
                         )
                       })}
