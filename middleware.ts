@@ -27,7 +27,8 @@ export function middleware(req: NextRequest) {
   return res
 }
 
-// Alleen op de pagina's waar prijzen getoond/gekozen worden
+// Op alle pagina's (behalve API, Next-assets en bestanden) zodat de taal- en munt-cookies
+// overal beschikbaar zijn — ook voor server-gerenderde pagina's zoals /about en de juridische pagina's.
 export const config = {
-  matcher: ['/', '/buy-credits', '/pricing', '/styles'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }
