@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { type Currency, type TierId, CURRENCY_SYMBOL, TIER_PRICE, readCurrencyClient } from '@/lib/currency'
+import { useLocale } from '@/lib/useLocale'
+import { BUYCREDITS } from '@/lib/messages/buycredits'
+import { LANDING } from '@/lib/messages/landing'
 
 interface PricingTier {
   id: string
@@ -82,6 +85,10 @@ export default function BuyCreditsPage() {
   const [currency, setCurrency] = useState<Currency>('EUR')
   useEffect(() => { setCurrency(readCurrencyClient()) }, [])
 
+  const locale = useLocale()
+  const tb = BUYCREDITS[locale]
+  const lp = LANDING[locale].pricing
+
   useEffect(() => {
     async function fetchUser() {
       const { data: { session } } = await supabase.auth.getSession()
@@ -126,11 +133,11 @@ export default function BuyCreditsPage() {
       if (data.url) {
         window.location.href = data.url
       } else {
-        alert('Failed to create checkout session')
+        alert(tb.alertFailed)
       }
     } catch (error) {
       console.error('Purchase error:', error)
-      alert('Something went wrong. Please try again.')
+      alert(tb.alertWrong)
     } finally {
       setPurchasing(null)
     }
@@ -160,16 +167,16 @@ export default function BuyCreditsPage() {
           
           <div className="flex items-center gap-4">
             <Link href="/create" className="text-gray-400 hover:text-white transition font-medium">
-              Create
+              {tb.navCreate}
             </Link>
             <Link href="/gallery" className="text-gray-400 hover:text-white transition font-medium">
-              Gallery
+              {tb.navGallery}
             </Link>
             {user && (
               <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
                 <span className="text-violet-400 text-sm">✦</span>
                 <span className="text-white font-semibold">{user.credits}</span>
-                <span className="text-gray-400 text-sm">credits</span>
+                <span className="text-gray-400 text-sm">{tb.credits}</span>
               </div>
             )}
           </div>
@@ -181,19 +188,19 @@ export default function BuyCreditsPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
-              Choose Your Pack
+              {tb.chooseYourPack}
             </h1>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              One-time payment. No subscription. Generate professional AI headshots in minutes.
+              {tb.subtitle}
             </p>
             <p className="text-base text-violet-300/90 max-w-2xl mx-auto mt-4">
-              ✨ Every style gives you <strong>4 variations</strong> — so you can pick the one you like best.
+              ✨ {tb.variationsNote}
             </p>
           </div>
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-3 gap-6">
-            {PRICING_TIERS.map((tier) => (
+            {PRICING_TIERS.map((tier, i) => (
               <div
                 key={tier.id}
                 className={`relative rounded-3xl p-8 transition-all duration-300 ${
@@ -205,21 +212,21 @@ export default function BuyCreditsPage() {
                 {tier.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                     <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg">
-                      Most Popular
+                      {tb.mostPopular}
                     </span>
                   </div>
                 )}
 
                 <div className="text-4xl mb-4">{tier.icon}</div>
-                <h2 className="text-xl font-bold text-white mb-1">{tier.name}</h2>
-                <p className="text-gray-400 text-sm mb-6">{tier.credits} credits</p>
+                <h2 className="text-xl font-bold text-white mb-1">{lp.tiers[i].name}</h2>
+                <p className="text-gray-400 text-sm mb-6">{lp.tiers[i].line}</p>
 
                 <div className="mb-8">
                   <span className="text-5xl font-bold text-white">{CURRENCY_SYMBOL[currency]}{TIER_PRICE[currency][tier.id as TierId]}</span>
                 </div>
 
                 <ul className="space-y-3 mb-8">
-                  {tier.features.map((feature, index) => (
+                  {lp.tiers[i].features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-3">
                       <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
                         <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
@@ -248,15 +255,15 @@ export default function BuyCreditsPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
-                      Processing...
+                      {tb.processing}
                     </span>
                   ) : (
-                    'Purchase'
+                    tb.purchase
                   )}
                 </button>
 
                 <p className="text-center text-gray-500 text-xs mt-4">
-                  One-time payment • No subscription
+                  {tb.oneTimeNoSub}
                 </p>
               </div>
             ))}
@@ -271,13 +278,13 @@ export default function BuyCreditsPage() {
                 onChange={(e) => setIsBusiness(e.target.checked)}
                 className="w-5 h-5 rounded accent-violet-500 cursor-pointer"
               />
-              <span className="text-white font-medium">I am buying as a business (I need an invoice)</span>
+              <span className="text-white font-medium">{tb.bizLabel}</span>
             </label>
 
             {isBusiness && (
               <div className="mt-4">
                 <p className="text-gray-400 text-sm">
-                  You&apos;ll enter your <span className="text-white">VAT number</span> and billing address securely at checkout. Belgian businesses receive a Peppol e-invoice; other businesses receive a standard invoice — both automatically.
+                  {tb.bizDesc}
                 </p>
               </div>
             )}
@@ -286,12 +293,12 @@ export default function BuyCreditsPage() {
           {/* GUARANTEE BANNER */}
           <div className="mt-10 bg-gradient-to-br from-emerald-900/30 to-teal-900/20 border border-emerald-500/30 rounded-2xl p-8 max-w-2xl mx-auto text-center">
             <div className="text-4xl mb-3">🛡️</div>
-            <h3 className="text-white font-bold text-xl mb-3">Profile-Worthy Guarantee</h3>
+            <h3 className="text-white font-bold text-xl mb-3">{lp.guarantee.title}</h3>
             <p className="text-gray-300 text-sm leading-relaxed mb-5">
-              Not every photo will be perfect — that&apos;s the nature of AI. But we guarantee you&apos;ll get at least <span className="text-white font-semibold">1 profile-worthy headshot</span> in every order. If not, we refund you in full within 7 days. No forms, no hassle.
+              {lp.guarantee.body}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-6">
-              {['Full refund within 7 days', 'No questions asked', 'No forms or hassle'].map((item) => (
+              {lp.guarantee.items.map((item) => (
                 <div key={item} className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-full bg-emerald-500/30 flex items-center justify-center shrink-0">
                     <svg className="w-2.5 h-2.5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
@@ -306,25 +313,25 @@ export default function BuyCreditsPage() {
 
           {/* Trust badges */}
           <div className="mt-16 text-center">
-            <p className="text-gray-500 text-sm mb-6">Secure payment powered by Stripe</p>
+            <p className="text-gray-500 text-sm mb-6">{tb.securePayment}</p>
             <div className="flex items-center justify-center gap-8">
               <div className="flex items-center gap-2 text-gray-400">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span className="text-sm">SSL Encrypted</span>
+                <span className="text-sm">{tb.ssl}</span>
               </div>
               <div className="flex items-center gap-2 text-gray-400">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" />
                 </svg>
-                <span className="text-sm">Profile-Worthy Guarantee</span>
+                <span className="text-sm">{tb.guaranteeBadge}</span>
               </div>
               <div className="flex items-center gap-2 text-gray-400">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span className="text-sm">Instant Delivery</span>
+                <span className="text-sm">{tb.instant}</span>
               </div>
             </div>
           </div>

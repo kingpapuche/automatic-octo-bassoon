@@ -3,6 +3,8 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useLocale } from '@/lib/useLocale'
+import { CREATE } from '@/lib/messages/create'
 
 interface GenerationStatus {
   id: string
@@ -18,6 +20,7 @@ interface GenerationStatus {
 
 export default function GenerationProgressPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  const t = CREATE[useLocale()].generations
   const { id } = use(params)
   const [status, setStatus] = useState<GenerationStatus | null>(null)
   const [error, setError] = useState<string>('')
@@ -29,7 +32,7 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
       try {
         const res = await fetch(`/api/generation-status/${id}`)
         if (!res.ok) {
-          setError('Generation niet gevonden')
+          setError(t.notFound)
           return
         }
         const data = await res.json()
@@ -49,16 +52,16 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
     interval = setInterval(fetchStatus, 4000)
 
     return () => clearInterval(interval)
-  }, [id, router])
+  }, [id, router, t.notFound])
 
   if (error) {
     return (
       <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center px-6">
         <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 max-w-md text-center">
-          <h1 className="text-2xl font-bold text-red-400 mb-3">Oops</h1>
+          <h1 className="text-2xl font-bold text-red-400 mb-3">{t.oops}</h1>
           <p className="text-gray-300 mb-6">{error}</p>
           <Link href="/gallery" className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-xl font-semibold">
-            Naar Gallery
+            {t.toGallery}
           </Link>
         </div>
       </div>
@@ -76,13 +79,13 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
         <div className="w-20 h-20 border-4 border-violet-400 border-t-transparent rounded-full animate-spin mx-auto mb-8"></div>
 
         <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">
-          Generating Your Headshots
+          {t.generating}
         </h1>
 
         <p className="text-gray-400 text-lg mb-8">
           {status
-            ? `${status.completed} of ${status.total} ready - ${status.totalStyles} ${status.totalStyles === 1 ? 'style' : 'styles'} x ${status.variationsPerStyle} variations`
-            : 'Starting up...'}
+            ? t.photosReady.replace('{done}', String(status.completed)).replace('{total}', String(status.total))
+            : t.startingUp}
         </p>
 
         <div className="bg-white/10 rounded-full h-3 mb-3 overflow-hidden">
@@ -91,10 +94,10 @@ export default function GenerationProgressPage({ params }: { params: Promise<{ i
             style={{ width: `${Math.max(5, progressPercent)}%` }}
           />
         </div>
-        <p className="text-violet-300 text-sm font-semibold mb-8">{progressPercent}% complete</p>
+        <p className="text-violet-300 text-sm font-semibold mb-8">{progressPercent}% {t.complete}</p>
 
         <p className="text-gray-500 text-sm">
-          This takes a few minutes. You'll be taken to your gallery automatically when all photos are ready.
+          {t.takesMinutes}
         </p>
 
       </div>

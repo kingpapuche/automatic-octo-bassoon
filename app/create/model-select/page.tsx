@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { useLocale } from '@/lib/useLocale'
+import { CREATE } from '@/lib/messages/create'
 
 interface Model { id: string; name: string; status: string; gender: string | null; preview_url: string | null }
 
@@ -17,6 +19,7 @@ function pick(model: Model, router: ReturnType<typeof useRouter>) {
 
 export default function ModelSelectPage() {
   const router = useRouter()
+  const t = CREATE[useLocale()].modelSelect
   const [loading, setLoading] = useState(true)
   const [models, setModels] = useState<Model[]>([])
 
@@ -42,14 +45,14 @@ export default function ModelSelectPage() {
   }, [router])
 
   if (loading) {
-    return <div className="min-h-screen bg-[#0b1020] flex items-center justify-center text-white/60">Laden…</div>
+    return <div className="min-h-screen bg-[#0b1020] flex items-center justify-center text-white/60">{t.loading}</div>
   }
 
   return (
     <div className="min-h-screen bg-[#0b1020] text-white">
       <div className="max-w-2xl mx-auto px-5 py-16">
-        <h1 className="text-2xl font-bold mb-2">Who are these headshots for?</h1>
-        <p className="text-white/50 mb-8">Choose the person — we&apos;ll show the right styles for them.</p>
+        <h1 className="text-2xl font-bold mb-2">{t.forWho}</h1>
+        <p className="text-white/50 mb-8">{t.forWhoDesc}</p>
 
         <div className="grid sm:grid-cols-2 gap-4">
           {models.map((m) => (
@@ -67,9 +70,9 @@ export default function ModelSelectPage() {
                 </div>
               )}
               <div className="text-lg font-semibold">{m.name}</div>
-              <div className="text-white/40 text-sm capitalize">{m.gender || 'model'}</div>
+              <div className="text-white/40 text-sm capitalize">{m.gender || t.modelFallback}</div>
               <div className="mt-4 text-violet-300 text-sm font-medium opacity-0 group-hover:opacity-100 transition">
-                Choose styles →
+                {t.chooseStyles}
               </div>
             </button>
           ))}
