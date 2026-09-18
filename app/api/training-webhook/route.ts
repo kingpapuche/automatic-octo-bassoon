@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import Replicate from 'replicate'
 import { Resend } from 'resend'
 import { brandedEmail } from '@/lib/email-template'
+import { EMAILS } from '@/lib/messages/emails'
+import { isLocale, DEFAULT_LOCALE } from '@/lib/i18n'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,6 +20,12 @@ interface ReplicateWebhookPayload {
   status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled'
   output?: { version?: string } | null
   error?: string | null
+}
+
+// Vult {name} in de kop; zonder naam wordt ", {name}" netjes verwijderd (werkt voor alle talen).
+function fillName(template: string, fullName?: string | null): string {
+  const name = (fullName || '').trim()
+  return name ? template.replace('{name}', name) : template.replace(/,?\s*\{name\}/, '')
 }
 
 export async function POST(request: NextRequest) {
@@ -36,9 +44,12 @@ export async function POST(request: NextRequest) {
     // Haal user op voor email
     const { data: userData } = await supabase
       .from('users')
-      .select('email, full_name')
+      .select('email, full_name, locale')
       .eq('id', userId)
       .single()
+
+    // Taal van de klant (opgeslagen bij het opslaan van kenmerken); fallback = Engels
+    const locale = isLocale(userData?.locale) ? userData.locale : DEFAULT_LOCALE
 
     // === SUCCEEDED ===
     if (payload.status === 'succeeded') {
@@ -92,20 +103,18 @@ export async function POST(request: NextRequest) {
 
       if (userData?.email) {
         try {
+          const copy = EMAILS[locale].ready
           const readyEmail = brandedEmail({
-            previewText: 'Your AI model is trained and ready — time to create your headshots.',
-            heading: `You're all set, ${userData.full_name || 'there'}!`,
-            paragraphs: [
-              'Great news — your personal AI model is trained and ready to generate professional headshots.',
-              'Head to your dashboard to choose your styles and create your first set. Each style gives you 4 unique variations.',
-            ],
-            button: { label: 'Create my headshots', url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard` },
+            previewText: copy.previewText,
+            heading: fillName(copy.heading, userData.full_name),
+            paragraphs: copy.paragraphs,
+            button: { label: copy.buttonLabel, url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard` },
           })
           await resend.emails.send({
             from: 'Nova Imago <noreply@novaimago.ai>',
             replyTo: 'support@novaimago.ai',
             to: userData.email,
-            subject: 'Your AI model is ready',
+            subject: copy.subject,
             html: readyEmail.html,
             text: readyEmail.text,
           })
@@ -143,21 +152,18 @@ export async function POST(request: NextRequest) {
 
       if (userData?.email) {
         try {
+          const copy = EMAILS[locale].issue
           const issueEmail = brandedEmail({
-            previewText: "Your training didn't complete — your credit is safe, let's try again.",
-            heading: `Let's get that sorted, ${userData.full_name || 'there'}`,
-            paragraphs: [
-              "Your training didn't complete successfully — but don't worry, your credit hasn't been used.",
-              'Please try again with a fresh set of photos. Clear, well-lit selfies from different angles give the best results.',
-              "Still stuck? Just reply to this email and we'll help you personally.",
-            ],
-            button: { label: 'Try again', url: `${process.env.NEXT_PUBLIC_APP_URL}/upload` },
+            previewText: copy.previewText,
+            heading: fillName(copy.heading, userData.full_name),
+            paragraphs: copy.paragraphs,
+            button: { label: copy.buttonLabel, url: `${process.env.NEXT_PUBLIC_APP_URL}/upload` },
           })
           await resend.emails.send({
             from: 'Nova Imago <noreply@novaimago.ai>',
             replyTo: 'support@novaimago.ai',
             to: userData.email,
-            subject: 'Training issue — let us help',
+            subject: copy.subject,
             html: issueEmail.html,
             text: issueEmail.text,
           })

@@ -77,7 +77,8 @@ const COMPRESSION_OPTIONS = {
 
 export default function UploadPage() {
   const router = useRouter()
-  const tu = UPLOAD[useLocale()]
+  const locale = useLocale()
+  const tu = UPLOAD[locale]
   const [user, setUser] = useState<{ id: string; email: string; credits: number } | null>(null)
   const [photos, setPhotos] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
@@ -164,6 +165,7 @@ export default function UploadPage() {
           has_beard:         characteristics.has_beard,
           use_cases:         characteristics.use_cases,
           allow_photo_usage: allowPhotoUsage,
+          locale,
         }),
       })
       const data = await response.json()

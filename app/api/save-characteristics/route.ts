@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { isLocale } from '@/lib/i18n'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +18,7 @@ export async function POST(request: NextRequest) {
       use_cases,
       age_range,
       allow_photo_usage,
+      locale,
     } = body
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
@@ -35,6 +37,8 @@ export async function POST(request: NextRequest) {
         use_cases,
         age_range,
         allow_photo_usage,
+        // Taal opslaan zodat transactionele e-mails in de juiste taal worden verstuurd
+        ...(isLocale(locale) ? { locale } : {}),
       })
       .eq('id', userId)
     if (error) {

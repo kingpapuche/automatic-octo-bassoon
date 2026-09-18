@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { User } from '@supabase/supabase-js'
+import { readLocaleClient } from './i18n'
 
 interface AuthContextType {
   user: User | null
@@ -62,6 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // Taal in user_metadata zodat de Supabase auth-mail (magic link) in de juiste taal kan
+        data: { locale: readLocaleClient() },
       },
     })
     return { error }
