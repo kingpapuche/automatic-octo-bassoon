@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Sparkles } from 'lucide-react'
 import ReviewCard from '@/components/ReviewCard'
+import { useLocale } from '@/lib/useLocale'
+import { GALLERY } from '@/lib/messages/gallery'
 
 interface Generation {
   id: string
@@ -16,6 +18,7 @@ interface Generation {
 
 export default function GalleryPage() {
   const router = useRouter()
+  const t = GALLERY[useLocale()].gallery
   const [user, setUser] = useState<any>(null)
   const [generations, setGenerations] = useState<Generation[]>([])
   const [loading, setLoading] = useState(true)
@@ -81,7 +84,7 @@ export default function GalleryPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
-        <p className="text-white">Loading your headshots...</p>
+        <p className="text-white">{t.loading}</p>
       </div>
     )
   }
@@ -89,7 +92,7 @@ export default function GalleryPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
-        <p className="text-white">Redirecting to login...</p>
+        <p className="text-white">{t.redirecting}</p>
       </div>
     )
   }
@@ -122,13 +125,13 @@ export default function GalleryPage() {
               href="/dashboard"
               className="border border-white/20 text-white px-6 py-2 rounded-lg hover:bg-white/10 transition text-sm"
             >
-              ← Dashboard
+              {t.dashboard}
             </Link>
             <Link
               href="/create/styles"
               className="bg-[#FF6B4A] text-white px-6 py-2 rounded-lg hover:bg-[#e55a3a] transition text-sm font-semibold"
             >
-              Generate More
+              {t.generateMore}
             </Link>
           </div>
         </div>
@@ -138,14 +141,14 @@ export default function GalleryPage() {
 
         {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Your Headshots</h1>
-          <p className="text-white/50 mt-1">{allImages.length} photos generated</p>
+          <h1 className="text-3xl font-bold text-white">{t.title}</h1>
+          <p className="text-white/50 mt-1">{allImages.length} {t.photosGenerated}</p>
 
           {/* Download-aanmoediging (geen verwijder-belofte die niet afgedwongen wordt -> GDPR-veilig) */}
           <div className="mt-4 flex items-start gap-2.5 bg-violet-500/10 border border-violet-500/30 text-violet-200 text-sm rounded-xl px-4 py-3">
             <span className="text-base leading-none mt-0.5">💾</span>
             <span>
-              Tip: <strong className="font-semibold">download the headshots you want to keep</strong> and save your favourites to your device.
+              {t.downloadTip} <strong className="font-semibold">{t.downloadTipStrong}</strong>
             </span>
           </div>
         </div>
@@ -156,12 +159,12 @@ export default function GalleryPage() {
         {/* Gallery Grid */}
         {allImages.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-[#94a3b8] text-lg mb-4">No headshots yet!</p>
+            <p className="text-[#94a3b8] text-lg mb-4">{t.none}</p>
             <Link
               href="/upload"
               className="bg-[#FF6B4A] text-white px-6 py-3 rounded-lg hover:bg-[#e55a3a] transition"
             >
-              Generate Your First Headshot
+              {t.generateFirst}
             </Link>
           </div>
         ) : (
@@ -184,7 +187,7 @@ export default function GalleryPage() {
                       }
                       className="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition"
                     >
-                      Download
+                      {t.download}
                     </button>
                   </div>
                 </div>
