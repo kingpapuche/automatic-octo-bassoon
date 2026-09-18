@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useLocale } from '@/lib/useLocale'
+import { DASHBOARD } from '@/lib/messages/dashboard'
 
 interface TrainingStatusProps {
   userId: string
@@ -15,6 +17,7 @@ interface TrainingStatusProps {
 const EXPECTED_TOTAL_MINUTES = 30
 
 export default function TrainingStatus({ userId }: TrainingStatusProps) {
+  const t = DASHBOARD[useLocale()].training
   const [status, setStatus] = useState<string>('checking')
   const [message, setMessage] = useState<string>('Checking status...')
   const [startedAt, setStartedAt] = useState<string | null>(null)
@@ -119,7 +122,7 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
           <div>
-            <h3 className="text-white font-bold text-xl">🚀 Training Your AI Model</h3>
+            <h3 className="text-white font-bold text-xl">{t.heading}</h3>
             <p className="text-white/80">{message}</p>
           </div>
         </div>
@@ -135,11 +138,9 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
 
         {/* Tips Section */}
         <div className="bg-white/10 rounded-xl p-4 mb-6">
-          <h4 className="text-white font-semibold mb-2">💡 While you wait:</h4>
+          <h4 className="text-white font-semibold mb-2">{t.tipsTitle}</h4>
           <ul className="text-white/80 text-sm space-y-1">
-            <li>• Training takes about 25-35 minutes</li>
-            <li>• You&apos;ll get better results with diverse photos</li>
-            <li>• Once ready, you can generate your styles!</li>
+            {t.tips.map((tip) => <li key={tip}>• {tip}</li>)}
           </ul>
         </div>
 
@@ -149,18 +150,18 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
             href="/buy-credits"
             className="bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-lg font-medium transition"
           >
-            💳 Buy More Credits
+            {t.buyMore}
           </Link>
           <Link
             href="/gallery"
             className="bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-lg font-medium transition"
           >
-            🖼️ View Gallery
+            {t.viewGallery}
           </Link>
         </div>
 
         <p className="text-white/70 text-sm mt-4">
-          📧 Stay on this page to watch the progress, or leave — <strong>we&apos;ll email you the moment it&apos;s ready</strong>. Don&apos;t see the email? Please check your spam folder.
+          {t.leaveNote}
         </p>
       </div>
     )
@@ -172,15 +173,15 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
         <div className="flex items-center gap-4">
           <div className="text-4xl">✅</div>
           <div>
-            <h3 className="text-white font-bold text-lg">Model Ready!</h3>
-            <p className="text-white/80">Your AI model is trained and ready to generate headshots.</p>
+            <h3 className="text-white font-bold text-lg">{t.readyTitle}</h3>
+            <p className="text-white/80">{t.readyDesc}</p>
           </div>
         </div>
         <Link
           href="/create"
           className="inline-block mt-4 bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition"
         >
-          Generate Headshots Now →
+          {t.generateNow}
         </Link>
       </div>
     )
@@ -192,15 +193,15 @@ export default function TrainingStatus({ userId }: TrainingStatusProps) {
         <div className="flex items-center gap-4">
           <div className="text-4xl">❌</div>
           <div>
-            <h3 className="text-red-400 font-bold text-lg">Training Failed</h3>
-            <p className="text-red-300">Something went wrong. Please try uploading your photos again.</p>
+            <h3 className="text-red-400 font-bold text-lg">{t.failedTitle}</h3>
+            <p className="text-red-300">{t.failedDesc}</p>
           </div>
         </div>
         <Link
           href="/upload"
           className="inline-block mt-4 bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition"
         >
-          Try Again →
+          {t.tryAgain}
         </Link>
       </div>
     )

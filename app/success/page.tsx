@@ -1,8 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { useLocale } from '@/lib/useLocale'
+import { DASHBOARD } from '@/lib/messages/dashboard'
 
 export default function SuccessPage() {
+  const t = DASHBOARD[useLocale()].success
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FAFAF9] to-[#F5F5F4] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
@@ -14,41 +17,41 @@ export default function SuccessPage() {
           </div>
 
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 bg-gradient-to-r from-[#5B4E9D] to-[#0D9488] bg-clip-text text-transparent">
-            Payment Successful! 🎉
+            {t.title}
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            Your credits have been added to your account. Let&apos;s create your headshots!
+            {t.subtitle}
           </p>
 
           <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">What happens next?</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">{t.whatNext}</h2>
             <div className="space-y-3 text-left">
               <div className="flex items-start gap-3">
                 <span className="text-2xl">📸</span>
                 <div>
-                  <p className="font-semibold text-gray-800">1. Upload your photos</p>
-                  <p className="text-sm text-gray-600">Upload 8–15 selfies so we can build your personal AI model.</p>
+                  <p className="font-semibold text-gray-800">{t.s1t}</p>
+                  <p className="text-sm text-gray-600">{t.s1d}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🤖</span>
                 <div>
-                  <p className="font-semibold text-gray-800">2. We train your model (~20–30 min)</p>
-                  <p className="text-sm text-gray-600">We learn your face from your photos — this runs in the background.</p>
+                  <p className="font-semibold text-gray-800">{t.s2t}</p>
+                  <p className="text-sm text-gray-600">{t.s2d}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-2xl">✨</span>
                 <div>
-                  <p className="font-semibold text-gray-800">3. Choose styles &amp; generate</p>
-                  <p className="text-sm text-gray-600">Pick your looks and get your professional headshots.</p>
+                  <p className="font-semibold text-gray-800">{t.s3t}</p>
+                  <p className="text-sm text-gray-600">{t.s3d}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <p className="text-sm text-gray-500 mt-6">
-            From your dashboard you can upload photos to train your model, or jump straight to generating if your model is ready.
+            {t.note}
           </p>
 
           <div className="mt-6 flex flex-col items-center gap-4">
@@ -56,10 +59,10 @@ export default function SuccessPage() {
               href="/dashboard"
               className="inline-block bg-gradient-to-r from-[#5B4E9D] to-[#0D9488] text-white px-8 py-4 rounded-2xl font-semibold hover:-translate-y-1 transition-all duration-300 shadow-lg"
             >
-              Go to your dashboard →
+              {t.goDashboard}
             </Link>
             <Link href="/" className="text-[#5B4E9D] hover:text-[#7D6FB8] font-semibold transition-colors">
-              ← Back to home
+              {t.backHome}
             </Link>
           </div>
         </div>

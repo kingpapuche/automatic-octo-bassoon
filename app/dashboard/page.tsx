@@ -7,14 +7,11 @@ import { supabase } from '@/lib/supabase'
 import { CreditCard, Upload, Sparkles, Play, Wand2, Images } from 'lucide-react'
 import TrainingStatus from '@/components/TrainingStatus'
 import Link from 'next/link'
+import { useLocale } from '@/lib/useLocale'
+import { DASHBOARD } from '@/lib/messages/dashboard'
 
-// Stappen naast de video in de How it Works kaart
-const HOW_STEPS = [
-  { icon: Upload, title: '1. Upload your photos', desc: 'Add 10-20 clear selfies. Different angles, expressions and lighting give the best results.' },
-  { icon: Wand2, title: '2. We train your AI model', desc: 'Your personal model trains in about 25-35 minutes — we’ll let you know when it’s ready.' },
-  { icon: Sparkles, title: '3. Choose your styles', desc: 'Pick from 45+ hand-curated styles. Each style generates 4 unique variations.' },
-  { icon: Images, title: '4. Download your headshots', desc: 'Browse your gallery and download the professional headshots you love.' },
-]
+// Iconen voor de How it Works-stappen (tekst komt uit de vertalingen)
+const STEP_ICONS = [Upload, Wand2, Sparkles, Images]
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth()
@@ -47,11 +44,12 @@ export default function DashboardPage() {
   }, [user, loading, router])
 
   const hasModel = !!trainedModelId
+  const t = DASHBOARD[useLocale()].dashboard
 
   if (loading || loadingCredits) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-white text-xl">{t.loading}</div>
       </div>
     )
   }
@@ -76,7 +74,7 @@ export default function DashboardPage() {
               onClick={() => signOut()}
               className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition text-sm"
             >
-              Sign Out
+              {t.signOut}
             </button>
           </div>
         </div>
@@ -86,8 +84,8 @@ export default function DashboardPage() {
 
         {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-white/50 mt-1">Manage your AI headshots</p>
+          <h1 className="text-3xl font-bold text-white">{t.title}</h1>
+          <p className="text-white/50 mt-1">{t.subtitle}</p>
         </div>
 
         {/* Welcome Card */}
@@ -97,17 +95,17 @@ export default function DashboardPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Welcome Back!</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t.welcomeBack}</h2>
               <p className="text-gray-600">{user?.email}</p>
             </div>
           </div>
           
           {/* Credits Display */}
           <div className="bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] text-white p-6 rounded-xl">
-            <div className="text-sm opacity-90 mb-1">Your Credits</div>
+            <div className="text-sm opacity-90 mb-1">{t.yourCredits}</div>
             <div className="text-5xl font-bold">{credits}</div>
             <div className="text-sm opacity-90 mt-2">
-              Each credit = 1 generated photo
+              {t.creditEquals}
             </div>
           </div>
         </div>
@@ -123,15 +121,15 @@ export default function DashboardPage() {
             <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mb-4">
               <CreditCard className="w-7 h-7 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Buy Credits</h3>
+            <h3 className="text-xl font-bold text-white mb-2">{t.buyTitle}</h3>
             <p className="text-gray-400 mb-4">
-              Purchase credit packs to generate AI headshots
+              {t.buyDesc}
             </p>
-            <button 
+            <button
               onClick={() => router.push('/buy-credits')}
               className="mt-auto w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-3 rounded-lg font-semibold transition"
             >
-              Buy Now →
+              {t.buyBtn}
             </button>
           </div>
 
@@ -140,15 +138,15 @@ export default function DashboardPage() {
             <div className="w-14 h-14 bg-gradient-to-br from-[#5B4E9D] to-[#7D6FB8] rounded-full flex items-center justify-center mb-4">
               <Upload className="w-7 h-7 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Train a Model</h3>
+            <h3 className="text-xl font-bold text-white mb-2">{t.trainTitle}</h3>
             <p className="text-gray-400 mb-4">
-              Upload 10-20 selfies to create a custom AI model — for yourself or someone else.
+              {t.trainDesc}
             </p>
             <button
               onClick={() => router.push('/upload')}
               className="mt-auto w-full bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] hover:from-[#483A7C] hover:to-[#5B4E9D] text-white py-3 rounded-lg font-semibold transition"
             >
-              {hasModel ? 'Train new model →' : 'Start Training →'}
+              {hasModel ? t.trainBtnNew : t.trainBtnStart}
             </button>
           </div>
 
@@ -157,20 +155,20 @@ export default function DashboardPage() {
             <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mb-4">
               <Wand2 className="w-7 h-7 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Generate</h3>
+            <h3 className="text-xl font-bold text-white mb-2">{t.genTitle}</h3>
             <p className="text-gray-400 mb-4">
-              Choose styles and create your headshots
+              {t.genDesc}
             </p>
             {hasModel ? (
-              <button 
+              <button
                 onClick={() => router.push('/create/model-select')}
                 className="mt-auto w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white py-3 rounded-lg font-semibold transition"
               >
-                Generate Headshots →
+                {t.genBtn}
               </button>
             ) : (
               <button className="mt-auto w-full bg-gray-700 text-gray-400 py-3 rounded-lg font-semibold cursor-not-allowed">
-                Model Required
+                {t.genRequired}
               </button>
             )}
           </div>
@@ -180,15 +178,15 @@ export default function DashboardPage() {
             <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-violet-500 rounded-full flex items-center justify-center mb-4">
               <Images className="w-7 h-7 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">My Gallery</h3>
+            <h3 className="text-xl font-bold text-white mb-2">{t.galTitle}</h3>
             <p className="text-gray-400 mb-4">
-              View and download your generated headshots
+              {t.galDesc}
             </p>
-            <button 
+            <button
               onClick={() => router.push('/gallery')}
               className="mt-auto w-full bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white py-3 rounded-lg font-semibold transition"
             >
-              View Gallery →
+              {t.galBtn}
             </button>
           </div>
         </div>
@@ -204,20 +202,23 @@ export default function DashboardPage() {
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <Play className="w-6 h-6 text-white ml-0.5" />
                 </div>
-                <h3 className="text-2xl font-bold text-white">How it Works</h3>
+                <h3 className="text-2xl font-bold text-white">{t.howTitle}</h3>
               </div>
               <div className="space-y-4">
-                {HOW_STEPS.map((s, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-                      <s.icon className="w-5 h-5 text-white" />
+                {t.steps.map((s, i) => {
+                  const Icon = STEP_ICONS[i]
+                  return (
+                    <div key={i} className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-white font-semibold">{s.title}</h4>
+                        <p className="text-gray-400 text-sm">{s.desc}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-white font-semibold">{s.title}</h4>
-                      <p className="text-gray-400 text-sm">{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
 
@@ -227,8 +228,8 @@ export default function DashboardPage() {
                 <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
                   <Play className="w-7 h-7 text-white ml-0.5" />
                 </div>
-                <p className="text-sm font-medium">See how it works in 90 seconds</p>
-                <p className="text-xs text-white/40 mt-1">Video coming soon</p>
+                <p className="text-sm font-medium">{t.videoTitle}</p>
+                <p className="text-xs text-white/40 mt-1">{t.videoSoon}</p>
               </div>
             </div>
           </div>
