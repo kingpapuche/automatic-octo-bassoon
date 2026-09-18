@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useDropzone } from 'react-dropzone'
 import { supabase } from '@/lib/supabase'
 import imageCompression from 'browser-image-compression'
+import { useLocale } from '@/lib/useLocale'
+import { UPLOAD } from '@/lib/messages/upload'
 
 const ETHNICITY_OPTIONS = [
   { value: 'caucasian',  label: 'Caucasian' },
@@ -75,6 +77,7 @@ const COMPRESSION_OPTIONS = {
 
 export default function UploadPage() {
   const router = useRouter()
+  const tu = UPLOAD[useLocale()]
   const [user, setUser] = useState<{ id: string; email: string; credits: number } | null>(null)
   const [photos, setPhotos] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
@@ -164,18 +167,18 @@ export default function UploadPage() {
         }),
       })
       const data = await response.json()
-      if (!response.ok || data.error) { setError('Failed to save your details. Please try again.'); return }
+      if (!response.ok || data.error) { setError(tu.errSave); return }
       setStep(2)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
-      setError('Failed to save your details. Please try again.')
+      setError(tu.errSave)
     }
   }
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setError('')
     if (photos.length + acceptedFiles.length > 20) {
-      setError('Maximum 15 photos allowed')
+      setError(tu.errMax)
       return
     }
     setCompressing(true)
@@ -185,19 +188,19 @@ export default function UploadPage() {
       for (const file of acceptedFiles) {
         if (!file.type.startsWith('image/')) continue
         if (file.size > 15 * 1024 * 1024) {
-          setError(`${file.name} is too large (>15MB). Please use a smaller photo.`)
+          setError(tu.errTooLarge.replace('{name}', file.name))
           continue
         }
         const fileSizeMB = file.size / (1024 * 1024)
         if (fileSizeMB > COMPRESSION_THRESHOLD_MB) {
           try {
-            setStatus(`Compressing ${file.name}...`)
+            setStatus(tu.optimizing)
             const compressed = await imageCompression(file, COMPRESSION_OPTIONS)
             const renamedFile = new File([compressed], file.name, { type: 'image/jpeg' })
             processedFiles.push(renamedFile)
             compressedCount++
           } catch (compErr) {
-            setError(`Could not process ${file.name}. Try a different photo.`)
+            setError(tu.errProcess.replace('{name}', file.name))
             continue
           }
         } else {
@@ -239,11 +242,11 @@ export default function UploadPage() {
 
   const handleSubmit = async () => {
     if (!user) { router.push('/login'); return }
-    if (photos.length < 8) { setError('Please upload at least 8 photos'); return }
-    if (user.credits < 1) { setError('You need credits to train a model.'); return }
+    if (photos.length < 8) { setError(tu.errMin8); return }
+    if (user.credits < 1) { setError(tu.errNoCredits); return }
     setUploading(true)
     setError('')
-    setStatus('Uploading photos...')
+    setStatus(tu.statusUploading)
     setUploadProgress(0)
     try {
       const photoUrls: string[] = []
@@ -260,9 +263,9 @@ export default function UploadPage() {
         if (!response.ok || data.error) throw new Error(`Failed to upload photo ${i + 1}: ${data.error}`)
         photoUrls.push(data.url)
         setUploadProgress(Math.round(((i + 1) / photos.length) * 100))
-        setStatus(`Uploading photos... ${i + 1}/${photos.length}`)
+        setStatus(`${tu.statusUploading} ${i + 1}/${photos.length}`)
       }
-      setStatus('Photos uploaded! Starting AI training...')
+      setStatus(tu.statusUploaded)
       setUploading(false)
       setTraining(true)
       const trainResponse = await fetch('/api/train', {
@@ -276,11 +279,11 @@ export default function UploadPage() {
         }),
       })
       const trainData = await trainResponse.json()
-      if (!trainResponse.ok || trainData.error) throw new Error(trainData.error || 'Failed to start training')
-      setStatus('Training started! 🎉')
+      if (!trainResponse.ok || trainData.error) throw new Error(trainData.error || tu.errStartTrain)
+      setStatus(tu.statusStarted)
       setTimeout(() => router.push('/dashboard?training=started'), 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : tu.errGeneric)
       setUploading(false)
       setTraining(false)
       setStatus('')
@@ -313,11 +316,11 @@ export default function UploadPage() {
             <span className="font-semibold text-xl text-white tracking-tight">Nova Imago</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-gray-400 hover:text-white transition font-medium text-sm">Dashboard</Link>
+            <Link href="/dashboard" className="text-gray-400 hover:text-white transition font-medium text-sm">{tu.navDashboard}</Link>
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
               <span className="text-violet-400 text-sm">✦</span>
               <span className="text-white font-semibold">{user.credits}</span>
-              <span className="text-gray-400 text-sm">credits</span>
+              <span className="text-gray-400 text-sm">{tu.credits}</span>
             </div>
           </div>
         </div>
@@ -336,7 +339,7 @@ export default function UploadPage() {
                   : 'bg-white/5 text-gray-500'
               }`}>{step > s ? '✓' : s}</div>
               <span className={`text-sm font-medium ${step === s ? 'text-white' : 'text-gray-500'}`}>
-                {s === 1 ? 'Your Details' : 'Upload Photos'}
+                {s === 1 ? tu.step1Label : tu.step2Label}
               </span>
               {s < 2 && <div className={`w-8 h-px ${step > s ? 'bg-violet-500' : 'bg-white/10'}`} />}
             </div>
@@ -346,57 +349,57 @@ export default function UploadPage() {
         {step === 1 && (
           <>
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Train Your AI Model</h1>
-              <p className="text-gray-400 text-lg">Tell us a bit about yourself so your AI model gets it right.</p>
+              <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">{tu.step1Title}</h1>
+              <p className="text-gray-400 text-lg">{tu.step1Sub}</p>
             </div>
 
             <div className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border border-violet-500/20 rounded-2xl p-6 mb-5">
-              <label className="block text-white font-semibold mb-1">Who are these photos for? *</label>
+              <label className="block text-white font-semibold mb-1">{tu.forWhom}</label>
               <p className="text-gray-500 text-sm mb-3">Use the full name (first + last) — it identifies this AI model.</p>
               <input
                 type="text"
                 value={characteristics.full_name}
                 onChange={e => updateChar('full_name', e.target.value)}
-                placeholder="e.g. John Smith"
+                placeholder={tu.namePlaceholder}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
               />
             </div>
 
             <div className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border border-violet-500/20 rounded-2xl p-6 mb-5 space-y-6">
-              <h3 className="text-white font-semibold">About You <span className="text-gray-500 font-normal text-sm">(helps the AI get the details right)</span></h3>
+              <h3 className="text-white font-semibold">{tu.aboutYou} <span className="text-gray-500 font-normal text-sm">{tu.aboutYouHint}</span></h3>
 
               <div>
-                <label className="block text-white font-semibold mb-2 text-sm">Gender *</label>
+                <label className="block text-white font-semibold mb-2 text-sm">{tu.gender}</label>
                 <div className="flex flex-wrap gap-2">
                   {['male', 'female', 'non-binary'].map(g => (
                     <button key={g} onClick={() => updateChar('gender', g)}
                       className={`${pillBase} capitalize ${characteristics.gender === g ? pillActive : pillInactive}`}>
-                      {g}
+                      {tu.genderOpts[g]}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-white font-semibold mb-2 text-sm">Ethnicity *</label>
+                <label className="block text-white font-semibold mb-2 text-sm">{tu.ethnicity}</label>
                 <div className="flex flex-wrap gap-2">
                   {ETHNICITY_OPTIONS.map(o => (
                     <button key={o.value} onClick={() => updateChar('ethnicity', o.value)}
                       className={`${pillBase} ${characteristics.ethnicity === o.value ? pillActive : pillInactive}`}>
-                      {o.label}
+                      {tu.ethnicityOpts[o.value]}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-white font-semibold mb-2 text-sm">Eye Color *</label>
+                <label className="block text-white font-semibold mb-2 text-sm">{tu.eyeColor}</label>
                 <div className="flex flex-wrap gap-2">
                   {EYE_COLOR_OPTIONS.map(o => (
                     <button key={o.value} onClick={() => updateChar('eye_color', o.value)}
                       className={`${pillBase} flex items-center gap-2 ${characteristics.eye_color === o.value ? pillActive : pillInactive}`}>
                       <div className="w-3.5 h-3.5 rounded-full border border-white/30 shrink-0" style={{ backgroundColor: o.color }} />
-                      {o.label}
+                      {tu.eyeOpts[o.value]}
                     </button>
                   ))}
                 </div>
@@ -409,7 +412,7 @@ export default function UploadPage() {
                   }`}>
                     {characteristics.is_bald && <span className="text-white text-xs font-bold">✓</span>}
                   </div>
-                  <span className="text-white text-sm">Bald / very short hair</span>
+                  <span className="text-white text-sm">{tu.bald}</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer" onClick={() => updateChar('has_glasses', !characteristics.has_glasses)}>
                   <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
@@ -417,7 +420,7 @@ export default function UploadPage() {
                   }`}>
                     {characteristics.has_glasses && <span className="text-white text-xs font-bold">✓</span>}
                   </div>
-                  <span className="text-white text-sm">Glasses</span>
+                  <span className="text-white text-sm">{tu.glasses}</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer" onClick={() => updateChar('has_beard', !characteristics.has_beard)}>
                   <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
@@ -425,19 +428,19 @@ export default function UploadPage() {
                   }`}>
                     {characteristics.has_beard && <span className="text-white text-xs font-bold">✓</span>}
                   </div>
-                  <span className="text-white text-sm">Beard / facial hair</span>
+                  <span className="text-white text-sm">{tu.beard}</span>
                 </label>
               </div>
 
               {!characteristics.is_bald && (
                 <div>
-                  <label className="block text-white font-semibold mb-2 text-sm">Hair Color *</label>
+                  <label className="block text-white font-semibold mb-2 text-sm">{tu.hairColor}</label>
                   <div className="flex flex-wrap gap-2">
                     {HAIR_COLOR_OPTIONS.map(o => (
                       <button key={o.value} onClick={() => updateChar('hair_color', o.value)}
                         className={`${pillBase} flex items-center gap-2 ${characteristics.hair_color === o.value ? pillActive : pillInactive}`}>
                         <div className="w-3.5 h-3.5 rounded-full border border-white/30 shrink-0" style={{ backgroundColor: o.color }} />
-                        {o.label}
+                        {tu.hairOpts[o.value]}
                       </button>
                     ))}
                   </div>
@@ -446,8 +449,8 @@ export default function UploadPage() {
 
               <div>
                 <label className="block text-white font-semibold mb-1 text-sm">
-                  What will you use these for?
-                  <span className="text-gray-500 font-normal ml-2">(optional, max 3)</span>
+                  {tu.useForWhat}
+                  <span className="text-gray-500 font-normal ml-2">{tu.useForWhatHint}</span>
                 </label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {USE_CASE_OPTIONS.map(o => (
@@ -456,7 +459,7 @@ export default function UploadPage() {
                       className={`${pillBase} text-xs disabled:opacity-40 disabled:cursor-not-allowed ${
                         characteristics.use_cases.includes(o.value) ? pillActive : pillInactive
                       }`}>
-                      {o.label}
+                      {tu.useCaseOpts[o.value]}
                     </button>
                   ))}
                 </div>
@@ -471,8 +474,8 @@ export default function UploadPage() {
                   {allowPhotoUsage && <span className="text-white text-xs font-bold">✓</span>}
                 </div>
                 <div>
-                  <p className="text-white font-medium text-sm">Allow Nova Imago to use my photos as examples</p>
-                  <p className="text-gray-500 text-xs mt-1">Your photos may be shown on our website to help future customers. No personal info is shared.</p>
+                  <p className="text-white font-medium text-sm">{tu.consentLabel}</p>
+                  <p className="text-gray-500 text-xs mt-1">{tu.consentDesc}</p>
                 </div>
               </label>
             </div>
@@ -491,7 +494,7 @@ export default function UploadPage() {
                   ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-xl shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5'
                   : 'bg-white/10 text-gray-500 cursor-not-allowed'
               }`}>
-              {isStep1Valid() ? 'Continue to Photo Upload →' : 'Please fill in all required fields'}
+              {isStep1Valid() ? tu.continueBtn : tu.fillRequired}
             </button>
           </>
         )}
@@ -499,23 +502,23 @@ export default function UploadPage() {
         {step === 2 && (
           <>
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Upload Your Photos</h1>
-              <p className="text-gray-400 text-lg">Upload <strong className="text-white">8–15 photos</strong> for the best results.</p>
+              <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">{tu.step2Title}</h1>
+              <p className="text-gray-400 text-lg">{tu.step2Sub}</p>
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6 items-center">
               <button onClick={() => setStep(1)} className="text-gray-400 hover:text-white text-sm transition">
-                ← Edit details
+                {tu.editDetails}
               </button>
               <div className="w-px h-4 bg-white/10" />
               {[
                 characteristics.full_name,
-                characteristics.gender,
-                characteristics.ethnicity,
-                `${characteristics.eye_color} eyes`,
-                characteristics.is_bald ? 'Bald' : `${characteristics.hair_color} hair`,
-                characteristics.has_glasses ? 'Glasses' : null,
-                characteristics.has_beard ? 'Beard' : null,
+                tu.genderOpts[characteristics.gender] || characteristics.gender,
+                tu.ethnicityOpts[characteristics.ethnicity] || characteristics.ethnicity,
+                `${tu.eyeOpts[characteristics.eye_color] || characteristics.eye_color} ${tu.eyesSuffix}`,
+                characteristics.is_bald ? tu.baldTag : `${tu.hairOpts[characteristics.hair_color] || characteristics.hair_color} ${tu.hairSuffix}`,
+                characteristics.has_glasses ? tu.glassesTag : null,
+                characteristics.has_beard ? tu.beardTag : null,
               ].filter(Boolean).map(tag => (
                 <span key={String(tag)} className="bg-violet-500/20 text-violet-300 border border-violet-500/30 px-2.5 py-0.5 rounded-full text-xs capitalize">
                   {tag}
@@ -524,17 +527,9 @@ export default function UploadPage() {
             </div>
 
             <div className="bg-gradient-to-br from-violet-900/30 to-fuchsia-900/20 border border-violet-500/30 rounded-2xl p-6 mb-6">
-              <h3 className="text-white font-semibold mb-4">💡 Tips for the best results</h3>
+              <h3 className="text-white font-semibold mb-4">{tu.tipsTitle}</h3>
               <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                {[
-                  <><span className="text-white font-semibold">8–15 photos</span> for best results</>,
-                  <>Solo only — no sunglasses or hats</>,
-                  <>Mix <span className="text-white font-semibold">smiling</span> and <span className="text-white font-semibold">neutral</span></>,
-                  <>Good <span className="text-white font-semibold">natural lighting</span></>,
-                  <>Different <span className="text-white font-semibold">angles</span> &amp; expressions</>,
-                  <><span className="text-white font-semibold">Varied backgrounds</span> &amp; locations — important for pro results!</>,
-                  <>Photos auto-optimized — any size works</>,
-                ].map((tip, i) => (
+                {tu.tips.map((tip, i) => (
                   <div key={i} className="flex items-start gap-2 text-gray-400 text-sm">
                     <span className="text-violet-400 shrink-0 mt-0.5">•</span>
                     <span>{tip}</span>
@@ -545,14 +540,14 @@ export default function UploadPage() {
 
             <div className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border border-violet-500/20 rounded-2xl p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-semibold">Upload Photos</h3>
+                <h3 className="text-white font-semibold">{tu.uploadSection}</h3>
                 {photoCount > 0 && (
                   <div className="flex items-center gap-3">
                     <span className={`text-sm font-semibold ${photoCount >= 8 ? 'text-emerald-400' : 'text-gray-400'}`}>
                       {photoCount}/15 photos{photoCount >= 8 && ' ✓'}
                     </span>
                     <button onClick={() => setPhotos([])} className="text-xs text-gray-500 hover:text-red-400 transition">
-                      Clear all
+                      {tu.clearAll}
                     </button>
                   </div>
                 )}
@@ -572,14 +567,14 @@ export default function UploadPage() {
                   <span className="text-2xl">{compressing ? '⏳' : '📸'}</span>
                 </div>
                 {compressing ? (
-                  <p className="text-violet-400 font-semibold text-lg">Optimizing photos...</p>
+                  <p className="text-violet-400 font-semibold text-lg">{tu.optimizing}</p>
                 ) : isDragActive ? (
-                  <p className="text-violet-400 font-semibold text-lg">Drop your photos here...</p>
+                  <p className="text-violet-400 font-semibold text-lg">{tu.dropHere}</p>
                 ) : (
                   <>
-                    <p className="text-white font-semibold text-lg mb-1">Drag & drop photos here</p>
-                    <p className="text-gray-500 text-sm mb-2">or click to browse</p>
-                    <p className="text-gray-600 text-xs">JPG, PNG, WEBP • Auto-optimized for upload</p>
+                    <p className="text-white font-semibold text-lg mb-1">{tu.dragDrop}</p>
+                    <p className="text-gray-500 text-sm mb-2">{tu.orBrowse}</p>
+                    <p className="text-gray-600 text-xs">{tu.fileTypes}</p>
                   </>
                 )}
               </div>
@@ -607,7 +602,7 @@ export default function UploadPage() {
             {photoCount > 0 && photoCount < 8 && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
                 <p className="text-amber-400 text-sm font-medium">
-                  Upload {8 - photoCount} more photo{8 - photoCount !== 1 ? 's' : ''} to continue (minimum 8)
+                  {tu.uploadMoreMin.replace('{n}', String(8 - photoCount))}
                 </p>
               </div>
             )}
@@ -656,18 +651,18 @@ export default function UploadPage() {
               {uploading ? (
                 <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>{status}</>
               ) : training ? (
-                <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Starting AI training...</>
+                <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>{tu.startingTraining}</>
               ) : compressing ? (
-                'Optimizing photos...'
+                tu.optimizing
               ) : photoCount < 8 ? (
-                `Upload ${8 - photoCount} more photo${8 - photoCount !== 1 ? 's' : ''} to continue`
+                tu.uploadMoreBtn.replace('{n}', String(8 - photoCount))
               ) : (
-                <><span className="text-xl">🚀</span> Start AI Training ({photoCount}/15 photos)</>
+                <><span className="text-xl">🚀</span> {tu.startTraining} ({photoCount}/15)</>
               )}
             </button>
 
             <p className="text-center mt-4 text-gray-600 text-sm">
-              Training takes about 25–35 minutes. Stay on this page to watch the progress, or leave — we&apos;ll email you the moment your model is ready. Don&apos;t see the email? Please check your spam folder.
+              {tu.trainingNote}
             </p>
           </>
         )}
