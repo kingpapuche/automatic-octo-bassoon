@@ -166,9 +166,9 @@ export default function SignupPage() {
           {/* Footer */}
           <p className="text-center text-gray-500 text-xs mt-6">
             {t.agree}{' '}
-            <Link href="/terms" className="underline hover:text-[#5B4E9D]">{t.terms}</Link>
+            <Link href="/terms-of-service" className="underline hover:text-[#5B4E9D]">{t.terms}</Link>
             {' '}&{' '}
-            <Link href="/privacy" className="underline hover:text-[#5B4E9D]">{t.privacy}</Link>
+            <Link href="/privacy-policy" className="underline hover:text-[#5B4E9D]">{t.privacy}</Link>
           </p>
         </div>
       </div>
