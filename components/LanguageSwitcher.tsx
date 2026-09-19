@@ -1,18 +1,21 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { Globe, ChevronDown } from 'lucide-react'
-import { LOCALES, LOCALE_NAMES, writeLocaleClient, type Locale } from '@/lib/i18n'
+import { LOCALES, LOCALE_NAMES, writeLocaleClient, localizedPath, type Locale } from '@/lib/i18n'
 
 interface Props {
   locale: Locale
-  onChange: (l: Locale) => void
+  onChange?: (l: Locale) => void
   className?: string
 }
 
 export default function LanguageSwitcher({ locale, onChange, className = '' }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -22,10 +25,12 @@ export default function LanguageSwitcher({ locale, onChange, className = '' }: P
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
 
+  // Navigeer naar dezelfde pagina in de gekozen taal (wisselt de URL-prefix).
   const select = (l: Locale) => {
     writeLocaleClient(l)
-    onChange(l)
+    onChange?.(l)
     setOpen(false)
+    router.push(localizedPath(pathname || '/', l))
   }
 
   return (
