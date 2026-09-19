@@ -32,6 +32,7 @@ export default function HeroCarousel({
   return (
     <div className="w-full max-w-[360px] mx-auto">
       <BeforeAfterSlider
+        key={index}
         beforeImage={cur.before}
         afterImage={cur.after}
         beforeLabel={beforeLabel}

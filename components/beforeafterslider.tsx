@@ -33,14 +33,8 @@ export default function BeforeAfterSlider({
   const containerRef = useRef<HTMLDivElement>(null)
   const cyclesRef = useRef(0)
   const [animationPhase, setAnimationPhase] = useState<Phase>('pause-left')
-
-  // Bij een nieuw voorbeeld: netjes herstarten aan de linkerkant + cyclusteller resetten.
-  useEffect(() => {
-    setSliderPosition(5)
-    setAnimationPhase('pause-left')
-    setIsAutoAnimating(true)
-    cyclesRef.current = 0
-  }, [beforeImage])
+  // NB: de carrousel geeft deze component een key={index}, dus bij een nieuw voorbeeld
+  // wordt hij volledig opnieuw gemonteerd -> state (positie, fase, teller) start vanzelf fris.
 
   // Animatie: pauze links → naar rechts → pauze rechts → naar links → korte rust → volgend voorbeeld.
   // De wissel naar het volgende voorbeeld gebeurt PAS bij 'cycle-end' (na de volledige terugweg),
@@ -70,14 +64,15 @@ export default function BeforeAfterSlider({
         })
       }, MOVE_INTERVAL_MS)
     } else if (animationPhase === 'cycle-end') {
-      // Eén heen-en-weer klaar: korte rust. Pas na 'cyclesPerExample' keer door naar het volgende voorbeeld.
+      // Eén heen-en-weer klaar: korte rust. Na 'cyclesPerExample' keer door naar het volgende voorbeeld,
+      // anders opnieuw heen-en-weer. Bij advancen NIET zelf de fase zetten (component remount via key).
       timeout = setTimeout(() => {
         cyclesRef.current += 1
-        if (cyclesRef.current >= cyclesPerExample) {
-          cyclesRef.current = 0
-          onCycleEnd?.()
+        if (cyclesRef.current >= cyclesPerExample && onCycleEnd) {
+          onCycleEnd()
+        } else {
+          setAnimationPhase('pause-left')
         }
-        setAnimationPhase('pause-left')
       }, END_PAUSE_MS)
     }
 
