@@ -50,14 +50,14 @@ export default function HomePage() {
     { name: 'Roy',    before: '/images/roy-before.jpg',    after: '/images/roy-after.webp' },
     { name: 'Mims',   before: '/images/mims-before.jpeg',  after: '/images/mims-after.webp' },
     { name: 'Alja',   before: '/images/alja-before.jpg',   after: '/images/alja-after.webp' },
-    { name: 'Nathalie', before: '/images/nathalie-before.jpg', after: '/images/nathalie-after.webp' },
+    { name: 'Britt',  before: '/images/britt-before.jpg',  after: '/images/britt-after.webp' },
   ]
 
   // Hero-carrousel: meerdere voor/na-voorbeelden met thumbnails (BetterPic-stijl)
   const heroExamples: HeroExample[] = [
     { name: 'Renata', before: '/images/renata-before.jpg', after: '/images/renata-after.jpg', align: true },
     { name: 'Stijn', before: '/images/stijn-before.jpg', after: '/images/stijn-after.jpg' },
-    { name: 'Britt', before: '/images/britt-before.jpg', after: '/images/britt-after.webp', align: true },
+    { name: 'Nathalie', before: '/images/nathalie-before.jpg', after: '/images/nathalie-after.webp', align: true },
     { name: 'featured', before: '/images/before.jpeg', after: '/images/headshot-42.webp' },
   ]
 
