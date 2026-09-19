@@ -36,6 +36,7 @@ export default function HeroCarousel({
         beforeLabel={beforeLabel}
         afterLabel={afterLabel}
         onCycleEnd={paused ? undefined : advance}
+        cyclesPerExample={2}
       />
 
       {examples.length > 1 && (

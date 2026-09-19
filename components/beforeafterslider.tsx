@@ -16,24 +16,28 @@ export default function BeforeAfterSlider({
   beforeLabel = 'Before',
   afterLabel = 'After',
   onCycleEnd,
+  cyclesPerExample = 1,
 }: {
   beforeImage: string
   afterImage: string
   beforeLabel?: string
   afterLabel?: string
   onCycleEnd?: () => void
+  cyclesPerExample?: number
 }) {
   const [sliderPosition, setSliderPosition] = useState(5)
   const [isDragging, setIsDragging] = useState(false)
   const [isAutoAnimating, setIsAutoAnimating] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
+  const cyclesRef = useRef(0)
   const [animationPhase, setAnimationPhase] = useState<Phase>('pause-left')
 
-  // Bij een nieuw voorbeeld: netjes herstarten aan de linkerkant.
+  // Bij een nieuw voorbeeld: netjes herstarten aan de linkerkant + cyclusteller resetten.
   useEffect(() => {
     setSliderPosition(5)
     setAnimationPhase('pause-left')
     setIsAutoAnimating(true)
+    cyclesRef.current = 0
   }, [beforeImage])
 
   // Animatie: pauze links → naar rechts → pauze rechts → naar links → korte rust → volgend voorbeeld.
@@ -64,15 +68,19 @@ export default function BeforeAfterSlider({
         })
       }, MOVE_INTERVAL_MS)
     } else if (animationPhase === 'cycle-end') {
-      // Volledige cyclus klaar: korte rust, dan (indien gewenst) door naar het volgende voorbeeld.
+      // Eén heen-en-weer klaar: korte rust. Pas na 'cyclesPerExample' keer door naar het volgende voorbeeld.
       timeout = setTimeout(() => {
-        onCycleEnd?.()
+        cyclesRef.current += 1
+        if (cyclesRef.current >= cyclesPerExample) {
+          cyclesRef.current = 0
+          onCycleEnd?.()
+        }
         setAnimationPhase('pause-left')
       }, END_PAUSE_MS)
     }
 
     return () => { if (interval) clearInterval(interval); if (timeout) clearTimeout(timeout) }
-  }, [isAutoAnimating, animationPhase, onCycleEnd])
+  }, [isAutoAnimating, animationPhase, onCycleEnd, cyclesPerExample])
 
   const handleInteractionStart = () => {
     setIsAutoAnimating(false)
