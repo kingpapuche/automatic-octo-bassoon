@@ -2,59 +2,77 @@
 
 import { useState, useEffect, useRef } from 'react'
 
+// Animatie-timing (sneller dan voorheen)
+const PAUSE_MS = 900        // pauze aan elke kant
+const END_PAUSE_MS = 600    // korte rust op "voor" voordat we naar het volgende voorbeeld gaan
+const MOVE_INTERVAL_MS = 16 // ~60fps
+const STEP = 2              // % per tick
+
+type Phase = 'pause-left' | 'moving-right' | 'pause-right' | 'moving-left' | 'cycle-end'
+
 export default function BeforeAfterSlider({
   beforeImage,
   afterImage,
   beforeLabel = 'Before',
   afterLabel = 'After',
+  onCycleEnd,
 }: {
   beforeImage: string
   afterImage: string
   beforeLabel?: string
   afterLabel?: string
+  onCycleEnd?: () => void
 }) {
   const [sliderPosition, setSliderPosition] = useState(5)
   const [isDragging, setIsDragging] = useState(false)
   const [isAutoAnimating, setIsAutoAnimating] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [animationPhase, setAnimationPhase] = useState<'pause-left' | 'moving-right' | 'pause-right' | 'moving-left'>('pause-left')
+  const [animationPhase, setAnimationPhase] = useState<Phase>('pause-left')
 
-  // Animatie: 2 sec pauze links, slide naar rechts, 2 sec pauze rechts, slide naar links
+  // Bij een nieuw voorbeeld: netjes herstarten aan de linkerkant.
+  useEffect(() => {
+    setSliderPosition(5)
+    setAnimationPhase('pause-left')
+    setIsAutoAnimating(true)
+  }, [beforeImage])
+
+  // Animatie: pauze links → naar rechts → pauze rechts → naar links → korte rust → volgend voorbeeld.
+  // De wissel naar het volgende voorbeeld gebeurt PAS bij 'cycle-end' (na de volledige terugweg),
+  // dus nooit meer midden in de terugweg.
   useEffect(() => {
     if (!isAutoAnimating) return
 
-    let interval: NodeJS.Timeout
+    let interval: ReturnType<typeof setInterval> | undefined
+    let timeout: ReturnType<typeof setTimeout> | undefined
 
     if (animationPhase === 'pause-left') {
-      // Wacht 2 seconden op 5%, dan ga naar rechts
-      interval = setTimeout(() => setAnimationPhase('moving-right'), 2000)
+      timeout = setTimeout(() => setAnimationPhase('moving-right'), PAUSE_MS)
     } else if (animationPhase === 'pause-right') {
-      // Wacht 2 seconden op 95%, dan ga naar links
-      interval = setTimeout(() => setAnimationPhase('moving-left'), 2000)
+      timeout = setTimeout(() => setAnimationPhase('moving-left'), PAUSE_MS)
     } else if (animationPhase === 'moving-right') {
       interval = setInterval(() => {
         setSliderPosition((prev) => {
-          if (prev >= 95) {
-            setAnimationPhase('pause-right')
-            return 95
-          }
-          return prev + 1
+          if (prev >= 95) { setAnimationPhase('pause-right'); return 95 }
+          return Math.min(prev + STEP, 95)
         })
-      }, 20)
+      }, MOVE_INTERVAL_MS)
     } else if (animationPhase === 'moving-left') {
       interval = setInterval(() => {
         setSliderPosition((prev) => {
-          if (prev <= 5) {
-            setAnimationPhase('pause-left')
-            return 5
-          }
-          return prev - 1
+          if (prev <= 5) { setAnimationPhase('cycle-end'); return 5 }
+          return Math.max(prev - STEP, 5)
         })
-      }, 20)
+      }, MOVE_INTERVAL_MS)
+    } else if (animationPhase === 'cycle-end') {
+      // Volledige cyclus klaar: korte rust, dan (indien gewenst) door naar het volgende voorbeeld.
+      timeout = setTimeout(() => {
+        onCycleEnd?.()
+        setAnimationPhase('pause-left')
+      }, END_PAUSE_MS)
     }
 
-    return () => clearInterval(interval)
-  }, [isAutoAnimating, animationPhase])
+    return () => { if (interval) clearInterval(interval); if (timeout) clearTimeout(timeout) }
+  }, [isAutoAnimating, animationPhase, onCycleEnd])
 
   const handleInteractionStart = () => {
     setIsAutoAnimating(false)

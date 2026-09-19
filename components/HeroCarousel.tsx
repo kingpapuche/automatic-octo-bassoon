@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import BeforeAfterSlider from './beforeafterslider'
 
 export interface HeroExample { name: string; before: string; after: string }
@@ -19,24 +19,23 @@ export default function HeroCarousel({
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
 
-  useEffect(() => {
-    if (paused || examples.length <= 1) return
-    const t = setTimeout(() => setIndex((i) => (i + 1) % examples.length), 8000)
-    return () => clearTimeout(t)
-  }, [index, paused, examples.length])
+  // Ga pas naar het volgende voorbeeld wanneer de slider zijn volledige cyclus heeft afgerond
+  // (dus nooit midden in de terugweg). Bij 'paused' (na klik op thumbnail) blijven we staan.
+  const advance = useCallback(() => {
+    if (examples.length > 1) setIndex((i) => (i + 1) % examples.length)
+  }, [examples.length])
 
   if (examples.length === 0) return null
   const cur = examples[index]
 
   return (
     <div className="w-full max-w-[360px] mx-auto">
-      {/* key={index} -> slider herstart z'n animatie netjes bij elk nieuw voorbeeld */}
       <BeforeAfterSlider
-        key={index}
         beforeImage={cur.before}
         afterImage={cur.after}
         beforeLabel={beforeLabel}
         afterLabel={afterLabel}
+        onCycleEnd={paused ? undefined : advance}
       />
 
       {examples.length > 1 && (
