@@ -9,6 +9,7 @@ const PATHS: { path: string; priority: number; cf: MetadataRoute.Sitemap[number]
   { path: '/styles', priority: 0.9, cf: 'weekly' },
   { path: '/buy-credits', priority: 0.8, cf: 'monthly' },
   { path: '/about', priority: 0.6, cf: 'monthly' },
+  { path: '/guides', priority: 0.7, cf: 'weekly' },
   ...GUIDE_SLUGS.map((slug) => ({ path: `/guides/${slug}`, priority: 0.7, cf: 'monthly' as const })),
   { path: '/refund-policy', priority: 0.3, cf: 'yearly' },
   { path: '/terms-of-service', priority: 0.3, cf: 'yearly' },
