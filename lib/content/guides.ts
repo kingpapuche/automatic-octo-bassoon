@@ -1129,15 +1129,27 @@ export const GUIDES_INDEX: Record<Locale, { title: string; heading: string; intr
 // Blog-metadata die niet per taal verschilt: hero-afbeelding + publicatiedatum per artikel.
 export const BLOG_AUTHOR = 'Nova Imago'
 export const GUIDE_META: Record<string, { image: string; date: string }> = {
-  'ai-headshots-for-linkedin': { image: '/blog/ai-headshots-for-linkedin.png', date: '2026-09-19' },
-  'ai-headshots-for-cv': { image: '/blog/ai-headshots-for-cv.png', date: '2026-09-19' },
-  'ai-photos-for-dating': { image: '/blog/ai-photos-for-dating.png', date: '2026-09-19' },
-  'ai-headshots-for-business-teams': { image: '/blog/ai-headshots-for-business-teams.png', date: '2026-09-19' },
-  'ai-headshots-vs-photographer': { image: '/blog/ai-headshots-vs-photographer.png', date: '2026-09-19' },
+  'ai-headshots-for-linkedin': { image: '/blog/photos/ai-headshots-for-linkedin-h.webp', date: '2026-09-19' },
+  'ai-headshots-for-cv': { image: '/blog/photos/ai-headshots-for-cv-h.webp', date: '2026-09-19' },
+  'ai-photos-for-dating': { image: '/blog/photos/ai-photos-for-dating-h.webp', date: '2026-09-19' },
+  'ai-headshots-for-business-teams': { image: '/blog/photos/ai-headshots-for-business-teams-h.webp', date: '2026-09-19' },
+  'ai-headshots-vs-photographer': { image: '/blog/photos/ai-headshots-vs-photographer-h.webp', date: '2026-09-19' },
   // Wekelijkse drip: verschijnen automatisch zodra hun datum bereikt is (ISR).
-  'ai-headshots-for-actors': { image: '/blog/ai-headshots-for-actors.png', date: '2026-09-26' },
-  'ai-headshots-for-real-estate-agents': { image: '/blog/ai-headshots-for-real-estate-agents.png', date: '2026-10-03' },
-  'how-to-take-good-selfies-for-ai-headshots': { image: '/blog/how-to-take-good-selfies-for-ai-headshots.png', date: '2026-10-10' },
+  'ai-headshots-for-actors': { image: '/blog/photos/ai-headshots-for-actors-h.webp', date: '2026-09-26' },
+  'ai-headshots-for-real-estate-agents': { image: '/blog/photos/ai-headshots-for-real-estate-agents-h.webp', date: '2026-10-03' },
+  'how-to-take-good-selfies-for-ai-headshots': { image: '/blog/photos/how-to-take-good-selfies-for-ai-headshots-h.webp', date: '2026-10-10' },
+}
+
+// Inline-foto per artikel (portret), midden in de tekst geplaatst.
+export const GUIDE_INLINE: Record<string, string> = {
+  'ai-headshots-for-linkedin': '/blog/photos/ai-headshots-for-linkedin-i.webp',
+  'ai-headshots-for-cv': '/blog/photos/ai-headshots-for-cv-i.webp',
+  'ai-photos-for-dating': '/blog/photos/ai-photos-for-dating-i.webp',
+  'ai-headshots-for-business-teams': '/blog/photos/ai-headshots-for-business-teams-i.webp',
+  'ai-headshots-vs-photographer': '/blog/photos/ai-headshots-vs-photographer-i.webp',
+  'ai-headshots-for-actors': '/blog/photos/ai-headshots-for-actors-i.webp',
+  'ai-headshots-for-real-estate-agents': '/blog/photos/ai-headshots-for-real-estate-agents-i.webp',
+  'how-to-take-good-selfies-for-ai-headshots': '/blog/photos/how-to-take-good-selfies-for-ai-headshots-i.webp',
 }
 
 // Tags per artikel, per taal (voor de blogkaarten + artikelpagina).

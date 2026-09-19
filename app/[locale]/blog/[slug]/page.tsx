@@ -5,7 +5,8 @@ import { Link } from '@/lib/nav'
 import { Sparkles } from 'lucide-react'
 import { LOCALES, isLocale, type Locale } from '@/lib/i18n'
 import { SITE, altLanguages } from '@/lib/seo'
-import { GUIDES, GUIDE_META, GUIDE_TAGS, BLOG_AUTHOR, isPublished, publishedSlugs, type GuideBlock } from '@/lib/content/guides'
+import { Fragment } from 'react'
+import { GUIDES, GUIDE_META, GUIDE_TAGS, GUIDE_INLINE, BLOG_AUTHOR, isPublished, publishedSlugs, type GuideBlock } from '@/lib/content/guides'
 
 // ISR: geplande artikels worden live zodra hun datum bereikt is.
 export const revalidate = 43200
@@ -56,6 +57,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ locale
   const meta = GUIDE_META[slug]
   if (!guide || !isPublished(slug)) notFound()
   const tags = GUIDE_TAGS[slug]?.[loc] ?? []
+  const inlineImg = GUIDE_INLINE[slug]
+  const insertAt = Math.min(2, guide.blocks.length - 1) // inline-foto na het 3e blok
   const fmtDate = (iso: string) => new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso))
 
   const articleLd = {
@@ -102,7 +105,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ locale
         )}
 
         <p className="text-lg text-[#2D2D2D] mb-2">{guide.intro}</p>
-        {guide.blocks.map((b, i) => renderBlock(b, i))}
+        {guide.blocks.map((b, i) => (
+          <Fragment key={i}>
+            {renderBlock(b, i)}
+            {inlineImg && i === insertAt && (
+              <figure className="my-9">
+                <Image src={inlineImg} alt={`${guide.h1} — Nova Imago`} width={760} height={950} className="w-full max-w-[500px] mx-auto rounded-2xl shadow-sm" />
+              </figure>
+            )}
+          </Fragment>
+        ))}
 
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-10">
