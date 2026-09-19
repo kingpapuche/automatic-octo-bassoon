@@ -18,5 +18,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Oude /guides-URL's (o.a. in Search Console ingediend) blijvend doorsturen naar /blog.
+  async redirects() {
+    return [
+      { source: '/:locale/guides', destination: '/:locale/blog', permanent: true },
+      { source: '/:locale/guides/:slug', destination: '/:locale/blog/:slug', permanent: true },
+    ]
+  },
 };
 export default nextConfig;

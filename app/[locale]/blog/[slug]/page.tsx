@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { Link } from '@/lib/nav'
 import { Sparkles } from 'lucide-react'
 import { LOCALES, isLocale, type Locale } from '@/lib/i18n'
 import { SITE, altLanguages } from '@/lib/seo'
-import { GUIDES, GUIDE_SLUGS, type GuideBlock } from '@/lib/content/guides'
+import { GUIDES, GUIDE_SLUGS, GUIDE_META, GUIDE_TAGS, BLOG_AUTHOR, type GuideBlock } from '@/lib/content/guides'
 
 export function generateStaticParams() {
   return LOCALES.flatMap((locale) => GUIDE_SLUGS.map((slug) => ({ locale, slug })))
@@ -14,8 +15,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale, slug } = await params
   const loc: Locale = isLocale(locale) ? locale : 'en'
   const guide = GUIDES[slug]?.[loc]
+  const meta = GUIDE_META[slug]
   if (!guide) return {}
-  const path = `/guides/${slug}`
+  const path = `/blog/${slug}`
   return {
     title: guide.h1,
     description: guide.metaDescription,
@@ -25,7 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       title: guide.metaTitle,
       description: guide.metaDescription,
       url: `/${loc}${path}`,
-      images: [`/og-${loc}.png`],
+      images: [meta?.image ?? `/og-${loc}.png`],
+      publishedTime: meta?.date,
     },
   }
 }
@@ -43,11 +46,14 @@ function renderBlock(b: GuideBlock, i: number) {
   }
 }
 
-export default async function GuidePage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
+export default async function ArticlePage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params
   const loc: Locale = isLocale(locale) ? locale : 'en'
   const guide = GUIDES[slug]?.[loc]
+  const meta = GUIDE_META[slug]
   if (!guide) notFound()
+  const tags = GUIDE_TAGS[slug]?.[loc] ?? []
+  const fmtDate = (iso: string) => new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso))
 
   const articleLd = {
     '@context': 'https://schema.org',
@@ -55,8 +61,11 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
     headline: guide.h1,
     description: guide.metaDescription,
     inLanguage: loc,
-    image: `${SITE}/og-${loc}.png`,
-    mainEntityOfPage: `${SITE}/${loc}/guides/${slug}`,
+    image: meta ? `${SITE}${meta.image}` : `${SITE}/og-${loc}.png`,
+    datePublished: meta?.date,
+    dateModified: meta?.date,
+    author: { '@type': 'Organization', name: BLOG_AUTHOR },
+    mainEntityOfPage: `${SITE}/${loc}/blog/${slug}`,
     publisher: { '@type': 'Organization', name: 'Nova Imago', logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` } },
   }
 
@@ -75,12 +84,32 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
         </div>
       </nav>
 
-      <article className="max-w-[820px] mx-auto px-8 py-16 text-[#4B4B4B] leading-relaxed">
-        <h1 className="font-serif text-[clamp(2rem,4vw,3rem)] text-[#2D2D2D] mb-6">{guide.h1}</h1>
+      <article className="max-w-[820px] mx-auto px-8 py-12 text-[#4B4B4B] leading-relaxed">
+        <h1 className="font-serif text-[clamp(2rem,4vw,3rem)] text-[#2D2D2D] mb-4">{guide.h1}</h1>
+        <div className="flex items-center gap-2 text-[#9B9B9B] text-sm mb-8">
+          <span className="font-medium text-[#6B6B6B]">{BLOG_AUTHOR}</span>
+          <span>·</span>
+          {meta && <span>{fmtDate(meta.date)}</span>}
+        </div>
+
+        {meta && (
+          <div className="relative aspect-[3/2] rounded-2xl overflow-hidden bg-[#EDEBE6] mb-10 shadow-sm">
+            <Image src={meta.image} alt={guide.h1} width={900} height={600} className="w-full h-full object-cover object-top" priority />
+          </div>
+        )}
+
         <p className="text-lg text-[#2D2D2D] mb-2">{guide.intro}</p>
         {guide.blocks.map((b, i) => renderBlock(b, i))}
 
-        <div className="mt-12 bg-[#F0EEF8] border border-[#5B4E9D]/20 rounded-2xl p-8 text-center">
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-10">
+            {tags.map((tag) => (
+              <span key={tag} className="text-xs text-[#5B4E9D] bg-[#F0EEF8] px-3 py-1 rounded-full">{tag}</span>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-10 bg-[#F0EEF8] border border-[#5B4E9D]/20 rounded-2xl p-8 text-center">
           <Link href="/buy-credits" className="inline-block bg-[#5B4E9D] hover:bg-[#483A7C] text-white px-8 py-3.5 rounded-full font-semibold transition">
             {guide.ctaText} →
           </Link>
@@ -89,7 +118,7 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
       </article>
 
       <footer className="border-t border-[#E8E6E0] px-8 py-8 text-center text-[#9B9B9B] text-sm">
-        <Link href="/" className="hover:text-[#5B4E9D] transition">← Nova Imago</Link>
+        <Link href="/blog" className="hover:text-[#5B4E9D] transition">← Nova Imago Blog</Link>
       </footer>
     </div>
   )

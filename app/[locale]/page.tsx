@@ -67,7 +67,7 @@ export default function HomePage() {
     { href: '#features', label: t.nav.whyUs },
     { href: '#pricing', label: t.nav.plans },
     { href: '#how-it-works', label: t.nav.howItWorks },
-    { href: '/guides', label: GUIDES_INDEX[locale].title },
+    { href: '/blog', label: GUIDES_INDEX[locale].title },
     { href: '#faq', label: t.nav.help },
   ]
 
@@ -449,7 +449,7 @@ export default function HomePage() {
             <div><h4 className="font-bold mb-5 text-lg">{t.footer.product}</h4><ul className="space-y-3">{['#features', '#pricing', '#how-it-works', '#faq'].map((href, i) => <li key={href}><Link href={href} className="text-white/70 hover:text-white transition">{t.footer.productItems[i]}</Link></li>)}</ul></div>
             <div><h4 className="font-bold mb-5 text-lg">{t.footer.company}</h4><ul className="space-y-3">
               <li><Link href="/about" className="text-white/70 hover:text-white transition">{t.footer.about}</Link></li>
-              <li><Link href="/guides" className="text-white/70 hover:text-white transition">{GUIDES_INDEX[locale].title}</Link></li>
+              <li><Link href="/blog" className="text-white/70 hover:text-white transition">{GUIDES_INDEX[locale].title}</Link></li>
               <li><a href="mailto:support@novaimago.ai" className="text-white/70 hover:text-white transition">{t.footer.contact}</a></li>
             </ul></div>
             <div><h4 className="font-bold mb-5 text-lg">{t.footer.useCases}</h4><ul className="space-y-3">{t.footer.useCaseItems.map((label) => <li key={label}><Link href="/styles" className="text-white/70 hover:text-white transition">{label}</Link></li>)}</ul></div>

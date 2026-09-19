@@ -746,13 +746,32 @@ export const GUIDE_ORDER = [
   'ai-headshots-vs-photographer',
 ]
 
-// Labels voor de guides-index + footer, per taal.
+// Labels voor de blog-index + navigatie/footer, per taal.
 export const GUIDES_INDEX: Record<Locale, { title: string; heading: string; intro: string }> = {
-  en: { title: 'Guides', heading: 'Guides & resources', intro: 'Practical guides to getting professional AI headshots for every use.' },
-  nl: { title: 'Gidsen', heading: 'Gidsen & bronnen', intro: 'Praktische gidsen voor professionele AI-headshots voor elk gebruik.' },
-  fr: { title: 'Guides', heading: 'Guides & ressources', intro: 'Des guides pratiques pour obtenir des portraits IA professionnels pour chaque usage.' },
-  de: { title: 'Ratgeber', heading: 'Ratgeber & Ressourcen', intro: 'Praktische Ratgeber für professionelle KI-Headshots für jeden Zweck.' },
-  es: { title: 'Guías', heading: 'Guías y recursos', intro: 'Guías prácticas para conseguir retratos con IA profesionales para cada uso.' },
-  it: { title: 'Guide', heading: 'Guide e risorse', intro: 'Guide pratiche per ottenere ritratti IA professionali per ogni utilizzo.' },
-  pt: { title: 'Guias', heading: 'Guias e recursos', intro: 'Guias práticos para obter retratos com IA profissionais para cada utilização.' },
+  en: { title: 'Blog', heading: 'The Nova Imago Blog', intro: 'Practical tips and guides on getting professional AI headshots for LinkedIn, your CV, dating, business and more.' },
+  nl: { title: 'Blog', heading: 'De Nova Imago Blog', intro: 'Praktische tips en gidsen over professionele AI-headshots voor LinkedIn, je cv, dating, bedrijven en meer.' },
+  fr: { title: 'Blog', heading: 'Le blog Nova Imago', intro: 'Conseils et guides pratiques pour des portraits IA professionnels : LinkedIn, CV, rencontres, entreprises et plus.' },
+  de: { title: 'Blog', heading: 'Der Nova Imago Blog', intro: 'Praktische Tipps und Ratgeber für professionelle KI-Headshots: LinkedIn, Lebenslauf, Dating, Unternehmen und mehr.' },
+  es: { title: 'Blog', heading: 'El blog de Nova Imago', intro: 'Consejos y guías prácticas para retratos con IA profesionales: LinkedIn, CV, citas, empresas y más.' },
+  it: { title: 'Blog', heading: 'Il blog di Nova Imago', intro: 'Consigli e guide pratiche per ritratti IA professionali: LinkedIn, CV, incontri, aziende e altro.' },
+  pt: { title: 'Blog', heading: 'O blog da Nova Imago', intro: 'Dicas e guias práticos para retratos com IA profissionais: LinkedIn, CV, encontros, empresas e mais.' },
+}
+
+// Blog-metadata die niet per taal verschilt: hero-afbeelding + publicatiedatum per artikel.
+export const BLOG_AUTHOR = 'Nova Imago'
+export const GUIDE_META: Record<string, { image: string; date: string }> = {
+  'ai-headshots-for-linkedin': { image: '/images/renata-after.jpg', date: '2026-09-19' },
+  'ai-headshots-for-cv': { image: '/images/stijn-after.jpg', date: '2026-09-19' },
+  'ai-photos-for-dating': { image: '/images/nathalie-after.webp', date: '2026-09-19' },
+  'ai-headshots-for-business-teams': { image: '/images/headshot-42.webp', date: '2026-09-19' },
+  'ai-headshots-vs-photographer': { image: '/images/britt-after.webp', date: '2026-09-19' },
+}
+
+// Tags per artikel, per taal (voor de blogkaarten + artikelpagina).
+export const GUIDE_TAGS: Record<string, Record<Locale, string[]>> = {
+  'ai-headshots-for-linkedin': { en: ['LinkedIn', 'profile photo', 'professional'], nl: ['LinkedIn', 'profielfoto', 'professioneel'], fr: ['LinkedIn', 'photo de profil', 'professionnel'], de: ['LinkedIn', 'Profilfoto', 'professionell'], es: ['LinkedIn', 'foto de perfil', 'profesional'], it: ['LinkedIn', 'foto profilo', 'professionale'], pt: ['LinkedIn', 'foto de perfil', 'profissional'] },
+  'ai-headshots-for-cv': { en: ['CV', 'resume', 'job application'], nl: ['cv', 'sollicitatie', 'carrière'], fr: ['CV', 'candidature', 'emploi'], de: ['Lebenslauf', 'Bewerbung', 'Beruf'], es: ['CV', 'candidatura', 'empleo'], it: ['CV', 'candidatura', 'lavoro'], pt: ['CV', 'candidatura', 'emprego'] },
+  'ai-photos-for-dating': { en: ['dating', 'profile photo', 'online dating'], nl: ['dating', 'profielfoto', 'online daten'], fr: ['rencontres', 'photo de profil', 'dating en ligne'], de: ['Dating', 'Profilfoto', 'Online-Dating'], es: ['citas', 'foto de perfil', 'dating online'], it: ['incontri', 'foto profilo', 'dating online'], pt: ['encontros', 'foto de perfil', 'dating online'] },
+  'ai-headshots-for-business-teams': { en: ['business', 'team photos', 'company'], nl: ['bedrijf', 'teamfoto’s', 'onderneming'], fr: ['entreprise', 'photos d’équipe', 'société'], de: ['Unternehmen', 'Teamfotos', 'Firma'], es: ['empresa', 'fotos de equipo', 'compañía'], it: ['azienda', 'foto del team', 'società'], pt: ['empresa', 'fotos de equipa', 'negócio'] },
+  'ai-headshots-vs-photographer': { en: ['comparison', 'photographer', 'AI headshots'], nl: ['vergelijking', 'fotograaf', 'AI-headshots'], fr: ['comparaison', 'photographe', 'portraits IA'], de: ['Vergleich', 'Fotograf', 'KI-Headshots'], es: ['comparación', 'fotógrafo', 'retratos IA'], it: ['confronto', 'fotografo', 'ritratti IA'], pt: ['comparação', 'fotógrafo', 'retratos IA'] },
 }
