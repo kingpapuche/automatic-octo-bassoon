@@ -5,8 +5,15 @@ import { isLocale, DEFAULT_LOCALE } from '@/lib/i18n'
 import { ABOUT } from '@/lib/messages/about'
 
 export const metadata = {
-  title: 'About Nova Imago',
+  title: 'About',
   description: 'Professional AI headshots from your selfies — studio quality in minutes, without the studio.',
+  alternates: { canonical: '/about' },
+  openGraph: {
+    title: 'About Nova Imago',
+    description: 'Professional AI headshots from your selfies — studio quality in minutes, without the studio.',
+    url: '/about',
+    images: ['/og.png'],
+  },
 }
 
 export default async function AboutPage() {
