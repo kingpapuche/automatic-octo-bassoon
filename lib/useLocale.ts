@@ -1,11 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { readLocaleClient, type Locale } from './i18n'
+import { usePathname } from 'next/navigation'
+import { localeFromPath, type Locale } from './i18n'
 
-// Client-hook: geeft de gekozen taal (cookie), default EN tot na mount.
+// De actieve taal komt uit de URL-prefix (/fr/…). Synchroon -> geen hydration-flikkering.
 export function useLocale(): Locale {
-  const [locale, setLocale] = useState<Locale>('en')
-  useEffect(() => { setLocale(readLocaleClient()) }, [])
-  return locale
+  return localeFromPath(usePathname())
 }

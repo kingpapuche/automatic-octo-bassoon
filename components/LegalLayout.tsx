@@ -1,14 +1,10 @@
-import Link from 'next/link'
+import { Link } from '@/lib/nav'
 import { Sparkles } from 'lucide-react'
-import { cookies } from 'next/headers'
-import { isLocale, DEFAULT_LOCALE, type Locale } from '@/lib/i18n'
+import type { Locale } from '@/lib/i18n'
 import { LEGAL_SHARED, type LegalContent, type Block } from '@/lib/messages/legal'
 
-// Gedeelde server-gerenderde layout voor de juridische pagina's.
-// Leest de nova_locale cookie en rendert de juiste taalversie + "Engelse versie is bindend"-notitie.
-export default async function LegalLayout({ page }: { page: Record<Locale, LegalContent> }) {
-  const raw = (await cookies()).get('nova_locale')?.value
-  const locale = isLocale(raw) ? raw : DEFAULT_LOCALE
+// Gedeelde layout voor de juridische pagina's. De taal komt uit de URL-prefix (via de page-params).
+export default function LegalLayout({ page, locale }: { page: Record<Locale, LegalContent>; locale: Locale }) {
   const s = LEGAL_SHARED[locale]
   const c = page[locale]
 

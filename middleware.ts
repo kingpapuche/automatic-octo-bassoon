@@ -1,34 +1,39 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { currencyForCountry } from '@/lib/currency'
-import { pickLocale } from '@/lib/i18n'
+import { pickLocale, isLocale, type Locale } from '@/lib/i18n'
 
-// Zet cookies op basis van de bezoeker:
-// - nova_currency: munt op basis van land (Vercel geo-header)
-// - nova_locale: taal op basis van de browsertaal (Accept-Language), enkel als de bezoeker nog niet zelf koos
-export function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+const YEAR = 60 * 60 * 24 * 365
+const MONTH = 60 * 60 * 24 * 30
 
-  const country = req.headers.get('x-vercel-ip-country')
-  res.cookies.set('nova_currency', currencyForCountry(country), {
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30,
-    sameSite: 'lax',
+function setCookies(req: NextRequest, res: NextResponse, locale: Locale) {
+  res.cookies.set('nova_currency', currencyForCountry(req.headers.get('x-vercel-ip-country')), {
+    path: '/', maxAge: MONTH, sameSite: 'lax',
   })
+  res.cookies.set('nova_locale', locale, { path: '/', maxAge: YEAR, sameSite: 'lax' })
+}
 
-  // Taal alleen auto-zetten als er nog geen keuze is (respecteer de taalkiezer van de klant)
-  if (!req.cookies.get('nova_locale')) {
-    res.cookies.set('nova_locale', pickLocale(req.headers.get('accept-language')), {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: 'lax',
-    })
+// URL-routing per taal: elk pad krijgt een locale-prefix (/en/…, /fr/…).
+// Zonder prefix -> redirect naar de taal uit de cookie, anders browsertaal, anders default.
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
+  const seg = pathname.split('/')[1]
+
+  if (isLocale(seg)) {
+    const res = NextResponse.next()
+    setCookies(req, res, seg)
+    return res
   }
 
+  const cookieLoc = req.cookies.get('nova_locale')?.value
+  const locale: Locale = isLocale(cookieLoc) ? cookieLoc : pickLocale(req.headers.get('accept-language'))
+  const url = req.nextUrl.clone()
+  url.pathname = `/${locale}${pathname === '/' ? '' : pathname}`
+  const res = NextResponse.redirect(url)
+  setCookies(req, res, locale)
   return res
 }
 
-// Op alle pagina's (behalve API, Next-assets en bestanden) zodat de taal- en munt-cookies
-// overal beschikbaar zijn — ook voor server-gerenderde pagina's zoals /about en de juridische pagina's.
+// Sla API, auth-callback, Next-assets en bestanden (met punt, bv. .png/.xml/.txt) over.
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+  matcher: ['/((?!api|auth|_next/static|_next/image|.*\\..*).*)'],
 }
