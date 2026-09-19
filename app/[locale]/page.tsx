@@ -67,6 +67,7 @@ export default function HomePage() {
     { href: '#features', label: t.nav.whyUs },
     { href: '#pricing', label: t.nav.plans },
     { href: '#how-it-works', label: t.nav.howItWorks },
+    { href: '/guides', label: GUIDES_INDEX[locale].title },
     { href: '#faq', label: t.nav.help },
   ]
 
