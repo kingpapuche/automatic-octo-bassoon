@@ -5,10 +5,13 @@ import { Link } from '@/lib/nav'
 import { Sparkles } from 'lucide-react'
 import { LOCALES, isLocale, type Locale } from '@/lib/i18n'
 import { SITE, altLanguages } from '@/lib/seo'
-import { GUIDES, GUIDE_SLUGS, GUIDE_META, GUIDE_TAGS, BLOG_AUTHOR, type GuideBlock } from '@/lib/content/guides'
+import { GUIDES, GUIDE_META, GUIDE_TAGS, BLOG_AUTHOR, isPublished, publishedSlugs, type GuideBlock } from '@/lib/content/guides'
+
+// ISR: geplande artikels worden live zodra hun datum bereikt is.
+export const revalidate = 43200
 
 export function generateStaticParams() {
-  return LOCALES.flatMap((locale) => GUIDE_SLUGS.map((slug) => ({ locale, slug })))
+  return LOCALES.flatMap((locale) => publishedSlugs().map((slug) => ({ locale, slug })))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
@@ -51,7 +54,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ locale
   const loc: Locale = isLocale(locale) ? locale : 'en'
   const guide = GUIDES[slug]?.[loc]
   const meta = GUIDE_META[slug]
-  if (!guide) notFound()
+  if (!guide || !isPublished(slug)) notFound()
   const tags = GUIDE_TAGS[slug]?.[loc] ?? []
   const fmtDate = (iso: string) => new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso))
 

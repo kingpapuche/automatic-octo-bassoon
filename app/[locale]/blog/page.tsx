@@ -4,7 +4,10 @@ import { Link } from '@/lib/nav'
 import { Sparkles } from 'lucide-react'
 import { LOCALES, isLocale, type Locale } from '@/lib/i18n'
 import { altLanguages } from '@/lib/seo'
-import { GUIDES, GUIDE_ORDER, GUIDES_INDEX, GUIDE_META, GUIDE_TAGS, BLOG_AUTHOR } from '@/lib/content/guides'
+import { GUIDES, GUIDES_INDEX, GUIDE_META, GUIDE_TAGS, BLOG_AUTHOR, publishedSlugs } from '@/lib/content/guides'
+
+// ISR: elke 12u opnieuw genereren zodat geplande artikels automatisch verschijnen zodra hun datum bereikt is.
+export const revalidate = 43200
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }))
@@ -26,7 +29,8 @@ export default async function BlogIndexPage({ params }: { params: Promise<{ loca
   const { locale } = await params
   const loc: Locale = isLocale(locale) ? locale : 'en'
   const idx = GUIDES_INDEX[loc]
-  const slugs = GUIDE_ORDER.filter((s) => GUIDES[s])
+  // Alleen gepubliceerde artikels (drip), nieuwste eerst.
+  const slugs = publishedSlugs().sort((a, b) => new Date(GUIDE_META[b].date).getTime() - new Date(GUIDE_META[a].date).getTime())
   const fmtDate = (iso: string) => new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
 
   return (

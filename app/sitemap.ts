@@ -1,7 +1,10 @@
 import type { MetadataRoute } from 'next'
 import { LOCALES } from '@/lib/i18n'
 import { SITE } from '@/lib/seo'
-import { GUIDE_SLUGS } from '@/lib/content/guides'
+import { publishedSlugs } from '@/lib/content/guides'
+
+// ISR: sitemap elke 12u verversen zodat nieuw gepubliceerde (drip-)artikels automatisch worden opgenomen.
+export const revalidate = 43200
 
 // Publieke pagina's, per taal, met hreflang-alternates.
 const PATHS: { path: string; priority: number; cf: MetadataRoute.Sitemap[number]['changeFrequency'] }[] = [
@@ -10,7 +13,7 @@ const PATHS: { path: string; priority: number; cf: MetadataRoute.Sitemap[number]
   { path: '/buy-credits', priority: 0.8, cf: 'monthly' },
   { path: '/about', priority: 0.6, cf: 'monthly' },
   { path: '/blog', priority: 0.7, cf: 'weekly' },
-  ...GUIDE_SLUGS.map((slug) => ({ path: `/blog/${slug}`, priority: 0.7, cf: 'monthly' as const })),
+  ...publishedSlugs().map((slug) => ({ path: `/blog/${slug}`, priority: 0.7, cf: 'monthly' as const })),
   { path: '/refund-policy', priority: 0.3, cf: 'yearly' },
   { path: '/terms-of-service', priority: 0.3, cf: 'yearly' },
   { path: '/privacy-policy', priority: 0.3, cf: 'yearly' },
