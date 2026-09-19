@@ -3,19 +3,20 @@ import { Link } from '@/lib/nav'
 import { Sparkles } from 'lucide-react'
 import { isLocale } from '@/lib/i18n'
 import { altLanguages } from '@/lib/seo'
+import { SEO_META } from '@/lib/messages/seoMeta'
 import { ABOUT } from '@/lib/messages/about'
 
-const DESC = 'Professional AI headshots from your selfies — studio quality in minutes, without the studio.'
 const PATH = '/about'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   const loc = isLocale(locale) ? locale : 'en'
+  const m = SEO_META[loc].about
   return {
-    title: 'About',
-    description: DESC,
+    title: m.title,
+    description: m.description,
     alternates: { canonical: `/${loc}${PATH}`, languages: altLanguages(PATH) },
-    openGraph: { title: 'About Nova Imago', description: DESC, url: `/${loc}${PATH}`, images: ['/og.png'] },
+    openGraph: { title: `${m.title} | Nova Imago`, description: m.description, url: `/${loc}${PATH}`, images: [`/og-${loc}.png`] },
   }
 }
 

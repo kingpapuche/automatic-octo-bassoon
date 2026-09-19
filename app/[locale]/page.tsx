@@ -396,6 +396,19 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section id="faq" className="py-24 px-8 bg-[#FAFAF9]">
+        {/* FAQPage structured data (zelfde bron als de zichtbare FAQ -> matcht altijd) */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: t.faq.items.map((f) => ({
+              '@type': 'Question',
+              name: f.q,
+              acceptedAnswer: { '@type': 'Answer', text: f.a },
+            })),
+          }) }}
+        />
         <div className="max-w-[880px] mx-auto">
           <div className="text-center mb-16">
             <h2 className="font-serif text-[clamp(2.25rem,5vw,3.75rem)] text-[#2D2D2D]">{t.faq.heading}</h2>

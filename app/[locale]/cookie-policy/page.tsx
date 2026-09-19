@@ -3,15 +3,17 @@ import LegalLayout from '@/components/LegalLayout'
 import { COOKIE } from '@/lib/messages/legal'
 import { isLocale } from '@/lib/i18n'
 import { altLanguages } from '@/lib/seo'
+import { SEO_META } from '@/lib/messages/seoMeta'
 
 const PATH = '/cookie-policy'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   const loc = isLocale(locale) ? locale : 'en'
+  const m = SEO_META[loc].cookie
   return {
-    title: 'Cookie Policy',
-    description: 'Nova Imago uses only essential cookies — no advertising or tracking cookies.',
+    title: m.title,
+    description: m.description,
     alternates: { canonical: `/${loc}${PATH}`, languages: altLanguages(PATH) },
   }
 }

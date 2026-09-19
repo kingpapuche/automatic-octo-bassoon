@@ -3,15 +3,17 @@ import LegalLayout from '@/components/LegalLayout'
 import { PRIVACY } from '@/lib/messages/legal'
 import { isLocale } from '@/lib/i18n'
 import { altLanguages } from '@/lib/seo'
+import { SEO_META } from '@/lib/messages/seoMeta'
 
 const PATH = '/privacy-policy'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   const loc = isLocale(locale) ? locale : 'en'
+  const m = SEO_META[loc].privacy
   return {
-    title: 'Privacy Policy',
-    description: 'How Nova Imago collects, uses and protects your personal data and photos (GDPR-compliant).',
+    title: m.title,
+    description: m.description,
     alternates: { canonical: `/${loc}${PATH}`, languages: altLanguages(PATH) },
   }
 }

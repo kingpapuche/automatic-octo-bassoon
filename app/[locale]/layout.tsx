@@ -6,6 +6,7 @@ import Analytics from '@/components/Analytics'
 import { notFound } from 'next/navigation'
 import { LOCALES, isLocale, type Locale } from '@/lib/i18n'
 import { SITE, altLanguages, OG_LOCALE } from '@/lib/seo'
+import { SEO_META } from '@/lib/messages/seoMeta'
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -19,13 +20,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   const loc: Locale = isLocale(locale) ? locale : 'en'
+  const m = SEO_META[loc].home
   return {
     metadataBase: new URL(SITE),
-    title: {
-      default: 'Nova Imago — Professional AI Headshots in Minutes',
-      template: '%s | Nova Imago',
-    },
-    description: DESCRIPTION,
+    title: { default: m.title, template: '%s | Nova Imago' },
+    description: m.description,
     applicationName: 'Nova Imago',
     keywords: [
       'AI headshots', 'professional headshots', 'AI headshot generator', 'LinkedIn photo',
@@ -40,16 +39,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       type: 'website',
       url: `/${loc}`,
       siteName: 'Nova Imago',
-      title: 'Nova Imago — Professional AI Headshots in Minutes',
-      description: DESCRIPTION,
-      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Nova Imago — Professional AI headshots in minutes' }],
+      title: m.title,
+      description: m.description,
+      images: [{ url: `/og-${loc}.png`, width: 1200, height: 630, alt: m.title }],
       locale: OG_LOCALE[loc],
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Nova Imago — Professional AI Headshots in Minutes',
-      description: DESCRIPTION,
-      images: ['/og.png'],
+      title: m.title,
+      description: m.description,
+      images: [`/og-${loc}.png`],
     },
     robots: {
       index: true,
