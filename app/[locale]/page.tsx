@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import { type Currency, CURRENCY_SYMBOL, TIER_PRICE, TIER_ANCHOR, readCurrencyClient } from '@/lib/currency'
 import { useLocale } from '@/lib/useLocale'
 import { LANDING } from '@/lib/messages/landing'
+import { GUIDES } from '@/lib/content/guides'
 import {
   Zap, Palette, Gem, Lock, BadgeDollarSign, ShieldCheck,
   Upload, SlidersHorizontal, Download,
@@ -447,6 +448,7 @@ export default function HomePage() {
             <div><h4 className="font-bold mb-5 text-lg">{t.footer.product}</h4><ul className="space-y-3">{['#features', '#pricing', '#how-it-works', '#faq'].map((href, i) => <li key={href}><Link href={href} className="text-white/70 hover:text-white transition">{t.footer.productItems[i]}</Link></li>)}</ul></div>
             <div><h4 className="font-bold mb-5 text-lg">{t.footer.company}</h4><ul className="space-y-3">
               <li><Link href="/about" className="text-white/70 hover:text-white transition">{t.footer.about}</Link></li>
+              <li><Link href="/guides/ai-headshots-for-linkedin" className="text-white/70 hover:text-white transition">{GUIDES['ai-headshots-for-linkedin'][locale].h1}</Link></li>
               <li><a href="mailto:support@novaimago.ai" className="text-white/70 hover:text-white transition">{t.footer.contact}</a></li>
             </ul></div>
             <div><h4 className="font-bold mb-5 text-lg">{t.footer.useCases}</h4><ul className="space-y-3">{t.footer.useCaseItems.map((label) => <li key={label}><Link href="/styles" className="text-white/70 hover:text-white transition">{label}</Link></li>)}</ul></div>
