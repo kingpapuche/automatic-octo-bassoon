@@ -27,12 +27,13 @@ export default function BeforeAfterSlider({
   cyclesPerExample?: number
   align?: boolean
 }) {
-  const [sliderPosition, setSliderPosition] = useState(5)
+  // Start RECHTS (95%): de klant ziet eerst de 'voor'-foto, daarna wordt de 'na' onthuld.
+  const [sliderPosition, setSliderPosition] = useState(95)
   const [isDragging, setIsDragging] = useState(false)
   const [isAutoAnimating, setIsAutoAnimating] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
   const cyclesRef = useRef(0)
-  const [animationPhase, setAnimationPhase] = useState<Phase>('pause-left')
+  const [animationPhase, setAnimationPhase] = useState<Phase>('pause-right')
   // NB: de carrousel geeft deze component een key={index}, dus bij een nieuw voorbeeld
   // wordt hij volledig opnieuw gemonteerd -> state (positie, fase, teller) start vanzelf fris.
 
@@ -49,18 +50,18 @@ export default function BeforeAfterSlider({
       timeout = setTimeout(() => setAnimationPhase('moving-right'), PAUSE_MS)
     } else if (animationPhase === 'pause-right') {
       timeout = setTimeout(() => setAnimationPhase('moving-left'), PAUSE_MS)
-    } else if (animationPhase === 'moving-right') {
-      interval = setInterval(() => {
-        setSliderPosition((prev) => {
-          if (prev >= 95) { setAnimationPhase('pause-right'); return 95 }
-          return Math.min(prev + STEP, 95)
-        })
-      }, MOVE_INTERVAL_MS)
     } else if (animationPhase === 'moving-left') {
       interval = setInterval(() => {
         setSliderPosition((prev) => {
-          if (prev <= 5) { setAnimationPhase('cycle-end'); return 5 }
+          if (prev <= 5) { setAnimationPhase('pause-left'); return 5 }
           return Math.max(prev - STEP, 5)
+        })
+      }, MOVE_INTERVAL_MS)
+    } else if (animationPhase === 'moving-right') {
+      interval = setInterval(() => {
+        setSliderPosition((prev) => {
+          if (prev >= 95) { setAnimationPhase('cycle-end'); return 95 }
+          return Math.min(prev + STEP, 95)
         })
       }, MOVE_INTERVAL_MS)
     } else if (animationPhase === 'cycle-end') {
@@ -71,7 +72,7 @@ export default function BeforeAfterSlider({
         if (cyclesRef.current >= cyclesPerExample && onCycleEnd) {
           onCycleEnd()
         } else {
-          setAnimationPhase('pause-left')
+          setAnimationPhase('pause-right')
         }
       }, END_PAUSE_MS)
     }
@@ -88,7 +89,7 @@ export default function BeforeAfterSlider({
     setIsDragging(false)
     setTimeout(() => {
       setIsAutoAnimating(true)
-      setAnimationPhase('pause-left')
+      setAnimationPhase('pause-right')
     }, 3000)
   }
 
