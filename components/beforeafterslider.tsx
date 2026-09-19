@@ -17,6 +17,7 @@ export default function BeforeAfterSlider({
   afterLabel = 'After',
   onCycleEnd,
   cyclesPerExample = 1,
+  align = false,
 }: {
   beforeImage: string
   afterImage: string
@@ -24,6 +25,7 @@ export default function BeforeAfterSlider({
   afterLabel?: string
   onCycleEnd?: () => void
   cyclesPerExample?: number
+  align?: boolean
 }) {
   const [sliderPosition, setSliderPosition] = useState(5)
   const [isDragging, setIsDragging] = useState(false)
@@ -119,7 +121,13 @@ export default function BeforeAfterSlider({
       >
         {/* After Image (achtergrond) */}
         <div className="absolute inset-0">
-          <img src={afterImage} alt="After" className="w-full h-full object-cover" style={{ transform: 'scale(1.1) translateY(15px)' }} draggable={false} />
+          <img
+            src={afterImage}
+            alt="After"
+            className="w-full h-full object-cover"
+            style={align ? { objectPosition: '50% 50%' } : { transform: 'scale(1.1) translateY(15px)' }}
+            draggable={false}
+          />
           <div className="absolute top-3 right-3 bg-[#0D9488] text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
             {afterLabel}
           </div>
@@ -135,7 +143,7 @@ export default function BeforeAfterSlider({
             src={beforeImage}
             alt="Before"
             className="w-full h-full object-cover"
-            style={{ objectPosition: '50% 18%' }}
+            style={{ objectPosition: align ? '50% 50%' : '50% 18%' }}
             draggable={false}
           />
           <div className="absolute top-3 left-3 bg-[#6B6B6B] text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">

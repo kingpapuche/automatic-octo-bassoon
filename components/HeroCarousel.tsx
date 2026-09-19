@@ -3,7 +3,8 @@
 import { useState, useCallback } from 'react'
 import BeforeAfterSlider from './beforeafterslider'
 
-export interface HeroExample { name: string; before: string; after: string }
+// align: true = voor/na zijn al bijgesneden op dezelfde ooghoogte -> toon zonder extra zoom/verschuiving
+export interface HeroExample { name: string; before: string; after: string; align?: boolean }
 
 // Carrousel van voor/na-voorbeelden (BetterPic-stijl): slider + klikbare thumbnails eronder.
 // Schuift automatisch door naar het volgende voorbeeld na één volledige slide-cyclus (~8s).
@@ -37,6 +38,7 @@ export default function HeroCarousel({
         afterLabel={afterLabel}
         onCycleEnd={paused ? undefined : advance}
         cyclesPerExample={2}
+        align={cur.align}
       />
 
       {examples.length > 1 && (
