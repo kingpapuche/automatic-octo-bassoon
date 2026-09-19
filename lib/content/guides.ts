@@ -1129,15 +1129,15 @@ export const GUIDES_INDEX: Record<Locale, { title: string; heading: string; intr
 // Blog-metadata die niet per taal verschilt: hero-afbeelding + publicatiedatum per artikel.
 export const BLOG_AUTHOR = 'Nova Imago'
 export const GUIDE_META: Record<string, { image: string; date: string }> = {
-  'ai-headshots-for-linkedin': { image: '/images/renata-after.jpg', date: '2026-09-19' },
-  'ai-headshots-for-cv': { image: '/images/stijn-after.jpg', date: '2026-09-19' },
-  'ai-photos-for-dating': { image: '/images/nathalie-after.webp', date: '2026-09-19' },
-  'ai-headshots-for-business-teams': { image: '/images/headshot-42.webp', date: '2026-09-19' },
-  'ai-headshots-vs-photographer': { image: '/images/britt-after.webp', date: '2026-09-19' },
+  'ai-headshots-for-linkedin': { image: '/blog/ai-headshots-for-linkedin.png', date: '2026-09-19' },
+  'ai-headshots-for-cv': { image: '/blog/ai-headshots-for-cv.png', date: '2026-09-19' },
+  'ai-photos-for-dating': { image: '/blog/ai-photos-for-dating.png', date: '2026-09-19' },
+  'ai-headshots-for-business-teams': { image: '/blog/ai-headshots-for-business-teams.png', date: '2026-09-19' },
+  'ai-headshots-vs-photographer': { image: '/blog/ai-headshots-vs-photographer.png', date: '2026-09-19' },
   // Wekelijkse drip: verschijnen automatisch zodra hun datum bereikt is (ISR).
-  'ai-headshots-for-actors': { image: '/images/roy-after.webp', date: '2026-09-26' },
-  'ai-headshots-for-real-estate-agents': { image: '/images/leen-after.webp', date: '2026-10-03' },
-  'how-to-take-good-selfies-for-ai-headshots': { image: '/images/mims-after.webp', date: '2026-10-10' },
+  'ai-headshots-for-actors': { image: '/blog/ai-headshots-for-actors.png', date: '2026-09-26' },
+  'ai-headshots-for-real-estate-agents': { image: '/blog/ai-headshots-for-real-estate-agents.png', date: '2026-10-03' },
+  'how-to-take-good-selfies-for-ai-headshots': { image: '/blog/how-to-take-good-selfies-for-ai-headshots.png', date: '2026-10-10' },
 }
 
 // Tags per artikel, per taal (voor de blogkaarten + artikelpagina).
