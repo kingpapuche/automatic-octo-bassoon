@@ -99,13 +99,17 @@ export default function BeforeAfterSlider({
           </div>
         </div>
 
-        {/* Before Image (overlay) */}
-        <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPosition}%` }}>
+        {/* Before Image (overlay) — geklipt via clip-path zodat de foto ALTIJD op volle grootte
+            blijft en alleen het zichtbare deel wordt afgesneden (geen sprong van klein naar groot). */}
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+        >
           <img
             src={beforeImage}
             alt="Before"
-            className="h-full object-cover"
-            style={{ width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '285px', objectPosition: '50% 18%' }}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: '50% 18%' }}
             draggable={false}
           />
           <div className="absolute top-3 left-3 bg-[#6B6B6B] text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
