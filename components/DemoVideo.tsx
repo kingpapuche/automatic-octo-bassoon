@@ -2,11 +2,28 @@
 
 import { useRef, useState } from 'react'
 import { Play } from 'lucide-react'
+import { LOCALES, type Locale } from '@/lib/i18n'
+import { useLocale } from '@/lib/useLocale'
+
+// Zet op `true` zodra de video ZONDER ingebrande ondertitels live staat.
+// Zolang dit `false` is, zijn de meertalige ondertitels wel beschikbaar in de
+// spelermenu's, maar staat er GEEN standaard aan (zo geen dubbele ondertitels).
+const SUBTITLES_DEFAULT_ON = false
+
+const LANG_LABEL: Record<Locale, string> = {
+  en: 'English',
+  nl: 'Nederlands',
+  fr: 'Français',
+  de: 'Deutsch',
+  es: 'Español',
+  it: 'Italiano',
+  pt: 'Português',
+}
 
 /**
  * Self-hosted "how it works" demo video.
  * Shows a poster with a play overlay; on first click the native controls appear.
- * Files live in /public/videos (mp4 + poster + English captions).
+ * Files live in /public/videos (mp4 + poster + per-taal ondertitels .vtt).
  */
 export default function DemoVideo({
   title,
@@ -19,6 +36,7 @@ export default function DemoVideo({
 }) {
   const ref = useRef<HTMLVideoElement>(null)
   const [started, setStarted] = useState(false)
+  const locale = useLocale()
 
   const start = () => {
     ref.current?.play()
@@ -43,8 +61,19 @@ export default function DemoVideo({
           setStarted(false)
         }}
       >
-        {/* Geen <track>: de video bevat al ingebrande ondertitels. */}
         <source src="/videos/how-it-works.mp4" type="video/mp4" />
+        {/* Meertalige ondertitels — de taal van de bezoeker staat standaard aan
+            (pas nadat de ingebrande ondertitels uit de video zijn; zie vlag hierboven). */}
+        {LOCALES.map((loc) => (
+          <track
+            key={loc}
+            kind="subtitles"
+            src={`/videos/how-it-works.${loc}.vtt`}
+            srcLang={loc}
+            label={LANG_LABEL[loc]}
+            default={SUBTITLES_DEFAULT_ON && loc === locale}
+          />
+        ))}
       </video>
 
       {!started && (
