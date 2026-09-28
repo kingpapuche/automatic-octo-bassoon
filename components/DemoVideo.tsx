@@ -8,7 +8,7 @@ import { useLocale } from '@/lib/useLocale'
 // Zet op `true` zodra de video ZONDER ingebrande ondertitels live staat.
 // Zolang dit `false` is, zijn de meertalige ondertitels wel beschikbaar in de
 // spelermenu's, maar staat er GEEN standaard aan (zo geen dubbele ondertitels).
-const SUBTITLES_DEFAULT_ON = false
+const SUBTITLES_DEFAULT_ON = true
 
 const LANG_LABEL: Record<Locale, string> = {
   en: 'English',
