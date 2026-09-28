@@ -24,3 +24,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Demo-video ondertitels: wit op een half-doorzichtig donker (merk-getint) kader.
+   Wit + donker kader is de leesbaarheidsstandaard (Netflix/BBC) en overleeft zowel
+   de lichte als de donkere scènes in de video. Best-effort: sommige browsers/OS'en
+   (bv. iOS) laten de systeem-ondertitelinstellingen voorgaan. */
+video::cue {
+  background-color: rgba(26, 21, 51, 0.8); /* donkerpaars, richting merkpaars #5B4E9D */
+  color: #ffffff;
+  line-height: 1.4;
+  font-size: 90%;
+}
