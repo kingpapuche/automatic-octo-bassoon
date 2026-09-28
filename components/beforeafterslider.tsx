@@ -115,26 +115,9 @@ export default function BeforeAfterSlider({
         onTouchEnd={handleInteractionEnd}
         onTouchMove={(e) => handleMove(e.touches[0].clientX)}
       >
-        {/* After Image (achtergrond) */}
+        {/* Before Image (basislaag) — ligt altijd volledig onderaan, zodat er bij het wisselen
+            van voorbeeld NOOIT even de 'na'-foto doorschijnt terwijl de foto's laden. */}
         <div className="absolute inset-0">
-          <img
-            src={afterImage}
-            alt="After"
-            className="w-full h-full object-cover"
-            style={align ? { objectPosition: '50% 50%' } : { transform: 'scale(1.1) translateY(15px)' }}
-            draggable={false}
-          />
-          <div className="absolute top-3 right-3 bg-[#0D9488] text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
-            {afterLabel}
-          </div>
-        </div>
-
-        {/* Before Image (overlay) — geklipt via clip-path zodat de foto ALTIJD op volle grootte
-            blijft en alleen het zichtbare deel wordt afgesneden (geen sprong van klein naar groot). */}
-        <div
-          className="absolute inset-0 overflow-hidden"
-          style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-        >
           <img
             src={beforeImage}
             alt="Before"
@@ -144,6 +127,24 @@ export default function BeforeAfterSlider({
           />
           <div className="absolute top-3 left-3 bg-[#6B6B6B] text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
             {beforeLabel}
+          </div>
+        </div>
+
+        {/* After Image (onthullingslaag) — geklipt via clip-path; wordt van rechts naar links
+            onthuld tijdens het sliden. De foto blijft altijd op volle grootte (geen sprong). */}
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+        >
+          <img
+            src={afterImage}
+            alt="After"
+            className="w-full h-full object-cover"
+            style={align ? { objectPosition: '50% 50%' } : { transform: 'scale(1.1) translateY(15px)' }}
+            draggable={false}
+          />
+          <div className="absolute top-3 right-3 bg-[#0D9488] text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
+            {afterLabel}
           </div>
         </div>
 

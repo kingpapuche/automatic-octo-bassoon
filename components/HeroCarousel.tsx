@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import BeforeAfterSlider from './beforeafterslider'
 
 // align: true = voor/na zijn al bijgesneden op dezelfde ooghoogte -> toon zonder extra zoom/verschuiving
@@ -18,10 +18,22 @@ export default function HeroCarousel({
   afterLabel: string
 }) {
   const [index, setIndex] = useState(0)
-  const [paused, setPaused] = useState(false)
+
+  // Laad alle voor/na-foto's vooraf in (en decodeer ze), zodat het wisselen naar het volgende
+  // voorbeeld naadloos is en er geen half-geladen foto even doorschijnt.
+  useEffect(() => {
+    examples.forEach((ex) => {
+      ;[ex.before, ex.after].forEach((src) => {
+        const img = new Image()
+        img.src = src
+        if (img.decode) img.decode().catch(() => {})
+      })
+    })
+  }, [examples])
 
   // Ga pas naar het volgende voorbeeld wanneer de slider zijn volledige cyclus heeft afgerond
-  // (dus nooit midden in de terugweg). Bij 'paused' (na klik op thumbnail) blijven we staan.
+  // (dus nooit midden in de terugweg). Klikken op een thumbnail springt naar dat voorbeeld
+  // en laat de carrousel gewoon verder automatisch doorlopen.
   const advance = useCallback(() => {
     if (examples.length > 1) setIndex((i) => (i + 1) % examples.length)
   }, [examples.length])
@@ -37,7 +49,7 @@ export default function HeroCarousel({
         afterImage={cur.after}
         beforeLabel={beforeLabel}
         afterLabel={afterLabel}
-        onCycleEnd={paused ? undefined : advance}
+        onCycleEnd={advance}
         cyclesPerExample={2}
         align={cur.align}
       />
@@ -47,7 +59,7 @@ export default function HeroCarousel({
           {examples.map((ex, i) => (
             <button
               key={ex.name}
-              onClick={() => { setIndex(i); setPaused(true) }}
+              onClick={() => setIndex(i)}
               aria-label={ex.name}
               className={`w-11 h-11 rounded-full overflow-hidden border-2 transition-all ${
                 i === index ? 'border-[#5B4E9D] scale-110 shadow-md' : 'border-white/70 opacity-60 hover:opacity-100'
