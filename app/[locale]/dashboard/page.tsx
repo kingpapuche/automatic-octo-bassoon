@@ -9,6 +9,7 @@ import TrainingStatus from '@/components/TrainingStatus'
 import { Link } from '@/lib/nav'
 import { useLocale } from '@/lib/useLocale'
 import { DASHBOARD } from '@/lib/messages/dashboard'
+import DemoVideo from '@/components/DemoVideo'
 
 // Iconen voor de How it Works-stappen (tekst komt uit de vertalingen)
 const STEP_ICONS = [Upload, Wand2, Sparkles, Images]
@@ -191,9 +192,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* How it Works — video inline naast de stappen (best practice: informatieve content, geen klik-barrière, vult de ruimte).
-            VERVANG het video-placeholderblok hieronder door de YouTube-embed zodra de link er is:
-            <iframe className="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/VIDEO_ID" title="How it Works" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> */}
+        {/* How it Works — video inline naast de stappen */}
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 sm:p-8 border border-white/10">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             {/* Links: titel + stappen */}
@@ -222,16 +221,8 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Rechts: video (placeholder tot de YouTube-link er is) */}
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-slate-950 to-black border border-white/10 flex items-center justify-center">
-              <div className="text-center text-white/60 px-6">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                  <Play className="w-7 h-7 text-white ml-0.5" />
-                </div>
-                <p className="text-sm font-medium">{t.videoTitle}</p>
-                <p className="text-xs text-white/40 mt-1">{t.videoSoon}</p>
-              </div>
-            </div>
+            {/* Rechts: video */}
+            <DemoVideo title={t.videoTitle} rounded="rounded-xl" />
           </div>
         </div>
 

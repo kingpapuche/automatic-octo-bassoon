@@ -23,7 +23,7 @@ function getStatusMessage(status: string, startedAt?: string): { message: string
           estimatedMinutes: remaining,
         }
       }
-      return { message: 'In progress. Takes 20-30 minutes.', estimatedMinutes: 25 }
+      return { message: 'In progress. Takes 25-30 minutes.', estimatedMinutes: 25 }
     }
     case 'succeeded':
       return { message: 'Training complete! Your model is ready.' }
@@ -78,7 +78,7 @@ async function getStatusForUser(userId: string) {
     return {
       success: true,
       status: 'processing',
-      message: 'In progress. Takes 20-30 minutes.',
+      message: 'In progress. Takes 25-30 minutes.',
       estimatedMinutes: 25,
     }
   }

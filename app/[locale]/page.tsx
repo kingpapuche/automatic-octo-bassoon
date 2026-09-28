@@ -10,10 +10,11 @@ import { type Currency, CURRENCY_SYMBOL, TIER_PRICE, TIER_ANCHOR, readCurrencyCl
 import { useLocale } from '@/lib/useLocale'
 import { LANDING } from '@/lib/messages/landing'
 import { GUIDES_INDEX } from '@/lib/content/guides'
+import DemoVideo from '@/components/DemoVideo'
 import {
   Zap, Palette, Gem, Lock, BadgeDollarSign, ShieldCheck,
   Upload, SlidersHorizontal, Download,
-  Camera, Star, Sparkles, Check, Menu, X, Play
+  Camera, Star, Sparkles, Check, Menu, X
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -216,17 +217,9 @@ export default function HomePage() {
             <p className="text-xl text-[#6B6B6B] max-w-[640px] mx-auto leading-relaxed">{t.how.sub}</p>
           </div>
 
-          {/* Video — VERVANG dit placeholder-blok door de YouTube-embed zodra de link er is */}
+          {/* How it works video */}
           <div className="max-w-3xl mx-auto mb-16">
-            <div className="relative aspect-video rounded-3xl overflow-hidden bg-gradient-to-br from-[#2D2D2D] to-[#1a1a1a] border border-[#E8E6E0] shadow-xl flex items-center justify-center">
-              <div className="text-center text-white/70 px-6">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                  <Play className="w-7 h-7 text-white ml-0.5" />
-                </div>
-                <p className="text-sm font-medium">{t.how.videoTitle}</p>
-                <p className="text-xs text-white/40 mt-1">{t.how.videoSoon}</p>
-              </div>
-            </div>
+            <DemoVideo title={t.how.videoTitle} />
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">

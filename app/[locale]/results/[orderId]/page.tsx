@@ -147,7 +147,7 @@ export default function ResultsPage() {
           <div className="text-6xl mb-4">🎨</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Processing...</h1>
           <p className="text-gray-600 mb-6">
-            Your headshots are being generated. This usually takes 20-30 minutes.
+            Your headshots are being generated. This usually takes 25-30 minutes.
           </p>
           <p className="text-sm text-gray-500">
             You can close this page and come back later!

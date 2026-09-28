@@ -40,5 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Lokaal marketing-document (niet committen)
-Nova-Imago-Marketing-en-Affiliate-Plan.docx
+# Lokale Word-documenten + tijdelijke lock-bestanden (niet committen)
+*.docx
+~$*
+
+# Bron-videobestanden (zwaar; enkel de web-versie in public/videos wordt gecommit)
+nova imago how to video/

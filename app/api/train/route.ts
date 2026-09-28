@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
       trainingId: training.id,
       triggerWord,
       validPhotos: validPhotos.length,
-      message: 'Training started! This takes about 20-30 minutes.',
+      message: 'Training started! This takes about 25-30 minutes.',
     })
 
   } catch (error) {
