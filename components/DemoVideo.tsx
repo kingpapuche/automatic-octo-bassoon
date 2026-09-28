@@ -34,6 +34,14 @@ export default function DemoVideo({
         controls={started}
         preload="none"
         playsInline
+        onEnded={() => {
+          const v = ref.current
+          if (v) {
+            v.pause()
+            v.currentTime = 0
+          }
+          setStarted(false)
+        }}
       >
         <source src="/videos/how-it-works.mp4" type="video/mp4" />
         <track kind="captions" src="/videos/how-it-works.en.vtt" srcLang="en" label="English" default />
