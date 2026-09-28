@@ -43,8 +43,8 @@ export default function DemoVideo({
           setStarted(false)
         }}
       >
+        {/* Geen <track>: de video bevat al ingebrande ondertitels. */}
         <source src="/videos/how-it-works.mp4" type="video/mp4" />
-        <track kind="captions" src="/videos/how-it-works.en.vtt" srcLang="en" label="English" default />
       </video>
 
       {!started && (
