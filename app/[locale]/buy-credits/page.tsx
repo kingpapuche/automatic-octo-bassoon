@@ -55,7 +55,7 @@ const PRICING_TIERS: PricingTier[] = [
   {
     id: 'premium',
     name: 'Premium Pack',
-    price: 49,
+    price: 59,
     credits: 120,
     headshots: 120,
     icon: '✨',
