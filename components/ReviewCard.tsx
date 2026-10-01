@@ -8,7 +8,7 @@ interface ReviewCardProps {
   userId: string
 }
 
-// Privé review-kaartje. Verschijnt op het piekmoment (gallerij, net na het genereren).
+// Privé review-kaartje. Verschijnt op het piekmoment (galerij, net na het genereren).
 // Wordt na indienen een bedankje; toont zich niet opnieuw als de klant al een review gaf.
 export default function ReviewCard({ userId }: ReviewCardProps) {
   const t = GALLERY[useLocale()].review

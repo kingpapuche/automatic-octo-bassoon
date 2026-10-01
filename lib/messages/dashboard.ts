@@ -58,13 +58,13 @@ const nl: DashboardBundle = {
     buyTitle: 'Credits kopen', buyDesc: 'Koop creditpakketten om AI-headshots te genereren', buyBtn: 'Nu kopen →',
     trainTitle: 'Model trainen', trainDesc: 'Upload 10-20 selfies om een eigen AI-model te maken — voor jezelf of iemand anders.', trainBtnNew: 'Nieuw model trainen →', trainBtnStart: 'Start training →',
     genTitle: 'Genereren', genDesc: 'Kies stijlen en maak je headshots', genBtn: 'Headshots genereren →', genRequired: 'Model vereist',
-    galTitle: 'Mijn gallerij', galDesc: 'Bekijk en download je gegenereerde headshots', galBtn: 'Gallerij bekijken →',
+    galTitle: 'Mijn galerij', galDesc: 'Bekijk en download je gegenereerde headshots', galBtn: 'Galerij bekijken →',
     howTitle: 'Hoe het werkt', videoTitle: 'Zie in 90 seconden hoe het werkt', videoSoon: 'Video komt binnenkort',
     steps: [
       { title: '1. Upload je foto’s', desc: 'Voeg 10-20 duidelijke selfies toe. Verschillende hoeken, uitdrukkingen en licht geven het beste resultaat.' },
       { title: '2. We trainen je AI-model', desc: 'Je persoonlijke model traint in ongeveer 25-30 minuten — we laten je weten wanneer het klaar is.' },
       { title: '3. Kies je stijlen', desc: 'Kies uit 45+ zorgvuldig samengestelde stijlen. Elke stijl levert 4 unieke variaties.' },
-      { title: '4. Download je headshots', desc: 'Blader door je gallerij en download de professionele headshots die je mooi vindt.' },
+      { title: '4. Download je headshots', desc: 'Blader door je galerij en download de professionele headshots die je mooi vindt.' },
     ],
   },
   success: {
@@ -76,7 +76,7 @@ const nl: DashboardBundle = {
   },
   training: {
     heading: '🚀 Je AI-model wordt getraind', tipsTitle: '💡 Terwijl je wacht:', tips: ['Training duurt ongeveer 25-30 minuten', 'Je krijgt betere resultaten met gevarieerde foto’s', 'Zodra het klaar is, kan je je stijlen genereren!'],
-    buyMore: '💳 Meer credits kopen', viewGallery: '🖼️ Gallerij bekijken', leaveNote: '📧 Blijf op deze pagina om de voortgang te volgen, of ga weg — we mailen je zodra het klaar is. Geen mail? Kijk in je spam-map.',
+    buyMore: '💳 Meer credits kopen', viewGallery: '🖼️ Galerij bekijken', leaveNote: '📧 Blijf op deze pagina om de voortgang te volgen, of ga weg — we mailen je zodra het klaar is. Geen mail? Kijk in je spam-map.',
     readyTitle: 'Model klaar!', readyDesc: 'Je AI-model is getraind en klaar om headshots te genereren.', generateNow: 'Nu headshots genereren →',
     failedTitle: 'Training mislukt', failedDesc: 'Er ging iets mis. Probeer je foto’s opnieuw te uploaden.', tryAgain: 'Opnieuw proberen →',
   },

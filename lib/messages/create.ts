@@ -10,7 +10,7 @@ const en: CreateBundle = {
 }
 const nl: CreateBundle = {
   modelSelect: { loading: 'Laden…', forWho: 'Voor wie zijn deze headshots?', forWhoDesc: 'Kies de persoon — we tonen de juiste stijlen voor hem/haar.', modelFallback: 'model', chooseStyles: 'Kies stijlen →' },
-  generations: { notFound: 'Generatie niet gevonden', toGallery: 'Naar gallerij', oops: 'Oeps', generating: 'Je headshots worden gegenereerd', photosReady: '{done} van {total} foto’s klaar', startingUp: 'Opstarten...', complete: 'voltooid', takesMinutes: 'Dit duurt enkele minuten. Je wordt automatisch naar je gallerij gebracht zodra alle foto’s klaar zijn.' },
+  generations: { notFound: 'Generatie niet gevonden', toGallery: 'Naar galerij', oops: 'Oeps', generating: 'Je headshots worden gegenereerd', photosReady: '{done} van {total} foto’s klaar', startingUp: 'Opstarten...', complete: 'voltooid', takesMinutes: 'Dit duurt enkele minuten. Je wordt automatisch naar je galerij gebracht zodra alle foto’s klaar zijn.' },
 }
 const fr: CreateBundle = {
   modelSelect: { loading: 'Chargement…', forWho: 'Pour qui sont ces portraits ?', forWhoDesc: 'Choisissez la personne — nous afficherons les styles adaptés.', modelFallback: 'modèle', chooseStyles: 'Choisir les styles →' },

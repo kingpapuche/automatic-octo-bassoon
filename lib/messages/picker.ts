@@ -79,7 +79,7 @@ export const PICKER: Record<Locale, PickerCopy> = {
     barStyles: 'Stijlen', barPerStyle: 'Per stijl', barTotal: 'Totaal headshots', back: '← Terug', cont: 'Doorgaan →',
     tAdd: '{label} toegevoegd — +{n} foto’s', tRemove: '{label} verwijderd — −{n} foto’s',
     tAddMulti: '{count} stijlen toegevoegd — +{n} foto’s', tRemoveMulti: '{count} stijlen verwijderd — −{n} foto’s',
-    navDashboard: 'Dashboard', navGallery: 'Gallerij', credits: 'credits', step1: 'Bestelgegevens', step2: 'Stijlen kiezen', step3: 'Genereren',
+    navDashboard: 'Dashboard', navGallery: 'Galerij', credits: 'credits', step1: 'Bestelgegevens', step2: 'Stijlen kiezen', step3: 'Genereren',
   },
   fr: {
     loading: 'Chargement...', onbTitle: 'Comment ça marche',

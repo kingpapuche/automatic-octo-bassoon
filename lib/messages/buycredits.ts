@@ -19,7 +19,7 @@ const en: BuyCopy = {
 }
 
 const nl: BuyCopy = {
-  navCreate: 'Aanmaken', navGallery: 'Gallerij', credits: 'credits',
+  navCreate: 'Aanmaken', navGallery: 'Galerij', credits: 'credits',
   chooseYourPack: 'Kies je pakket', subtitle: 'Eenmalige betaling. Geen abonnement. Professionele AI-headshots in minuten.', variationsNote: 'Elke stijl geeft je 4 variaties — zo kies je degene die je het mooist vindt.',
   mostPopular: 'Meest gekozen', processing: 'Bezig...', purchase: 'Kopen', oneTimeNoSub: 'Eenmalige betaling • Geen abonnement',
   bizLabel: 'Ik koop als bedrijf (ik heb een factuur nodig)', bizDesc: 'Je vult je btw-nummer en factuuradres veilig in bij het afrekenen. Belgische bedrijven krijgen een Peppol-e-factuur; andere bedrijven een standaardfactuur — allebei automatisch.',
