@@ -27,6 +27,14 @@ export async function POST(request: NextRequest) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
 
+      // Alleen credits toekennen als de betaling écht voltooid is. Bij uitgestelde
+      // betaalmethodes (SEPA, Multibanco, sommige BNPL) komt 'completed' al binnen terwijl
+      // het geld nog niet bevestigd is (payment_status 'unpaid'/'processing').
+      if (session.payment_status !== 'paid') {
+        console.log(`⏳ Sessie ${session.id} nog niet betaald (payment_status=${session.payment_status}) — nog geen credits`)
+        return NextResponse.json({ received: true })
+      }
+
       const userId      = session.metadata?.userId
       const credits     = parseInt(session.metadata?.credits || '0')
       const plan        = session.metadata?.plan
