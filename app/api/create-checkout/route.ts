@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
     const planCredits = CREDITS[plan]
 
     const params: Stripe.Checkout.SessionCreateParams = {
-      payment_method_types: ['card'],
+      // Geen payment_method_types => Stripe toont automatisch de methodes die in het
+      // dashboard aanstaan (Bancontact, kaart, Apple/Google Pay, iDEAL…) per klant/munt/land.
       line_items: [{ price: stripePriceId, quantity: 1 }],
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
