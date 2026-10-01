@@ -182,7 +182,7 @@ export default function StylesPage() {
               <img
                 src={`${SUPABASE_URL}/storage/v1/object/public/headshots/style-examples/${lightbox.styleId}.webp`}
                 alt={lightbox.label}
-                className="w-full object-cover max-h-[55vh]"
+                className="w-full object-contain max-h-[60vh] bg-[#F4F2EE]"
               />
               <div className="p-5">
                 <h3 className="font-serif text-xl text-[#2D2D2D] mb-1">{lightbox.label}</h3>
