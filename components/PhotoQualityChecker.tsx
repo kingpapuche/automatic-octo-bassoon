@@ -11,7 +11,7 @@ interface PhotoCheck {
 }
 
 const GOOD_PHOTO_TIPS = [
-  '10–20 photos give the best results',
+  '8–15 photos give the best results',
   'Mix smiling and neutral expressions',
   'Different angles — front, three-quarter, slight side',
   'Good lighting — natural daylight, no heavy filters',
@@ -75,8 +75,8 @@ async function analyzePhoto(file: File, preview: string): Promise<{ issues: stri
 
 export default function PhotoQualityChecker({
   onPhotosApproved,
-  minPhotos = 10,
-  maxPhotos = 20,
+  minPhotos = 8,
+  maxPhotos = 15,
 }: {
   onPhotosApproved: (files: File[]) => void
   minPhotos?: number

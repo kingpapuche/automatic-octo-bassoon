@@ -26,12 +26,12 @@ const en: DashboardBundle = {
   dashboard: {
     signOut: 'Sign Out', title: 'Dashboard', subtitle: 'Manage your AI headshots', welcomeBack: 'Welcome Back!', yourCredits: 'Your Credits', creditEquals: 'Each credit = 1 generated photo', loading: 'Loading...',
     buyTitle: 'Buy Credits', buyDesc: 'Purchase credit packs to generate AI headshots', buyBtn: 'Buy Now →',
-    trainTitle: 'Train a Model', trainDesc: 'Upload 10-20 selfies to create a custom AI model — for yourself or someone else.', trainBtnNew: 'Train new model →', trainBtnStart: 'Start Training →', trainingsLeft: 'Trainings left: {n}', trainBtnNone: 'Buy a pack to train →',
+    trainTitle: 'Train a Model', trainDesc: 'Upload 8–15 selfies to create a custom AI model — for yourself or someone else.', trainBtnNew: 'Train new model →', trainBtnStart: 'Start Training →', trainingsLeft: 'Trainings left: {n}', trainBtnNone: 'Buy a pack to train →',
     genTitle: 'Generate', genDesc: 'Choose styles and create your headshots', genBtn: 'Generate Headshots →', genRequired: 'Model Required',
     galTitle: 'My Gallery', galDesc: 'View and download your generated headshots', galBtn: 'View Gallery →',
     howTitle: 'How it Works', videoTitle: 'See how it works in 90 seconds', videoSoon: 'Video coming soon',
     steps: [
-      { title: '1. Upload your photos', desc: 'Add 10-20 clear selfies. Different angles, expressions and lighting give the best results.' },
+      { title: '1. Upload your photos', desc: 'Add 8–15 clear selfies. Different angles, expressions and lighting give the best results.' },
       { title: '2. We train your AI model', desc: 'Your personal model trains in about 25-30 minutes — we’ll let you know when it’s ready.' },
       { title: '3. Choose your styles', desc: 'Pick from 45+ hand-curated styles. Each style generates 4 unique variations.' },
       { title: '4. Download your headshots', desc: 'Browse your gallery and download the professional headshots you love.' },
@@ -56,12 +56,12 @@ const nl: DashboardBundle = {
   dashboard: {
     signOut: 'Uitloggen', title: 'Dashboard', subtitle: 'Beheer je AI-headshots', welcomeBack: 'Welkom terug!', yourCredits: 'Jouw credits', creditEquals: 'Elke credit = 1 gegenereerde foto', loading: 'Laden...',
     buyTitle: 'Credits kopen', buyDesc: 'Koop creditpakketten om AI-headshots te genereren', buyBtn: 'Nu kopen →',
-    trainTitle: 'Model trainen', trainDesc: 'Upload 10-20 selfies om een eigen AI-model te maken — voor jezelf of iemand anders.', trainBtnNew: 'Nieuw model trainen →', trainBtnStart: 'Start training →', trainingsLeft: 'Trainingen over: {n}', trainBtnNone: 'Koop een pakket om te trainen →',
+    trainTitle: 'Model trainen', trainDesc: 'Upload 8–15 selfies om een eigen AI-model te maken — voor jezelf of iemand anders.', trainBtnNew: 'Nieuw model trainen →', trainBtnStart: 'Start training →', trainingsLeft: 'Trainingen over: {n}', trainBtnNone: 'Koop een pakket om te trainen →',
     genTitle: 'Genereren', genDesc: 'Kies stijlen en maak je headshots', genBtn: 'Headshots genereren →', genRequired: 'Model vereist',
     galTitle: 'Mijn galerij', galDesc: 'Bekijk en download je gegenereerde headshots', galBtn: 'Galerij bekijken →',
     howTitle: 'Hoe het werkt', videoTitle: 'Zie in 90 seconden hoe het werkt', videoSoon: 'Video komt binnenkort',
     steps: [
-      { title: '1. Upload je foto’s', desc: 'Voeg 10-20 duidelijke selfies toe. Verschillende hoeken, uitdrukkingen en licht geven het beste resultaat.' },
+      { title: '1. Upload je foto’s', desc: 'Voeg 8–15 duidelijke selfies toe. Verschillende hoeken, uitdrukkingen en licht geven het beste resultaat.' },
       { title: '2. We trainen je AI-model', desc: 'Je persoonlijke model traint in ongeveer 25-30 minuten — we laten je weten wanneer het klaar is.' },
       { title: '3. Kies je stijlen', desc: 'Kies uit 45+ zorgvuldig samengestelde stijlen. Elke stijl levert 4 unieke variaties.' },
       { title: '4. Download je headshots', desc: 'Blader door je galerij en download de professionele headshots die je mooi vindt.' },
@@ -86,12 +86,12 @@ const fr: DashboardBundle = {
   dashboard: {
     signOut: 'Déconnexion', title: 'Tableau de bord', subtitle: 'Gérez vos portraits IA', welcomeBack: 'Bon retour !', yourCredits: 'Vos crédits', creditEquals: 'Chaque crédit = 1 photo générée', loading: 'Chargement...',
     buyTitle: 'Acheter des crédits', buyDesc: 'Achetez des packs de crédits pour générer des portraits IA', buyBtn: 'Acheter →',
-    trainTitle: 'Entraîner un modèle', trainDesc: 'Importez 10-20 selfies pour créer un modèle IA personnalisé — pour vous ou quelqu’un d’autre.', trainBtnNew: 'Entraîner un nouveau modèle →', trainBtnStart: 'Démarrer l’entraînement →', trainingsLeft: 'Entraînements restants : {n}', trainBtnNone: 'Achetez un pack pour entraîner →',
+    trainTitle: 'Entraîner un modèle', trainDesc: 'Importez 8–15 selfies pour créer un modèle IA personnalisé — pour vous ou quelqu’un d’autre.', trainBtnNew: 'Entraîner un nouveau modèle →', trainBtnStart: 'Démarrer l’entraînement →', trainingsLeft: 'Entraînements restants : {n}', trainBtnNone: 'Achetez un pack pour entraîner →',
     genTitle: 'Générer', genDesc: 'Choisissez des styles et créez vos portraits', genBtn: 'Générer les portraits →', genRequired: 'Modèle requis',
     galTitle: 'Ma galerie', galDesc: 'Consultez et téléchargez vos portraits générés', galBtn: 'Voir la galerie →',
     howTitle: 'Comment ça marche', videoTitle: 'Découvrez comment ça marche en 90 secondes', videoSoon: 'Vidéo bientôt disponible',
     steps: [
-      { title: '1. Importez vos photos', desc: 'Ajoutez 10-20 selfies nets. Différents angles, expressions et éclairages donnent les meilleurs résultats.' },
+      { title: '1. Importez vos photos', desc: 'Ajoutez 8–15 selfies nets. Différents angles, expressions et éclairages donnent les meilleurs résultats.' },
       { title: '2. Nous entraînons votre modèle IA', desc: 'Votre modèle personnel s’entraîne en environ 25-30 minutes — nous vous préviendrons dès qu’il est prêt.' },
       { title: '3. Choisissez vos styles', desc: 'Choisissez parmi plus de 45 styles soignés. Chaque style génère 4 variations uniques.' },
       { title: '4. Téléchargez vos portraits', desc: 'Parcourez votre galerie et téléchargez les portraits que vous aimez.' },
@@ -116,12 +116,12 @@ const de: DashboardBundle = {
   dashboard: {
     signOut: 'Abmelden', title: 'Dashboard', subtitle: 'Verwalte deine KI-Headshots', welcomeBack: 'Willkommen zurück!', yourCredits: 'Deine Credits', creditEquals: 'Jeder Credit = 1 generiertes Foto', loading: 'Laden...',
     buyTitle: 'Credits kaufen', buyDesc: 'Kaufe Credit-Pakete, um KI-Headshots zu generieren', buyBtn: 'Jetzt kaufen →',
-    trainTitle: 'Modell trainieren', trainDesc: 'Lade 10-20 Selfies hoch, um ein eigenes KI-Modell zu erstellen — für dich oder jemand anderen.', trainBtnNew: 'Neues Modell trainieren →', trainBtnStart: 'Training starten →', trainingsLeft: 'Verbleibende Trainings: {n}', trainBtnNone: 'Paket kaufen zum Trainieren →',
+    trainTitle: 'Modell trainieren', trainDesc: 'Lade 8–15 Selfies hoch, um ein eigenes KI-Modell zu erstellen — für dich oder jemand anderen.', trainBtnNew: 'Neues Modell trainieren →', trainBtnStart: 'Training starten →', trainingsLeft: 'Verbleibende Trainings: {n}', trainBtnNone: 'Paket kaufen zum Trainieren →',
     genTitle: 'Generieren', genDesc: 'Wähle Stile und erstelle deine Headshots', genBtn: 'Headshots generieren →', genRequired: 'Modell erforderlich',
     galTitle: 'Meine Galerie', galDesc: 'Sieh dir deine generierten Headshots an und lade sie herunter', galBtn: 'Galerie ansehen →',
     howTitle: 'So funktioniert’s', videoTitle: 'In 90 Sekunden sehen, wie es funktioniert', videoSoon: 'Video folgt in Kürze',
     steps: [
-      { title: '1. Lade deine Fotos hoch', desc: 'Füge 10-20 klare Selfies hinzu. Verschiedene Winkel, Ausdrücke und Licht liefern die besten Ergebnisse.' },
+      { title: '1. Lade deine Fotos hoch', desc: 'Füge 8–15 klare Selfies hinzu. Verschiedene Winkel, Ausdrücke und Licht liefern die besten Ergebnisse.' },
       { title: '2. Wir trainieren dein KI-Modell', desc: 'Dein persönliches Modell trainiert in etwa 25-30 Minuten — wir sagen dir Bescheid, sobald es fertig ist.' },
       { title: '3. Wähle deine Stile', desc: 'Wähle aus über 45 kuratierten Stilen. Jeder Stil erzeugt 4 einzigartige Varianten.' },
       { title: '4. Lade deine Headshots herunter', desc: 'Durchstöbere deine Galerie und lade die Headshots herunter, die dir gefallen.' },
@@ -146,12 +146,12 @@ const es: DashboardBundle = {
   dashboard: {
     signOut: 'Cerrar sesión', title: 'Panel', subtitle: 'Gestiona tus retratos IA', welcomeBack: '¡Bienvenido de nuevo!', yourCredits: 'Tus créditos', creditEquals: 'Cada crédito = 1 foto generada', loading: 'Cargando...',
     buyTitle: 'Comprar créditos', buyDesc: 'Compra packs de créditos para generar retratos IA', buyBtn: 'Comprar →',
-    trainTitle: 'Entrenar un modelo', trainDesc: 'Sube 10-20 selfies para crear un modelo IA personalizado — para ti o para otra persona.', trainBtnNew: 'Entrenar nuevo modelo →', trainBtnStart: 'Iniciar entrenamiento →', trainingsLeft: 'Entrenamientos restantes: {n}', trainBtnNone: 'Compra un paquete para entrenar →',
+    trainTitle: 'Entrenar un modelo', trainDesc: 'Sube 8–15 selfies para crear un modelo IA personalizado — para ti o para otra persona.', trainBtnNew: 'Entrenar nuevo modelo →', trainBtnStart: 'Iniciar entrenamiento →', trainingsLeft: 'Entrenamientos restantes: {n}', trainBtnNone: 'Compra un paquete para entrenar →',
     genTitle: 'Generar', genDesc: 'Elige estilos y crea tus retratos', genBtn: 'Generar retratos →', genRequired: 'Modelo necesario',
     galTitle: 'Mi galería', galDesc: 'Consulta y descarga tus retratos generados', galBtn: 'Ver galería →',
     howTitle: 'Cómo funciona', videoTitle: 'Descubre cómo funciona en 90 segundos', videoSoon: 'Vídeo próximamente',
     steps: [
-      { title: '1. Sube tus fotos', desc: 'Añade 10-20 selfies nítidas. Distintos ángulos, expresiones e iluminación dan los mejores resultados.' },
+      { title: '1. Sube tus fotos', desc: 'Añade 8–15 selfies nítidas. Distintos ángulos, expresiones e iluminación dan los mejores resultados.' },
       { title: '2. Entrenamos tu modelo IA', desc: 'Tu modelo personal se entrena en unos 25-30 minutos — te avisaremos cuando esté listo.' },
       { title: '3. Elige tus estilos', desc: 'Elige entre más de 45 estilos cuidados. Cada estilo genera 4 variaciones únicas.' },
       { title: '4. Descarga tus retratos', desc: 'Explora tu galería y descarga los retratos que más te gusten.' },
@@ -176,12 +176,12 @@ const it: DashboardBundle = {
   dashboard: {
     signOut: 'Esci', title: 'Dashboard', subtitle: 'Gestisci i tuoi ritratti IA', welcomeBack: 'Bentornato!', yourCredits: 'I tuoi crediti', creditEquals: 'Ogni credito = 1 foto generata', loading: 'Caricamento...',
     buyTitle: 'Acquista crediti', buyDesc: 'Acquista pacchetti di crediti per generare ritratti IA', buyBtn: 'Acquista →',
-    trainTitle: 'Allena un modello', trainDesc: 'Carica 10-20 selfie per creare un modello IA personalizzato — per te o per qualcun altro.', trainBtnNew: 'Allena nuovo modello →', trainBtnStart: 'Avvia l’allenamento →', trainingsLeft: 'Allenamenti rimasti: {n}', trainBtnNone: 'Acquista un pacchetto per allenare →',
+    trainTitle: 'Allena un modello', trainDesc: 'Carica 8–15 selfie per creare un modello IA personalizzato — per te o per qualcun altro.', trainBtnNew: 'Allena nuovo modello →', trainBtnStart: 'Avvia l’allenamento →', trainingsLeft: 'Allenamenti rimasti: {n}', trainBtnNone: 'Acquista un pacchetto per allenare →',
     genTitle: 'Genera', genDesc: 'Scegli gli stili e crea i tuoi ritratti', genBtn: 'Genera ritratti →', genRequired: 'Modello richiesto',
     galTitle: 'La mia galleria', galDesc: 'Visualizza e scarica i tuoi ritratti generati', galBtn: 'Vedi la galleria →',
     howTitle: 'Come funziona', videoTitle: 'Guarda come funziona in 90 secondi', videoSoon: 'Video in arrivo',
     steps: [
-      { title: '1. Carica le tue foto', desc: 'Aggiungi 10-20 selfie nitidi. Angolazioni, espressioni e luci diverse danno i risultati migliori.' },
+      { title: '1. Carica le tue foto', desc: 'Aggiungi 8–15 selfie nitidi. Angolazioni, espressioni e luci diverse danno i risultati migliori.' },
       { title: '2. Alleniamo il tuo modello IA', desc: 'Il tuo modello personale si allena in circa 25-30 minuti — ti avviseremo quando è pronto.' },
       { title: '3. Scegli i tuoi stili', desc: 'Scegli tra oltre 45 stili curati. Ogni stile genera 4 variazioni uniche.' },
       { title: '4. Scarica i tuoi ritratti', desc: 'Sfoglia la tua galleria e scarica i ritratti che ami.' },
@@ -206,12 +206,12 @@ const pt: DashboardBundle = {
   dashboard: {
     signOut: 'Sair', title: 'Painel', subtitle: 'Gerencie seus retratos IA', welcomeBack: 'Bem-vindo de volta!', yourCredits: 'Seus créditos', creditEquals: 'Cada crédito = 1 foto gerada', loading: 'Carregando...',
     buyTitle: 'Comprar créditos', buyDesc: 'Compre pacotes de créditos para gerar retratos IA', buyBtn: 'Comprar →',
-    trainTitle: 'Treinar um modelo', trainDesc: 'Envie 10-20 selfies para criar um modelo IA personalizado — para você ou outra pessoa.', trainBtnNew: 'Treinar novo modelo →', trainBtnStart: 'Iniciar treinamento →', trainingsLeft: 'Treinos restantes: {n}', trainBtnNone: 'Compra um pacote para treinar →',
+    trainTitle: 'Treinar um modelo', trainDesc: 'Envie 8–15 selfies para criar um modelo IA personalizado — para você ou outra pessoa.', trainBtnNew: 'Treinar novo modelo →', trainBtnStart: 'Iniciar treinamento →', trainingsLeft: 'Treinos restantes: {n}', trainBtnNone: 'Compra um pacote para treinar →',
     genTitle: 'Gerar', genDesc: 'Escolha estilos e crie seus retratos', genBtn: 'Gerar retratos →', genRequired: 'Modelo necessário',
     galTitle: 'Minha galeria', galDesc: 'Veja e baixe seus retratos gerados', galBtn: 'Ver galeria →',
     howTitle: 'Como funciona', videoTitle: 'Veja como funciona em 90 segundos', videoSoon: 'Vídeo em breve',
     steps: [
-      { title: '1. Envie suas fotos', desc: 'Adicione 10-20 selfies nítidas. Ângulos, expressões e iluminação variados dão os melhores resultados.' },
+      { title: '1. Envie suas fotos', desc: 'Adicione 8–15 selfies nítidas. Ângulos, expressões e iluminação variados dão os melhores resultados.' },
       { title: '2. Treinamos seu modelo IA', desc: 'Seu modelo pessoal treina em cerca de 25-30 minutos — avisaremos quando estiver pronto.' },
       { title: '3. Escolha seus estilos', desc: 'Escolha entre mais de 45 estilos selecionados. Cada estilo gera 4 variações únicas.' },
       { title: '4. Baixe seus retratos', desc: 'Navegue pela sua galeria e baixe os retratos que você adora.' },
