@@ -166,22 +166,23 @@ export default function StylesPage() {
       {/* Lightbox */}
       {lightbox && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
           onClick={() => setLightbox(null)}
         >
-          <div className="relative max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setLightbox(null)}
-              className="absolute -top-11 right-0 text-white/80 hover:text-white flex items-center gap-1 text-sm"
-            >
-              {t.close} <X className="w-5 h-5" />
-            </button>
-            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
+          <div className="relative max-w-md w-full my-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl relative">
+              <button
+                onClick={() => setLightbox(null)}
+                aria-label={t.close}
+                className="absolute top-3 right-3 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`${SUPABASE_URL}/storage/v1/object/public/headshots/style-examples/${lightbox.styleId}.webp`}
                 alt={lightbox.label}
-                className="w-full aspect-[3/4] object-cover"
+                className="w-full object-cover max-h-[55vh]"
               />
               <div className="p-5">
                 <h3 className="font-serif text-xl text-[#2D2D2D] mb-1">{lightbox.label}</h3>
