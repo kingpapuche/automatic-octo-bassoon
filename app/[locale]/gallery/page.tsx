@@ -19,9 +19,30 @@ interface Generation {
 export default function GalleryPage() {
   const router = useRouter()
   const t = GALLERY[useLocale()].gallery
+  const rt = GALLERY[useLocale()].refund
   const [user, setUser] = useState<any>(null)
   const [generations, setGenerations] = useState<Generation[]>([])
   const [loading, setLoading] = useState(true)
+
+  const requestRefund = async () => {
+    if (!window.confirm(rt.confirm)) return
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/request-refund', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session?.access_token ?? ''}` },
+      })
+      const data = await res.json()
+      const map: Record<string, string> = {
+        refunded: rt.refunded, downloaded: rt.downloaded, used: rt.used,
+        window: rt.window, already_refunded: rt.already, no_purchase: rt.none,
+      }
+      window.alert(map[data?.reason] ?? rt.error)
+      if (data?.ok) window.location.reload()
+    } catch {
+      window.alert(rt.error)
+    }
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -195,6 +216,15 @@ export default function GalleryPage() {
             ))}
           </div>
         )}
+
+        <div className="mt-12 text-center">
+          <button
+            onClick={requestRefund}
+            className="text-[#64748b] text-sm underline underline-offset-4 hover:text-[#94a3b8] transition"
+          >
+            {rt.btn}
+          </button>
+        </div>
 
       </div>
     </div>
