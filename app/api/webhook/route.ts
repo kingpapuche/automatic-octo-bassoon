@@ -71,13 +71,15 @@ export async function POST(request: NextRequest) {
       const currentCredits   = userData?.credits || 0
       const newCredits       = currentCredits + credits
       const currentTrainings = userData?.trainings_remaining || 0
+      // Premium geeft 2 AI-model trainingen (zoals op de prijspagina), andere pakketten 1.
+      const trainingsToAdd   = plan === 'premium' ? 2 : 1
 
       // Update credits + trainings
       const { error: updateError } = await supabaseAdmin
         .from('users')
         .update({
           credits:              newCredits,
-          trainings_remaining:  currentTrainings + 1,
+          trainings_remaining:  currentTrainings + trainingsToAdd,
         })
         .eq('id', userId)
 
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest) {
           description: `${plan} plan - Stripe session: ${session.id}`,
         })
 
-      console.log(`✅ Successfully added ${credits} credits + 1 training. New balance: ${newCredits} credits`)
+      console.log(`✅ Successfully added ${credits} credits + ${trainingsToAdd} training(s). New balance: ${newCredits} credits`)
 
       // ── Verwittiging: alleen BELGISCHE bedrijven (BE-BTW) vereisen een Peppol-factuur ──
       const isBelgianBusiness = isBusiness && vatNumber.trim().toUpperCase().startsWith('BE')
