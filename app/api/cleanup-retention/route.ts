@@ -9,7 +9,8 @@ import Replicate from 'replicate'
 // Retentie:
 //   - Geüploade selfies (uploads/<uid>/)      -> 7 dagen
 //   - Gegenereerde foto's (generated/<uid>/)   -> 30 dagen
-//   - AI-model (LoRA, Replicate)               -> 30 dagen na aanmaak (zoals privacybeleid)
+//   - AI-model (LoRA, Replicate)               -> 30 dagen na laatste activiteit; NOOIT zolang
+//                                                 de klant nog credits/trainingen heeft
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
@@ -66,6 +67,7 @@ async function cleanStorageFolder(root: string, days: number, dry: boolean) {
 
 async function cleanModels(dry: boolean) {
   let deleted = 0
+  let skipped = 0
   const errors: string[] = []
   const cutoff = new Date(Date.now() - MODEL_DAYS * DAY_MS).toISOString()
 
@@ -76,10 +78,29 @@ async function cleanModels(dry: boolean) {
     .eq('status', 'completed')
     .lt('created_at', cutoff)
     .limit(MAX_MODELS_PER_RUN)
-  if (error || !models) return { deleted, errors: error ? [error.message] : [] }
+  if (error || !models) return { deleted, skipped, errors: error ? [error.message] : [] }
 
   for (const m of models) {
-    // Strikt volgens privacybeleid: 30 dagen na aanmaak (de query filtert hier al op).
+    // Bescherm betalende/actieve klanten: NIET wissen zolang er nog credits of trainingen
+    // zijn, of als er binnen 30 dagen activiteit was (aankoop of generatie). Zo verliest
+    // een klant die op dag 29 credits bijkoopt nooit zijn model.
+    const { data: u } = await supabase
+      .from('users')
+      .select('credits, trainings_remaining')
+      .eq('id', m.user_id)
+      .maybeSingle()
+    if ((u?.credits ?? 0) > 0 || (u?.trainings_remaining ?? 0) > 0) { skipped++; continue }
+
+    const { data: lastGen } = await supabase
+      .from('generations').select('created_at').eq('user_id', m.user_id)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle()
+    const { data: lastBuy } = await supabase
+      .from('credits_transactions').select('created_at').eq('user_id', m.user_id).eq('type', 'purchase')
+      .order('created_at', { ascending: false }).limit(1).maybeSingle()
+    const dates = [m.created_at, lastGen?.created_at, lastBuy?.created_at].filter(Boolean) as string[]
+    const lastActivity = dates.reduce((a, b) => (new Date(b) > new Date(a) ? b : a), dates[0])
+    if (!olderThan(lastActivity, MODEL_DAYS)) { skipped++; continue }
+
     // training_id is "owner/name:version" na succes -> owner/name parsen.
     const ownerName = String(m.training_id || '').split(':')[0]
     if (ownerName.includes('/')) {
@@ -103,7 +124,7 @@ async function cleanModels(dry: boolean) {
     }
     deleted++
   }
-  return { deleted, errors }
+  return { deleted, skipped, errors }
 }
 
 export async function GET(request: Request) {
