@@ -4,7 +4,7 @@ interface Step { title: string; desc: string }
 interface DashCopy {
   signOut: string; title: string; subtitle: string; welcomeBack: string; yourCredits: string; creditEquals: string; loading: string
   buyTitle: string; buyDesc: string; buyBtn: string
-  trainTitle: string; trainDesc: string; trainBtnNew: string; trainBtnStart: string
+  trainTitle: string; trainDesc: string; trainBtnNew: string; trainBtnStart: string; trainingsLeft: string; trainBtnNone: string
   genTitle: string; genDesc: string; genBtn: string; genRequired: string
   galTitle: string; galDesc: string; galBtn: string
   howTitle: string; videoTitle: string; videoSoon: string; steps: [Step, Step, Step, Step]
@@ -26,7 +26,7 @@ const en: DashboardBundle = {
   dashboard: {
     signOut: 'Sign Out', title: 'Dashboard', subtitle: 'Manage your AI headshots', welcomeBack: 'Welcome Back!', yourCredits: 'Your Credits', creditEquals: 'Each credit = 1 generated photo', loading: 'Loading...',
     buyTitle: 'Buy Credits', buyDesc: 'Purchase credit packs to generate AI headshots', buyBtn: 'Buy Now →',
-    trainTitle: 'Train a Model', trainDesc: 'Upload 10-20 selfies to create a custom AI model — for yourself or someone else.', trainBtnNew: 'Train new model →', trainBtnStart: 'Start Training →',
+    trainTitle: 'Train a Model', trainDesc: 'Upload 10-20 selfies to create a custom AI model — for yourself or someone else.', trainBtnNew: 'Train new model →', trainBtnStart: 'Start Training →', trainingsLeft: 'Trainings left: {n}', trainBtnNone: 'Buy a pack to train →',
     genTitle: 'Generate', genDesc: 'Choose styles and create your headshots', genBtn: 'Generate Headshots →', genRequired: 'Model Required',
     galTitle: 'My Gallery', galDesc: 'View and download your generated headshots', galBtn: 'View Gallery →',
     howTitle: 'How it Works', videoTitle: 'See how it works in 90 seconds', videoSoon: 'Video coming soon',
@@ -56,7 +56,7 @@ const nl: DashboardBundle = {
   dashboard: {
     signOut: 'Uitloggen', title: 'Dashboard', subtitle: 'Beheer je AI-headshots', welcomeBack: 'Welkom terug!', yourCredits: 'Jouw credits', creditEquals: 'Elke credit = 1 gegenereerde foto', loading: 'Laden...',
     buyTitle: 'Credits kopen', buyDesc: 'Koop creditpakketten om AI-headshots te genereren', buyBtn: 'Nu kopen →',
-    trainTitle: 'Model trainen', trainDesc: 'Upload 10-20 selfies om een eigen AI-model te maken — voor jezelf of iemand anders.', trainBtnNew: 'Nieuw model trainen →', trainBtnStart: 'Start training →',
+    trainTitle: 'Model trainen', trainDesc: 'Upload 10-20 selfies om een eigen AI-model te maken — voor jezelf of iemand anders.', trainBtnNew: 'Nieuw model trainen →', trainBtnStart: 'Start training →', trainingsLeft: 'Trainingen over: {n}', trainBtnNone: 'Koop een pakket om te trainen →',
     genTitle: 'Genereren', genDesc: 'Kies stijlen en maak je headshots', genBtn: 'Headshots genereren →', genRequired: 'Model vereist',
     galTitle: 'Mijn galerij', galDesc: 'Bekijk en download je gegenereerde headshots', galBtn: 'Galerij bekijken →',
     howTitle: 'Hoe het werkt', videoTitle: 'Zie in 90 seconden hoe het werkt', videoSoon: 'Video komt binnenkort',
@@ -86,7 +86,7 @@ const fr: DashboardBundle = {
   dashboard: {
     signOut: 'Déconnexion', title: 'Tableau de bord', subtitle: 'Gérez vos portraits IA', welcomeBack: 'Bon retour !', yourCredits: 'Vos crédits', creditEquals: 'Chaque crédit = 1 photo générée', loading: 'Chargement...',
     buyTitle: 'Acheter des crédits', buyDesc: 'Achetez des packs de crédits pour générer des portraits IA', buyBtn: 'Acheter →',
-    trainTitle: 'Entraîner un modèle', trainDesc: 'Importez 10-20 selfies pour créer un modèle IA personnalisé — pour vous ou quelqu’un d’autre.', trainBtnNew: 'Entraîner un nouveau modèle →', trainBtnStart: 'Démarrer l’entraînement →',
+    trainTitle: 'Entraîner un modèle', trainDesc: 'Importez 10-20 selfies pour créer un modèle IA personnalisé — pour vous ou quelqu’un d’autre.', trainBtnNew: 'Entraîner un nouveau modèle →', trainBtnStart: 'Démarrer l’entraînement →', trainingsLeft: 'Entraînements restants : {n}', trainBtnNone: 'Achetez un pack pour entraîner →',
     genTitle: 'Générer', genDesc: 'Choisissez des styles et créez vos portraits', genBtn: 'Générer les portraits →', genRequired: 'Modèle requis',
     galTitle: 'Ma galerie', galDesc: 'Consultez et téléchargez vos portraits générés', galBtn: 'Voir la galerie →',
     howTitle: 'Comment ça marche', videoTitle: 'Découvrez comment ça marche en 90 secondes', videoSoon: 'Vidéo bientôt disponible',
@@ -116,7 +116,7 @@ const de: DashboardBundle = {
   dashboard: {
     signOut: 'Abmelden', title: 'Dashboard', subtitle: 'Verwalte deine KI-Headshots', welcomeBack: 'Willkommen zurück!', yourCredits: 'Deine Credits', creditEquals: 'Jeder Credit = 1 generiertes Foto', loading: 'Laden...',
     buyTitle: 'Credits kaufen', buyDesc: 'Kaufe Credit-Pakete, um KI-Headshots zu generieren', buyBtn: 'Jetzt kaufen →',
-    trainTitle: 'Modell trainieren', trainDesc: 'Lade 10-20 Selfies hoch, um ein eigenes KI-Modell zu erstellen — für dich oder jemand anderen.', trainBtnNew: 'Neues Modell trainieren →', trainBtnStart: 'Training starten →',
+    trainTitle: 'Modell trainieren', trainDesc: 'Lade 10-20 Selfies hoch, um ein eigenes KI-Modell zu erstellen — für dich oder jemand anderen.', trainBtnNew: 'Neues Modell trainieren →', trainBtnStart: 'Training starten →', trainingsLeft: 'Verbleibende Trainings: {n}', trainBtnNone: 'Paket kaufen zum Trainieren →',
     genTitle: 'Generieren', genDesc: 'Wähle Stile und erstelle deine Headshots', genBtn: 'Headshots generieren →', genRequired: 'Modell erforderlich',
     galTitle: 'Meine Galerie', galDesc: 'Sieh dir deine generierten Headshots an und lade sie herunter', galBtn: 'Galerie ansehen →',
     howTitle: 'So funktioniert’s', videoTitle: 'In 90 Sekunden sehen, wie es funktioniert', videoSoon: 'Video folgt in Kürze',
@@ -146,7 +146,7 @@ const es: DashboardBundle = {
   dashboard: {
     signOut: 'Cerrar sesión', title: 'Panel', subtitle: 'Gestiona tus retratos IA', welcomeBack: '¡Bienvenido de nuevo!', yourCredits: 'Tus créditos', creditEquals: 'Cada crédito = 1 foto generada', loading: 'Cargando...',
     buyTitle: 'Comprar créditos', buyDesc: 'Compra packs de créditos para generar retratos IA', buyBtn: 'Comprar →',
-    trainTitle: 'Entrenar un modelo', trainDesc: 'Sube 10-20 selfies para crear un modelo IA personalizado — para ti o para otra persona.', trainBtnNew: 'Entrenar nuevo modelo →', trainBtnStart: 'Iniciar entrenamiento →',
+    trainTitle: 'Entrenar un modelo', trainDesc: 'Sube 10-20 selfies para crear un modelo IA personalizado — para ti o para otra persona.', trainBtnNew: 'Entrenar nuevo modelo →', trainBtnStart: 'Iniciar entrenamiento →', trainingsLeft: 'Entrenamientos restantes: {n}', trainBtnNone: 'Compra un paquete para entrenar →',
     genTitle: 'Generar', genDesc: 'Elige estilos y crea tus retratos', genBtn: 'Generar retratos →', genRequired: 'Modelo necesario',
     galTitle: 'Mi galería', galDesc: 'Consulta y descarga tus retratos generados', galBtn: 'Ver galería →',
     howTitle: 'Cómo funciona', videoTitle: 'Descubre cómo funciona en 90 segundos', videoSoon: 'Vídeo próximamente',
@@ -176,7 +176,7 @@ const it: DashboardBundle = {
   dashboard: {
     signOut: 'Esci', title: 'Dashboard', subtitle: 'Gestisci i tuoi ritratti IA', welcomeBack: 'Bentornato!', yourCredits: 'I tuoi crediti', creditEquals: 'Ogni credito = 1 foto generata', loading: 'Caricamento...',
     buyTitle: 'Acquista crediti', buyDesc: 'Acquista pacchetti di crediti per generare ritratti IA', buyBtn: 'Acquista →',
-    trainTitle: 'Allena un modello', trainDesc: 'Carica 10-20 selfie per creare un modello IA personalizzato — per te o per qualcun altro.', trainBtnNew: 'Allena nuovo modello →', trainBtnStart: 'Avvia l’allenamento →',
+    trainTitle: 'Allena un modello', trainDesc: 'Carica 10-20 selfie per creare un modello IA personalizzato — per te o per qualcun altro.', trainBtnNew: 'Allena nuovo modello →', trainBtnStart: 'Avvia l’allenamento →', trainingsLeft: 'Allenamenti rimasti: {n}', trainBtnNone: 'Acquista un pacchetto per allenare →',
     genTitle: 'Genera', genDesc: 'Scegli gli stili e crea i tuoi ritratti', genBtn: 'Genera ritratti →', genRequired: 'Modello richiesto',
     galTitle: 'La mia galleria', galDesc: 'Visualizza e scarica i tuoi ritratti generati', galBtn: 'Vedi la galleria →',
     howTitle: 'Come funziona', videoTitle: 'Guarda come funziona in 90 secondi', videoSoon: 'Video in arrivo',
@@ -206,7 +206,7 @@ const pt: DashboardBundle = {
   dashboard: {
     signOut: 'Sair', title: 'Painel', subtitle: 'Gerencie seus retratos IA', welcomeBack: 'Bem-vindo de volta!', yourCredits: 'Seus créditos', creditEquals: 'Cada crédito = 1 foto gerada', loading: 'Carregando...',
     buyTitle: 'Comprar créditos', buyDesc: 'Compre pacotes de créditos para gerar retratos IA', buyBtn: 'Comprar →',
-    trainTitle: 'Treinar um modelo', trainDesc: 'Envie 10-20 selfies para criar um modelo IA personalizado — para você ou outra pessoa.', trainBtnNew: 'Treinar novo modelo →', trainBtnStart: 'Iniciar treinamento →',
+    trainTitle: 'Treinar um modelo', trainDesc: 'Envie 10-20 selfies para criar um modelo IA personalizado — para você ou outra pessoa.', trainBtnNew: 'Treinar novo modelo →', trainBtnStart: 'Iniciar treinamento →', trainingsLeft: 'Treinos restantes: {n}', trainBtnNone: 'Compra um pacote para treinar →',
     genTitle: 'Gerar', genDesc: 'Escolha estilos e crie seus retratos', genBtn: 'Gerar retratos →', genRequired: 'Modelo necessário',
     galTitle: 'Minha galeria', galDesc: 'Veja e baixe seus retratos gerados', galBtn: 'Ver galeria →',
     howTitle: 'Como funciona', videoTitle: 'Veja como funciona em 90 segundos', videoSoon: 'Vídeo em breve',

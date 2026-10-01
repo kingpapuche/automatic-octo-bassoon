@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const [credits, setCredits] = useState(0)
   const [trainedModelId, setTrainedModelId] = useState<string | null>(null)
+  const [trainingsRemaining, setTrainingsRemaining] = useState(0)
   const [loadingCredits, setLoadingCredits] = useState(true)
 
   useEffect(() => {
@@ -30,13 +31,14 @@ export default function DashboardPage() {
       const fetchUserData = async () => {
         const { data } = await supabase
           .from('users')
-          .select('credits, trained_model_id')
+          .select('credits, trained_model_id, trainings_remaining')
           .eq('id', user.id)
           .single()
-        
+
         if (data) {
           setCredits(data.credits)
           setTrainedModelId(data.trained_model_id)
+          setTrainingsRemaining(data.trainings_remaining ?? 0)
         }
         setLoadingCredits(false)
       }
@@ -143,12 +145,24 @@ export default function DashboardPage() {
             <p className="text-gray-400 mb-4">
               {t.trainDesc}
             </p>
-            <button
-              onClick={() => router.push('/upload')}
-              className="mt-auto w-full bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] hover:from-[#483A7C] hover:to-[#5B4E9D] text-white py-3 rounded-lg font-semibold transition"
-            >
-              {hasModel ? t.trainBtnNew : t.trainBtnStart}
-            </button>
+            <div className="mb-4 inline-flex self-start items-center gap-1.5 bg-white/10 text-white/90 text-xs font-medium px-3 py-1.5 rounded-full">
+              🎟️ {t.trainingsLeft.replace('{n}', String(trainingsRemaining))}
+            </div>
+            {trainingsRemaining > 0 ? (
+              <button
+                onClick={() => router.push('/upload')}
+                className="mt-auto w-full bg-gradient-to-r from-[#5B4E9D] to-[#7D6FB8] hover:from-[#483A7C] hover:to-[#5B4E9D] text-white py-3 rounded-lg font-semibold transition"
+              >
+                {hasModel ? t.trainBtnNew : t.trainBtnStart}
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push('/buy-credits')}
+                className="mt-auto w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-3 rounded-lg font-semibold transition"
+              >
+                {t.trainBtnNone}
+              </button>
+            )}
           </div>
 
           {/* Generate */}
