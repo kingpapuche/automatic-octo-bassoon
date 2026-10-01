@@ -2,7 +2,7 @@ import type { Locale } from '@/lib/i18n'
 
 // Juridische pagina's (Terms, Privacy, Refund, Cookie) in 7 talen.
 // Best practice (internationale SaaS): vertaling beschikbaar in elke taal + "Engelse versie is bindend"-clausule.
-// De Engelse tekst is de authoritatieve versie; vertalingen zijn ter beschikking voor het gemak van de klant.
+// De Engelse tekst is de autoritatieve versie; vertalingen zijn ter beschikking voor het gemak van de klant.
 
 export type Block =
   | { t: 'box'; title: string; text: string }

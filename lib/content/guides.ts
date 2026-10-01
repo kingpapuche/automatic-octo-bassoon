@@ -434,7 +434,7 @@ export const GUIDES: Record<string, Record<Locale, GuideContent>> = {
         { t: 'h2', text: 'Cómo conseguir tu foto de CV con IA' },
         { t: 'ol', items: ['Sube 8–15 selfies nítidos desde distintos ángulos.', 'Entrenamos un modelo de IA personal de tu rostro.', 'Elige un estilo formal o smart-casual acorde a tu sector.', 'Descarga tu foto de CV en ~30 minutos.'] },
         { t: 'h2', text: 'Consejos para una buena foto de CV' },
-        { t: 'ul', items: ['Manténla de cabeza y hombros con un fondo neutro.', 'Vístete como para el puesto que buscas.', 'Elige una expresión cercana y segura.', 'Usa la misma foto en tu CV y LinkedIn para una marca personal coherente.'] },
+        { t: 'ul', items: ['Mantenla de cabeza y hombros con un fondo neutro.', 'Vístete como para el puesto que buscas.', 'Elige una expresión cercana y segura.', 'Usa la misma foto en tu CV y LinkedIn para una marca personal coherente.'] },
         { t: 'h2', text: 'Por qué la IA funciona para fotos de CV' },
         { t: 'p', text: 'Obtienes un resultado profesional y consistente en minutos por una fracción del precio de un estudio — y decenas de estilos para cualquier sector, de finanzas a tecnología o creativo.' },
       ],
